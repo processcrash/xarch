@@ -63,4 +63,47 @@ public class CommonController {
         response.setHeader("Content-Disposition", "attachment; filename=" + (templateName != null ? templateName : "template"));
         commonService.tempDownload(templateName, alias, response.getOutputStream());
     }
+
+    /**
+     * Upload file
+     */
+    @PostMapping("/files/upload")
+    @XarchLog(value = "Upload file", type = "UPLOAD")
+    public ApiResult<Map<String, String>> upload(@RequestParam("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return ApiResult.fail("1001", "File is empty");
+        }
+        String url = commonService.uploadFile(file);
+        Map<String, String> result = new HashMap<>();
+        result.put("url", url);
+        result.put("filename", file.getOriginalFilename());
+        result.put("size", String.valueOf(file.getSize()));
+        return ApiResult.ok(result);
+    }
+
+    /**
+     * Upload image (with size validation)
+     */
+    @PostMapping("/images/upload")
+    @XarchLog(value = "Upload image", type = "UPLOAD")
+    public ApiResult<Map<String, String>> uploadImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "maxSize", defaultValue = "5242880") long maxSize) throws IOException {
+        if (file.isEmpty()) {
+            return ApiResult.fail("1001", "File is empty");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            return ApiResult.fail("1001", "File must be an image");
+        }
+        if (file.getSize() > maxSize) {
+            return ApiResult.fail("1001", "File size exceeds limit");
+        }
+        String url = commonService.uploadFile(file);
+        Map<String, String> result = new HashMap<>();
+        result.put("url", url);
+        result.put("filename", file.getOriginalFilename());
+        result.put("size", String.valueOf(file.getSize()));
+        return ApiResult.ok(result);
+    }
 }
