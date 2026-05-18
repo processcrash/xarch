@@ -1,0 +1,21 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation project(':xarch-starter-core')
+    implementation project(':xarch-starter-db')
+    implementation project(':xarch-starter-web')
+    implementation project(':xarch-starter-cache')
+
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'com.h2database:h2'
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'app.jar'
+}
+
+springBoot {
+    mainClass = 'com.xarch.example.XarchExampleApplication'
+}

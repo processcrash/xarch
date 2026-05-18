@@ -1,0 +1,11 @@
+dependencies {
+    api project(':xarch-starter-core')
+
+    compileOnly 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.springframework.boot:spring-boot-starter-validation'
+    compileOnly 'org.springframework.boot:spring-boot-starter-aop'
+
+    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+    api 'cn.dev33:sa-token-spring-boot3-starter:1.37.0'
+    api 'io.swagger.core.v3:swagger-annotations'
+}

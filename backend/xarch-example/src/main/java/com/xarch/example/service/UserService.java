@@ -1,8 +1,13 @@
 package com.xarch.example.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xarch.example.entity.User;
 import com.xarch.example.mapper.UserMapper;
+import com.xarch.starter.core.result.PageResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -12,33 +17,42 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private final UserMapper userMapper;
+    @Autowired
+    private UserMapper userMapper;
 
-    public UserService(UserMapper userMapper) {
-        this.userMapper = userMapper;
+    public PageResult<User> page(String username, String status, int pageNum, int pageSize) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(username)) {
+            wrapper.like(User::getUsername, username);
+        }
+        if (StringUtils.hasText(status)) {
+            wrapper.eq(User::getStatus, status);
+        }
+        wrapper.orderByDesc(User::getCreateTime);
+
+        Page<User> page = new Page<>(pageNum, pageSize);
+        Page<User> result = userMapper.selectPage(page, wrapper);
+
+        return PageResult.of(result.getRecords(), result.getTotal());
     }
 
     public User getById(Long id) {
-        return userMapper.findById(id);
+        return userMapper.selectById(id);
     }
 
-    public User getByUsername(String username) {
-        return userMapper.findByUsername(username);
+    public void create(User user) {
+        userMapper.insert(user);
     }
 
-    public List<User> listAll() {
-        return userMapper.findAll();
+    public void update(User user) {
+        userMapper.updateById(user);
     }
 
-    public boolean save(User user) {
-        return userMapper.insert(user) > 0;
+    public void delete(Long id) {
+        userMapper.deleteById(id);
     }
 
-    public boolean update(User user) {
-        return userMapper.update(user) > 0;
-    }
-
-    public boolean delete(Long id) {
-        return userMapper.deleteById(id) > 0;
+    public List<User> list() {
+        return userMapper.selectList(null);
     }
 }
