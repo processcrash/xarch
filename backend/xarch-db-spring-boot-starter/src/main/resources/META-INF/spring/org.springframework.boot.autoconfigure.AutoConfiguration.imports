@@ -1,0 +1,1 @@
+spring.factories.auto-configuration from META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports

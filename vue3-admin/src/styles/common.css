@@ -1,0 +1,78 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+#app {
+  height: 100%;
+}
+
+.login-container {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-card {
+  width: 400px;
+}
+
+.home {
+  height: 100%;
+}
+
+.el-container {
+  height: 100%;
+}
+
+.el-header {
+  background-color: #545c64;
+  color: #fff;
+  line-height: 60px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.el-aside {
+  background-color: #f2f2f2;
+}
+
+.el-main {
+  padding: 20px;
+}
+
+.content {
+  max-width: 800px;
+}
+
+.card-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.card-content ul li {
+  padding: 8px 0;
+  color: #666;
+}
+
+.not-found {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

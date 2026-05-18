@@ -1,0 +1,39 @@
+{
+  "name": "xarch-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "format": "prettier --write src/"
+  },
+  "dependencies": {
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "pinia": "^3.0.1",
+    "axios": "^1.7.9",
+    "element-plus": "^2.9.5",
+    "@element-plus/icons-vue": "^2.3.1",
+    "@vueuse/core": "^12.5.0",
+    "dayjs": "^1.11.13",
+    "lodash-es": "^4.17.21",
+    "nprogress": "^0.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.7",
+    "vue-tsc": "^2.2.0",
+    "@types/node": "^22.10.5",
+    "@types/lodash-es": "^4.17.12",
+    "@types/nprogress": "^0.2.3",
+    "unplugin-auto-import": "^19.0.0",
+    "unplugin-vue-components": "^0.25.2",
+    "eslint": "^9.18.0",
+    "eslint-plugin-vue": "^9.32.0",
+    "prettier": "^3.4.2"
+  }
+}
