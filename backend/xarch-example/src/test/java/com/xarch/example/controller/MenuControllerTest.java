@@ -1,0 +1,42 @@
+package com.xarch.example.controller;
+
+import com.xarch.starter.core.result.ApiResult;
+import com.xarch.starter.core.result.PageResult;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * MenuController unit tests
+ */
+@SpringBootTest
+class MenuControllerTest {
+
+    @Autowired
+    private MenuController menuController;
+
+    @Test
+    void testPage() {
+        ApiResult<PageResult<com.xarch.example.entity.Menu>> result = menuController.page(null, 1, 10);
+        assertNotNull(result);
+        assertEquals("0000", result.getCode());
+    }
+
+    @Test
+    void testTree() {
+        ApiResult<List<com.xarch.example.entity.Menu>> result = menuController.tree();
+        assertNotNull(result);
+        assertEquals("0000", result.getCode());
+    }
+
+    @Test
+    void testOptions() {
+        ApiResult<List<com.xarch.example.entity.Menu>> result = menuController.options();
+        assertNotNull(result);
+        assertEquals("0000", result.getCode());
+    }
+}
