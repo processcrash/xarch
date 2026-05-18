@@ -1,0 +1,105 @@
+# ===============================================
+# xarch 生产环境 Kustomize 配置
+# ===============================================
+# 生产环境配置覆盖
+# 特点：
+#   - 高可用部署（多副本）
+#   - 使用具体版本标签
+#   - 资源限制较高
+#   - 启用 HPA 自动扩缩容
+#   - 安全配置强化
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 基础配置
+namespace: xarch
+
+# 基础资源
+resources:
+  - ../base/namespace-config.yaml
+  - ../base/ingress.yaml  # 生产环境需要 Ingress
+
+# 配置覆盖
+configMapGenerator:
+  - name: xarch-config
+    behavior: replace
+    literals:
+      - APP_NAME=xarch-prod
+      - NACOS_SERVER_ADDR=nacos.xarch:8848
+      - SPRING_CLOUD_NAcOS_SERVER_ADDR=nacos.xarch:8848
+      - JAVA_OPTS=-Xms1024m -Xmx2048m -XX:+UseG1GC
+
+# Secret 引用（生产环境应使用 Sealed Secrets 或 Vault）
+# 注意：实际部署时应替换为加密的 Secret 源
+secretGenerator:
+  - name: xarch-secrets
+    behavior: replace
+    envs:
+      - .env.production
+
+# 镜像覆盖（生产环境使用正式版本标签）
+images:
+  - name: xarch/xarch-example
+    newTag: "1.0.0"
+  - name: xarch/xarch-mcp-database
+    newTag: "1.0.0"
+  - name: xarch/xarch-mcp-knowledge
+    newTag: "1.0.0"
+  - name: xarch/xarch-mcp-filesystem
+    newTag: "1.0.0"
+  - name: xarch/xarch-cloud-gateway
+    newTag: "1.0.0"
+
+# 生产环境副本数配置（通过 HPA 管理）
+patches:
+  # Gateway 高可用
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: xarch-cloud-gateway
+      spec:
+        replicas: 3
+    target:
+      kind: Deployment
+      name: xarch-cloud-gateway
+  # MCP Servers 高可用
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: xarch-mcp-database
+      spec:
+        replicas: 3
+    target:
+      kind: Deployment
+      name: xarch-mcp-database
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: xarch-mcp-knowledge
+      spec:
+        replicas: 3
+    target:
+      kind: Deployment
+      name: xarch-mcp-knowledge
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: xarch-mcp-filesystem
+      spec:
+        replicas: 3
+    target:
+      kind: Deployment
+      name: xarch-mcp-filesystem
+
+# 标签覆盖
+commonLabels:
+  environment: production
+  version: "1.0.0"
+
+# 生产环境名称后缀（可选，用于多集群部署）
+# nameSuffix: "-prod"

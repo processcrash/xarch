@@ -1,0 +1,119 @@
+# ===============================================
+# Database MCP Server 部署配置
+# ===============================================
+# 支持 MySQL、PostgreSQL、MongoDB、SQL Server 的数据库 MCP Server
+# 提供工具：query_execute、schema_get、table_list、table_describe、index_list、execute_update
+# 端口：9090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xarch-mcp-database
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: xarch-mcp-database
+    app.kubernetes.io/component: mcp-server
+    app.kubernetes.io/version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: xarch-mcp-database
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: xarch-mcp-database
+        app.kubernetes.io/component: mcp-server
+        app.kubernetes.io/version: "1.0.0"
+    spec:
+      serviceAccountName: xarch-sa
+      initContainers:
+        - name: wait-for-nacos
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Nacos to be ready..."
+              until curl -sf http://nacos.xarch:8848/nacos/v1/console/health/readiness; do
+                echo "Nacos is not ready, waiting..."
+                sleep 5
+              done
+              echo "Nacos is ready!"
+      containers:
+        - name: xarch-mcp-database
+          image: xarch/xarch-mcp-database:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 9090
+              protocol: TCP
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: "xarch-mcp-database"
+            - name: SERVER_PORT
+              value: "9090"
+            # Nacos MCP 服务注册
+            - name: SPRING_CLOUD_NAcOS_SERVER_ADDR
+              value: "nacos.xarch:8848"
+            - name: SPRING_CLOUD_NAcOS_DISCOVERY_NAMESPACE
+              value: "xarch-cloud"
+            - name: SPRING_CLOUD_NAcOS_DISCOVERY_GROUP
+              value: "MCP"
+            # MCP Server 类型标识
+            - name: XARCH_MCP_TYPE
+              value: "database"
+            # 允许连接的数据库类型
+            - name: XARCH_MCP_ALLOWED_DATABASES
+              value: "mysql,postgresql,mongodb,sqlserver"
+            # JVM 参数
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx512m -XX:+UseG1GC"
+          readinessProbe:
+            httpGet:
+              path: /mcp/database/health
+              port: 9090
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /mcp/database/health
+              port: 9090
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xarch-mcp-database
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: xarch-mcp-database
+    app.kubernetes.io/component: mcp-server
+  annotations:
+    description: "Database MCP Server - Multi-database support"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: xarch-mcp-database

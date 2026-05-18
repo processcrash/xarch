@@ -1,0 +1,98 @@
+# ===============================================
+# xarch 开发环境 Kustomize 配置
+# ===============================================
+# 开发环境配置覆盖
+# 特点：
+#   - 副本数较少（节省资源）
+#   - 镜像使用 latest 标签
+#   - 启用 Nacos 控制台访问
+#   - 资源限制较低
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 基础配置
+namespace: xarch-dev
+
+# 基础资源
+resources:
+  - ../base/namespace-config.yaml
+
+# 配置覆盖
+configMapGenerator:
+  - name: xarch-config
+    behavior: replace
+    literals:
+      - APP_NAME=xarch-dev
+      - NACOS_SERVER_ADDR=nacos.xarch-dev:8848
+      - SPRING_CLOUD_NAcOS_SERVER_ADDR=nacos.xarch-dev:8848
+      - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+
+# Secret 覆盖（开发环境示例密码）
+secretGenerator:
+  - name: xarch-secrets
+    behavior: replace
+    literals:
+      - DB_USERNAME=root
+      - DB_PASSWORD=root123
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - REDIS_PASSWORD=redis123
+
+# 镜像覆盖（开发环境使用最新镜像）
+images:
+  - name: xarch/xarch-example
+    newTag: latest
+  - name: xarch/xarch-mcp-database
+    newTag: latest
+  - name: xarch/xarch-mcp-knowledge
+    newTag: latest
+  - name: xarch/xarch-mcp-filesystem
+    newTag: latest
+  - name: xarch/xarch-cloud-gateway
+    newTag: latest
+
+# 副本数覆盖
+patches:
+  # Nacos 开发环境单节点
+  - patch: |-
+      $patch: delete
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nacos
+      spec:
+        replicas: 1
+    target:
+      kind: Deployment
+      name: nacos
+  # 业务应用副本数
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: xarch-example
+      spec:
+        replicas: 1
+    target:
+      kind: Deployment
+      name: xarch-example
+  # MySQL 副本数
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mysql
+      spec:
+        replicas: 1
+    target:
+      kind: Deployment
+      name: mysql
+
+# 名称后缀（区分环境）
+namePrefix: dev-
+
+# 标签覆盖
+commonLabels:
+  environment: development
+  version: latest

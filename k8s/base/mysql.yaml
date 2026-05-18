@@ -1,0 +1,164 @@
+# ===============================================
+# MySQL 数据库部署配置
+# ===============================================
+# xarch 项目的核心数据存储
+# 端口：3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/component: database
+    app.kubernetes.io/version: "8.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mysql
+  strategy:
+    type: Recreate  # MySQL 不支持同时运行多个实例
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mysql
+        app.kubernetes.io/component: database
+        app.kubernetes.io/version: "8.0"
+    spec:
+      serviceAccountName: xarch-sa
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: mysql
+              containerPort: 3306
+              protocol: TCP
+          env:
+            # 数据库初始化配置
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: xarch-secrets
+                  key: DB_PASSWORD
+            - name: MYSQL_DATABASE
+              value: "xarch"
+            # 时区配置
+            - name: TZ
+              value: "Asia/Shanghai"
+          # 数据持久化
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: mysql-init
+              mountPath: /docker-entrypoint-initdb.d
+          # 健康检查
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+      volumes:
+        # 数据持久化卷（生产环境建议使用 StorageClass）
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        # 初始化脚本
+        - name: mysql-init
+          configMap:
+            name: mysql-init-script
+---
+# ===============================================
+# MySQL Service 配置
+# ===============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/component: database
+  annotations:
+    description: "MySQL Database for xarch"
+spec:
+  type: ClusterIP
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: mysql
+---
+# ===============================================
+# MySQL PVC 配置
+# ===============================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/component: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # 根据实际 StorageClass 调整
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 50Gi  # 根据数据量调整
+---
+# ===============================================
+# MySQL 初始化脚本 ConfigMap
+# ===============================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/component: database
+data:
+  init.sql: |
+    -- xarch 数据库初始化脚本
+    -- 此脚本在 MySQL 容器首次启动时自动执行
+
+    CREATE DATABASE IF NOT EXISTS xarch DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+    USE xarch;
+
+    -- 注意：表结构应由 xarch-example 应用在启动时自动创建
+    -- 此处仅预留初始化位置
+
+    SET GLOBAL max_connections = 2000;
+    SET GLOBAL innodb_buffer_pool_size = 1G;

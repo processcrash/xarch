@@ -1,0 +1,138 @@
+# ===============================================
+# Ingress 配置
+# ===============================================
+# Kubernetes Ingress 用于外部访问入口
+# 支持以下服务：
+#   - /api/*    -> xarch-example (业务 API)
+#   - /mcp/*    -> MCP Servers (MCP 协议端点)
+#   - /doc.html -> xarch-example (API 文档)
+#   - /nacos/*  -> Nacos (仅开发环境)
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: xarch-ingress
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: xarch
+    app.kubernetes.io/component: ingress
+  annotations:
+    # Nginx Ingress Controller 配置
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # 连接超时
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    # CORS 配置（允许 AI 服务跨域访问 MCP）
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type, Accept, Origin, X-Requested-With"
+    # 速率限制
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+    # WebSocket 支持（MCP 协议可能需要）
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    # 服务端负载均衡
+    nginx.ingress.kubernetes.io/load-balance: "round_robin"
+spec:
+  ingressClassName: nginx
+  rules:
+    # 主域名规则
+    - host: xarch.example.com  # 替换为实际域名
+      http:
+        paths:
+          # 业务 API 路由
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: xarch-example
+                port:
+                  number: 8080
+          # API 文档路由
+          - path: /doc.html
+            pathType: Exact
+            backend:
+              service:
+                name: xarch-example
+                port:
+                  number: 8080
+          # MCP Server 路由（统一入口）
+          - path: /mcp
+            pathType: Prefix
+            backend:
+              service:
+                name: xarch-cloud-gateway
+                port:
+                  number: 8080
+          # Nacos 控制台（可通过子路径访问）
+          - path: /nacos
+            pathType: Prefix
+            backend:
+              service:
+                name: nacos
+                port:
+                  number: 8848
+    # 备用域名规则（用于测试环境）
+    - host: xarch.dev.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: xarch-cloud-gateway
+                port:
+                  number: 8080
+---
+# ===============================================
+# HPA 配置（Horizontal Pod Autoscaler）
+# ===============================================
+# 根据 CPU 和内存使用率自动扩缩容
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: xarch-example-hpa
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: xarch-example
+    app.kubernetes.io/component: autoscaler
+spec:
+  # 监控目标
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: xarch-example
+  # 副本数范围
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    # CPU 使用率触发扩容
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    # 内存使用率触发扩容
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  # 扩容冷却时间
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60

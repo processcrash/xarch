@@ -1,0 +1,77 @@
+# ===============================================
+# Namespace 配置
+# ===============================================
+# 为 xarch 项目创建独立的命名空间，实现资源隔离
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: xarch
+  labels:
+    # 环境标签，用于区分不同环境
+    environment: production
+    # 框架标识
+    app.kubernetes.io/name: xarch
+    app.kubernetes.io/version: "1.0.0"
+    # 管理标签
+    app.kubernetes.io/managed-by: kubectl
+---
+# ===============================================
+# ConfigMap 配置
+# ===============================================
+# 共享配置中心，存放各服务共用的配置
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: xarch-config
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: xarch
+    app.kubernetes.io/component: config
+data:
+  # 应用通用配置
+  APP_NAME: "xarch"
+  # 时区配置
+  TZ: "Asia/Shanghai"
+  # Java JVM 参数
+  JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC"
+  # Nacos 服务地址（K8s 集群内部使用服务名访问）
+  NACOS_SERVER_ADDR: "nacos.xarch:8848"
+  # Spring Cloud 配置
+  SPRING_CLOUD_NAcos_SERVER_ADDR: "nacos.xarch:8848"
+  SPRING_CLOUD_NAcos_DISCOVERY_NAMESPACE: "xarch-cloud"
+  SPRING_CLOUD_NAcos_DISCOVERY_GROUP: "DEFAULT_GROUP"
+---
+# ===============================================
+# Secret 配置（Base64 编码）
+# ===============================================
+# 注意：生产环境应使用 Vault 或 Sealed Secrets 等加密方案
+apiVersion: v1
+kind: Secret
+metadata:
+  name: xarch-secrets
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: xarch
+    app.kubernetes.io/component: secrets
+type: Opaque
+data:
+  # 用户名密码应使用加密存储，以下为示例值（Base64 编码）
+  # 实际部署时请替换为真实凭证
+  # echo -n "your-password" | base64
+  DB_USERNAME: cm9vdA==
+  DB_PASSWORD: cm9vdDEyMw==
+  NACOS_USERNAME: bmFj
+  NACOS_PASSWORD: bmFjb3MxMjM=
+---
+# ===============================================
+# ServiceAccount 配置
+# ===============================================
+# 为 xarch 应用创建专用的 ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: xarch-sa
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: xarch
+    app.kubernetes.io/component: service-account

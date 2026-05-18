@@ -1,0 +1,54 @@
+# ===============================================
+# Kustomize 基础配置
+# ===============================================
+# 所有环境的共同配置入口
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 基础资源配置
+resources:
+  # 命名空间、ConfigMap、Secret、ServiceAccount
+  - namespace-config.yaml
+  # 基础设施服务
+  - mysql.yaml
+  - redis.yaml
+  # Nacos 服务注册中心
+  - nacos.yaml
+  # 业务应用
+  - xarch-example.yaml
+  # MCP Servers
+  - xarch-mcp-database.yaml
+  - xarch-mcp-knowledge.yaml
+  - xarch-mcp-filesystem.yaml
+  # API 网关
+  - xarch-cloud-gateway.yaml
+  # Ingress 和 HPA（在 overlays 中按需引入）
+  # - ingress.yaml
+
+# 通用标签（所有资源都会加上这些标签）
+commonLabels:
+  app.kubernetes.io/name: xarch
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/part-of: xarch-framework
+
+# 通用注解
+commonAnnotations:
+  description: "xarch - AI-Enabled Enterprise Backend Framework"
+  documentation: "https://github.com/processcrash/xarch"
+
+# 配置 ConfigMap 生成器
+configMapGenerator:
+  - name: xarch-config
+    literals:
+      - APP_NAME=xarch
+      - TZ=Asia/Shanghai
+
+# Secret 生成器
+secretGenerator:
+  - name: xarch-secrets
+    type: Opaque
+    literals:
+      - DB_USERNAME=root
+      - DB_PASSWORD=root123
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
