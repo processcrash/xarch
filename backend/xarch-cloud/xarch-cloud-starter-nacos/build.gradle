@@ -1,0 +1,17 @@
+// xarch-cloud-starter-nacos
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:3.2.0'
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:3.2.0'
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer:4.1.0'
+    implementation 'org.springframework.cloud:spring-cloud-commons:4.1.0'
+}
+
+java {
+    library {
+        jvmVersion = 25
+    }
+}

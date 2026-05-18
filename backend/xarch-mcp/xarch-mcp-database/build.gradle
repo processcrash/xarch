@@ -1,0 +1,21 @@
+// xarch-mcp-database
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation project(':xarch-core-spring-boot-starter')
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.4.0'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.postgresql:postgresql:42.7.0'
+    implementation 'org.mongodb:mongodb-driver:4.11.0'
+    implementation 'com.microsoft.sqlserver:mssql-jdbc:12.6.0.jre11'
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:3.2.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+}
+
+java {
+    library {
+        jvmVersion = 25
+    }
+}

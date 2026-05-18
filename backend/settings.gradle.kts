@@ -15,5 +15,13 @@ include(
     "xarch-db-spring-boot-starter",
     "xarch-web-spring-boot-starter",
     "xarch-cache-spring-boot-starter",
-    "xarch-example"
+    "xarch-example",
+    // Spring Cloud modules
+    "xarch-cloud:xarch-cloud-starter-nacos",
+    "xarch-cloud:xarch-cloud-starter-gateway",
+    "xarch-cloud:xarch-cloud-starter-mcp",
+    // MCP Servers
+    "xarch-mcp:xarch-mcp-database",
+    "xarch-mcp:xarch-mcp-knowledge",
+    "xarch-mcp:xarch-mcp-filesystem"
 )
