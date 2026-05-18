@@ -50,4 +50,21 @@ class UserControllerTest {
         assertNotNull(result);
         assertEquals("0000", result.getCode());
     }
+
+    @Test
+    void testGetUserRoles() {
+        ApiResult<List<Long>> result = userController.getUserRoles(1L);
+        assertNotNull(result);
+        assertEquals("0000", result.getCode());
+        assertNotNull(result.getData());
+    }
+
+    @Test
+    void testAssignRoles() {
+        // Assign roles to user 1
+        List<Long> roleIds = List.of(1L);
+        ApiResult<Void> result = userController.assignRoles(1L, roleIds);
+        assertNotNull(result);
+        assertEquals("0000", result.getCode());
+    }
 }
