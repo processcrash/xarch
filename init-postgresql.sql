@@ -214,6 +214,71 @@ CREATE TABLE IF NOT EXISTS sys_config (
 );
 
 -- ======================
+-- Storage Module Tables
+-- ======================
+
+-- Resource file table (sys_resource)
+CREATE TABLE IF NOT EXISTS sys_resource (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    resource_name VARCHAR(255) DEFAULT '',
+    object_key VARCHAR(500) DEFAULT '',
+    access_url VARCHAR(500) DEFAULT '',
+    scene_code VARCHAR(100) DEFAULT '',
+    file_size BIGINT DEFAULT 0,
+    file_type VARCHAR(100) DEFAULT '',
+    storage_type VARCHAR(20) DEFAULT 'local',
+    biz_key VARCHAR(100) DEFAULT '',
+    create_user_id BIGINT DEFAULT NULL,
+    create_user_name VARCHAR(100) DEFAULT '',
+    create_time TIMESTAMP DEFAULT NULL,
+    update_time TIMESTAMP DEFAULT NULL,
+    del_flag INTEGER DEFAULT 0
+);
+
+COMMENT ON TABLE sys_resource IS 'File resource table';
+COMMENT ON COLUMN sys_resource.resource_name IS 'Resource name (original filename)';
+COMMENT ON COLUMN sys_resource.object_key IS 'Storage object key';
+COMMENT ON COLUMN sys_resource.access_url IS 'Access URL';
+COMMENT ON COLUMN sys_resource.scene_code IS 'Scene code for categorization';
+COMMENT ON COLUMN sys_resource.file_size IS 'File size in bytes';
+COMMENT ON COLUMN sys_resource.file_type IS 'MIME type';
+COMMENT ON COLUMN sys_resource.storage_type IS 'Storage type: local, minio, aliyun_oss';
+COMMENT ON COLUMN sys_resource.biz_key IS 'Business key for grouping';
+
+-- Storage configuration table (sys_storage_config)
+CREATE TABLE IF NOT EXISTS sys_storage_config (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    storage_type VARCHAR(20) DEFAULT 'local',
+    config_name VARCHAR(100) NOT NULL,
+    is_default INTEGER DEFAULT 0,
+    endpoint VARCHAR(255) DEFAULT '',
+    access_key VARCHAR(255) DEFAULT '',
+    secret_key VARCHAR(255) DEFAULT '',
+    bucket_name VARCHAR(100) DEFAULT '',
+    region VARCHAR(100) DEFAULT '',
+    base_path VARCHAR(255) DEFAULT '',
+    domain VARCHAR(255) DEFAULT '',
+    status INTEGER DEFAULT 1,
+    description VARCHAR(500) DEFAULT '',
+    create_time TIMESTAMP DEFAULT NULL,
+    update_time TIMESTAMP DEFAULT NULL,
+    del_flag INTEGER DEFAULT 0
+);
+
+COMMENT ON TABLE sys_storage_config IS 'Storage configuration table';
+COMMENT ON COLUMN sys_storage_config.storage_type IS 'Storage type: local, minio, aliyun_oss';
+COMMENT ON COLUMN sys_storage_config.config_name IS 'Configuration name';
+COMMENT ON COLUMN sys_storage_config.is_default IS 'Is default: 0=no, 1=yes';
+COMMENT ON COLUMN sys_storage_config.endpoint IS 'Endpoint URL';
+COMMENT ON COLUMN sys_storage_config.access_key IS 'Access key / Access ID';
+COMMENT ON COLUMN sys_storage_config.secret_key IS 'Secret key';
+COMMENT ON COLUMN sys_storage_config.bucket_name IS 'Bucket name';
+COMMENT ON COLUMN sys_storage_config.region IS 'Region';
+COMMENT ON COLUMN sys_storage_config.base_path IS 'Base path for files';
+COMMENT ON COLUMN sys_storage_config.domain IS 'Domain/CDN for accessing files';
+COMMENT ON COLUMN sys_storage_config.status IS 'Status: 0-disabled, 1-enabled';
+
+-- ======================
 -- Notice Table
 -- ======================
 

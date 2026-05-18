@@ -457,6 +457,61 @@ dependencies {
 |--------|------|---------|
 | `ExcelController` | `/excel/*` | Excel 导入导出 |
 
+### 文件管理模块
+
+| 控制器 | 端点 | 功能说明 |
+|--------|------|---------|
+| `FileController` | `/file/*` | 企业级文件管理中心：上传、下载、删除、预览，支持本地存储、MinIO、阿里云 OSS |
+
+---
+
+## 文件管理中心
+
+xarch 提供企业级文件管理中心，支持多种存储后端：
+
+### 存储类型
+
+| 存储类型 | 说明 | 配置项 |
+|---------|------|-------|
+| `local` | 本地文件系统存储 | 存储路径 |
+| `minio` | MinIO 对象存储 | Endpoint, AccessKey, SecretKey, Bucket |
+| `aliyun_oss` | 阿里云 OSS | Endpoint, AccessKey, SecretKey, Bucket, Region |
+
+### API 端点
+
+| 端点 | 方法 | 功能说明 |
+|------|------|---------|
+| `/file/page` | GET | 分页查询文件列表 |
+| `/file/{id}` | GET | 获取文件详情 |
+| `/file/upload` | POST | 上传文件 |
+| `/file/download/{id}` | GET | 下载文件 |
+| `/file/preview/{id}` | GET | 预览文件 |
+| `/file/{id}` | DELETE | 删除文件（软删除） |
+| `/file/stats` | GET | 获取存储统计 |
+| `/file/storage/configs` | GET | 获取存储配置列表 |
+| `/file/storage/config` | POST | 创建存储配置 |
+| `/file/storage/config` | PUT | 更新存储配置 |
+| `/file/storage/config/{id}` | DELETE | 删除存储配置 |
+| `/file/storage/config/{id}/test` | POST | 测试存储连接 |
+
+### 配置存储
+
+创建存储配置：
+
+```json
+{
+  "storageType": "minio",
+  "configName": "Production MinIO",
+  "endpoint": "http://localhost:9000",
+  "accessKey": "minioadmin",
+  "secretKey": "minioadmin",
+  "bucketName": "xarch",
+  "domain": "",
+  "isDefault": 1,
+  "status": 1
+}
+```
+
 ---
 
 ## API 响应格式
