@@ -14,37 +14,42 @@
 - [x] 初始化数据库脚本
 - [x] Git 初始化提交
 
+### 后端增强
+
+- [x] 添加 MyBatis generic base mapper
+- [x] 添加分页插件自动配置
+- [x] 添加 SQL 日志打印功能（@XarchLog）
+- [x] 完善 Knife4j 配置
+- [x] 添加登录/登出 API（/api/auth/login, /api/auth/logout）
+
+### 前端增强
+
+- [x] 添加登录/登出功能
+- [x] 添加用户管理页面
+- [x] 完善路由守卫
+- [x] 添加 auth store (Pinia)
+- [x] 添加请求 Loading 效果
+
+### 部署
+
+- [x] 分离 backend 和 vue3-admin 的 Dockerfile
+- [x] 完善 docker-compose.yml
+
 ## 待完成
 
 ### 后端增强
 
-- [ ] 添加 MyBatis 通用 Mapper
-- [ ] 添加分页插件自动配置
-- [ ] 添加 SQL 日志打印功能
-- [ ] 完善 Druid 监控配置
-- [ ] 添加多数据源支持
-
-### Web 模块增强
-
-- [ ] 添加统一日志注解 @XarchLog
-- [ ] 添加接口限流注解 @XarchRateLimit
-- [ ] 添加权限校验注解 @XarchAuth
-- [ ] 完善 Knife4j 配置
-
-### 缓存模块增强
-
 - [ ] 添加 Redis 分布式锁工具
 - [ ] 添加缓存注解 @XarchCache
-- [ ] 添加 Redis 连接池配置
+- [ ] 添加多数据源支持
+- [ ] 添加权限校验注解 @XarchAuth
 
 ### 前端增强
 
-- [ ] 添加登录/登出功能
-- [ ] 添加用户管理页面
-- [ ] 添加权限管理页面
 - [ ] 添加角色管理页面
-- [ ] 完善路由守卫
-- [ ] 添加请求 Loading 效果
+- [ ] 添加权限管理页面
+- [ ] 完善菜单导航
+- [ ] 添加 CRUD 用户功能
 
 ### 测试
 

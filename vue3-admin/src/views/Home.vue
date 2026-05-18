@@ -4,12 +4,15 @@
       <el-header>
         <div class="header-content">
           <h2>xarch Backend Framework</h2>
-          <el-button type="primary" @click="handleLogout">Logout</el-button>
+          <div class="header-actions">
+            <span class="username">{{ authStore.userInfo?.username || username }}</span>
+            <el-button type="primary" @click="handleLogout">Logout</el-button>
+          </div>
         </div>
       </el-header>
       <el-container>
         <el-aside width="200px">
-          <el-menu default-active="1" class="el-menu-vertical">
+          <el-menu default-active="1" class="el-menu-vertical" @select="handleMenuSelect">
             <el-menu-item index="1">
               <el-icon><User /></el-icon>
               <span>User Management</span>
@@ -47,10 +50,81 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { User, Setting } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
 
-const handleLogout = () => {
-  localStorage.removeItem('token')
+const router = useRouter()
+const authStore = useAuthStore()
+
+const username = computed(() => localStorage.getItem('username') || '')
+
+const handleLogout = async () => {
+  await authStore.logout()
   ElMessage.success('Logged out successfully')
+  router.push('/login')
 }
+
+const handleMenuSelect = (index: string) => {
+  if (index === '1') {
+    router.push('/users')
+  }
+}
+</script>
+
+<style scoped>
+.home {
+  height: 100%;
+}
+
+.el-container {
+  height: 100%;
+}
+
+.el-header {
+  background-color: #545c64;
+  color: #fff;
+  line-height: 60px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.username {
+  color: #fff;
+}
+
+.el-aside {
+  background-color: #f2f2f2;
+}
+
+.el-main {
+  padding: 20px;
+}
+
+.content {
+  max-width: 800px;
+}
+
+.card-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.card-content ul li {
+  padding: 8px 0;
+  color: #666;
+}
+</style>
