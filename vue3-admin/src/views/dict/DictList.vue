@@ -1,15 +1,9 @@
 <template>
-  <div class="user-list">
+  <div class="dict-list">
     <div class="toolbar">
       <el-form :model="queryParams" inline>
-        <el-form-item label="Username">
-          <el-input v-model="queryParams.username" placeholder="Please enter username" clearable />
-        </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="queryParams.status" placeholder="Please select" clearable style="width: 150px">
-            <el-option label="Active" value="1" />
-            <el-option label="Disabled" value="0" />
-          </el-select>
+        <el-form-item label="Dictionary Name">
+          <el-input v-model="queryParams.dictName" placeholder="Please enter" clearable />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">Search</el-button>
@@ -17,16 +11,15 @@
         </el-form-item>
       </el-form>
       <div class="actions">
-        <el-button type="primary" @click="handleAdd">Add User</el-button>
+        <el-button type="primary" @click="handleAdd">Add Dictionary</el-button>
       </div>
     </div>
 
     <el-table :data="tableData" v-loading="loading" stripe>
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="username" label="Username" />
-      <el-table-column prop="nickname" label="Nickname" />
-      <el-table-column prop="email" label="Email" />
-      <el-table-column prop="mobile" label="Mobile" />
+      <el-table-column prop="dictName" label="Dictionary Name" />
+      <el-table-column prop="dictCode" label="Code" />
+      <el-table-column prop="description" label="Description" />
       <el-table-column prop="status" label="Status" width="100">
         <template #default="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'danger'">
@@ -34,9 +27,10 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" width="200" fixed="right">
+      <el-table-column label="Actions" width="250" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="handleEdit(row)">Edit</el-button>
+          <el-button size="small" @click="handleViewData(row)">Data</el-button>
           <el-button size="small" type="danger" @click="handleDelete(row)">Delete</el-button>
         </template>
       </el-table-column>
@@ -55,20 +49,14 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
       <el-form :model="formData" label-width="100px">
-        <el-form-item label="Username">
-          <el-input v-model="formData.username" :disabled="!!formData.id" />
+        <el-form-item label="Dictionary Name">
+          <el-input v-model="formData.dictName" />
         </el-form-item>
-        <el-form-item label="Password" v-if="!formData.id">
-          <el-input v-model="formData.password" type="password" show-password />
+        <el-form-item label="Code">
+          <el-input v-model="formData.dictCode" :disabled="!!formData.id" />
         </el-form-item>
-        <el-form-item label="Nickname">
-          <el-input v-model="formData.nickname" />
-        </el-form-item>
-        <el-form-item label="Email">
-          <el-input v-model="formData.email" />
-        </el-form-item>
-        <el-form-item label="Mobile">
-          <el-input v-model="formData.mobile" />
+        <el-form-item label="Description">
+          <el-input v-model="formData.description" type="textarea" />
         </el-form-item>
         <el-form-item label="Status">
           <el-radio-group v-model="formData.status">
@@ -82,40 +70,54 @@
         <el-button type="primary" @click="handleSubmit">Submit</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="dataDialogVisible" title="Dictionary Data" width="600px">
+      <el-table :data="dictDataList" stripe>
+        <el-table-column prop="dictLabel" label="Label" />
+        <el-table-column prop="dictValue" label="Value" />
+        <el-table-column prop="sortOrder" label="Sort" width="80" />
+        <el-table-column prop="status" label="Status" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 1 ? 'success' : 'danger'">
+              {{ row.status === 1 ? 'Active' : 'Disabled' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { userApi } from '@/api/user'
-import type { User } from '@/api/user'
+import { dictApi, type Dict, type DictData } from '@/api/dict'
 
 const loading = ref(false)
-const tableData = ref<User[]>([])
+const tableData = ref<Dict[]>([])
+const dictDataList = ref<DictData[]>([])
 const total = ref(0)
 const dialogVisible = ref(false)
+const dataDialogVisible = ref(false)
 const dialogTitle = ref('')
 
 const queryParams = reactive({
-  username: '',
-  status: '',
+  dictName: '',
   pageNum: 1,
   pageSize: 10
 })
 
-const formData = reactive<User>({
-  username: '',
-  nickname: '',
-  email: '',
-  mobile: '',
+const formData = reactive<Dict>({
+  dictName: '',
+  dictCode: '',
+  description: '',
   status: 1
 })
 
 const loadData = async () => {
   loading.value = true
   try {
-    const result = await userApi.page(queryParams)
+    const result = await dictApi.page(queryParams)
     tableData.value = result.list || []
     total.value = result.total || 0
   } catch {
@@ -131,8 +133,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  queryParams.username = ''
-  queryParams.status = ''
+  queryParams.dictName = ''
   queryParams.pageNum = 1
   loadData()
 }
@@ -141,23 +142,23 @@ const handleAdd = () => {
   Object.keys(formData).forEach(key => {
     (formData as any)[key] = key === 'status' ? 1 : undefined
   })
-  dialogTitle.value = 'Add User'
+  dialogTitle.value = 'Add Dictionary'
   dialogVisible.value = true
 }
 
-const handleEdit = (row: User) => {
+const handleEdit = (row: Dict) => {
   Object.assign(formData, row)
-  dialogTitle.value = 'Edit User'
+  dialogTitle.value = 'Edit Dictionary'
   dialogVisible.value = true
 }
 
 const handleSubmit = async () => {
   try {
     if (formData.id) {
-      await userApi.update(formData.id!, formData)
+      await dictApi.update(formData.id!, formData)
       ElMessage.success('Updated successfully')
     } else {
-      await userApi.create(formData)
+      await dictApi.create(formData)
       ElMessage.success('Created successfully')
     }
     dialogVisible.value = false
@@ -167,15 +168,21 @@ const handleSubmit = async () => {
   }
 }
 
-const handleDelete = async (row: User) => {
+const handleDelete = async (row: Dict) => {
   try {
-    await ElMessageBox.confirm(`Delete user ${row.username}?`, 'Confirm', { type: 'warning' })
-    await userApi.delete(row.id!)
+    await ElMessageBox.confirm(`Delete dictionary ${row.dictName}?`, 'Confirm', { type: 'warning' })
+    await dictApi.delete(row.id!)
     ElMessage.success('Deleted successfully')
     loadData()
   } catch {
     // cancelled
   }
+}
+
+const handleViewData = async (row: Dict) => {
+  const result = await dictApi.getDataById(row.id!)
+  dictDataList.value = result
+  dataDialogVisible.value = true
 }
 
 onMounted(() => {
@@ -184,7 +191,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.user-list {
+.dict-list {
   padding: 20px;
 }
 
@@ -192,9 +199,5 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-}
-
-.actions {
-  text-align: right;
 }
 </style>

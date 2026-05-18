@@ -27,6 +27,42 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/roles',
+    name: 'RoleManagement',
+    component: () => import('@/views/role/RoleList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/menus',
+    name: 'MenuManagement',
+    component: () => import('@/views/menu/MenuList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/depts',
+    name: 'DeptManagement',
+    component: () => import('@/views/dept/DeptList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dicts',
+    name: 'DictManagement',
+    component: () => import('@/views/dict/DictList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/configs',
+    name: 'ConfigManagement',
+    component: () => import('@/views/config/ConfigList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/logs',
+    name: 'LogManagement',
+    component: () => import('@/views/log/LogList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/NotFound.vue')

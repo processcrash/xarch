@@ -1,15 +1,9 @@
 <template>
-  <div class="user-list">
+  <div class="menu-list">
     <div class="toolbar">
       <el-form :model="queryParams" inline>
-        <el-form-item label="Username">
-          <el-input v-model="queryParams.username" placeholder="Please enter username" clearable />
-        </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="queryParams.status" placeholder="Please select" clearable style="width: 150px">
-            <el-option label="Active" value="1" />
-            <el-option label="Disabled" value="0" />
-          </el-select>
+        <el-form-item label="Menu Name">
+          <el-input v-model="queryParams.menuName" placeholder="Please enter" clearable />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">Search</el-button>
@@ -17,16 +11,26 @@
         </el-form-item>
       </el-form>
       <div class="actions">
-        <el-button type="primary" @click="handleAdd">Add User</el-button>
+        <el-button type="primary" @click="handleAdd">Add Menu</el-button>
       </div>
     </div>
 
-    <el-table :data="tableData" v-loading="loading" stripe>
+    <el-table :data="tableData" v-loading="loading" stripe row-key="id" default-expand-all>
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="username" label="Username" />
-      <el-table-column prop="nickname" label="Nickname" />
-      <el-table-column prop="email" label="Email" />
-      <el-table-column prop="mobile" label="Mobile" />
+      <el-table-column prop="menuName" label="Menu Name">
+        <template #default="{ row }">
+          {{ row.menuName }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="menuCode" label="Code" />
+      <el-table-column prop="menuType" label="Type" width="100">
+        <template #default="{ row }">
+          {{ row.menuType === 1 ? 'Menu' : 'Button' }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="path" label="Path" />
+      <el-table-column prop="icon" label="Icon" width="100" />
+      <el-table-column prop="sortOrder" label="Sort" width="80" />
       <el-table-column prop="status" label="Status" width="100">
         <template #default="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'danger'">
@@ -55,20 +59,29 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
       <el-form :model="formData" label-width="100px">
-        <el-form-item label="Username">
-          <el-input v-model="formData.username" :disabled="!!formData.id" />
+        <el-form-item label="Parent Menu">
+          <el-tree-select v-model="formData.parentId" :data="menuTree" :props="{ label: 'menuName', value: 'id' }" placeholder="Root menu" clearable style="width: 100%" />
         </el-form-item>
-        <el-form-item label="Password" v-if="!formData.id">
-          <el-input v-model="formData.password" type="password" show-password />
+        <el-form-item label="Menu Name">
+          <el-input v-model="formData.menuName" />
         </el-form-item>
-        <el-form-item label="Nickname">
-          <el-input v-model="formData.nickname" />
+        <el-form-item label="Menu Code">
+          <el-input v-model="formData.menuCode" />
         </el-form-item>
-        <el-form-item label="Email">
-          <el-input v-model="formData.email" />
+        <el-form-item label="Type">
+          <el-radio-group v-model="formData.menuType">
+            <el-radio :label="1">Menu</el-radio>
+            <el-radio :label="2">Button</el-radio>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="Mobile">
-          <el-input v-model="formData.mobile" />
+        <el-form-item label="Path">
+          <el-input v-model="formData.path" />
+        </el-form-item>
+        <el-form-item label="Icon">
+          <el-input v-model="formData.icon" />
+        </el-form-item>
+        <el-form-item label="Sort">
+          <el-input-number v-model="formData.sortOrder" :min="0" />
         </el-form-item>
         <el-form-item label="Status">
           <el-radio-group v-model="formData.status">
@@ -88,34 +101,36 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { userApi } from '@/api/user'
-import type { User } from '@/api/user'
+import { menuApi } from '@/api/menu'
+import type { Menu } from '@/api/menu'
 
 const loading = ref(false)
-const tableData = ref<User[]>([])
+const tableData = ref<Menu[]>([])
+const menuTree = ref<Menu[]>([])
 const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 
 const queryParams = reactive({
-  username: '',
-  status: '',
+  menuName: '',
   pageNum: 1,
   pageSize: 10
 })
 
-const formData = reactive<User>({
-  username: '',
-  nickname: '',
-  email: '',
-  mobile: '',
+const formData = reactive<Menu>({
+  menuName: '',
+  menuCode: '',
+  menuType: 1,
+  path: '',
+  icon: '',
+  sortOrder: 0,
   status: 1
 })
 
 const loadData = async () => {
   loading.value = true
   try {
-    const result = await userApi.page(queryParams)
+    const result = await menuApi.page(queryParams)
     tableData.value = result.list || []
     total.value = result.total || 0
   } catch {
@@ -125,54 +140,60 @@ const loadData = async () => {
   }
 }
 
+const loadTree = async () => {
+  const result = await menuApi.tree()
+  menuTree.value = [{ id: 0, menuName: 'Root', children: result }] as any
+}
+
 const handleSearch = () => {
   queryParams.pageNum = 1
   loadData()
 }
 
 const handleReset = () => {
-  queryParams.username = ''
-  queryParams.status = ''
+  queryParams.menuName = ''
   queryParams.pageNum = 1
   loadData()
 }
 
 const handleAdd = () => {
   Object.keys(formData).forEach(key => {
-    (formData as any)[key] = key === 'status' ? 1 : undefined
+    (formData as any)[key] = key === 'menuType' || key === 'sortOrder' || key === 'status' ? (key === 'menuType' ? 1 : key === 'sortOrder' ? 0 : 1) : undefined
   })
-  dialogTitle.value = 'Add User'
+  dialogTitle.value = 'Add Menu'
   dialogVisible.value = true
 }
 
-const handleEdit = (row: User) => {
+const handleEdit = (row: Menu) => {
   Object.assign(formData, row)
-  dialogTitle.value = 'Edit User'
+  dialogTitle.value = 'Edit Menu'
   dialogVisible.value = true
 }
 
 const handleSubmit = async () => {
   try {
     if (formData.id) {
-      await userApi.update(formData.id!, formData)
+      await menuApi.update(formData.id!, formData)
       ElMessage.success('Updated successfully')
     } else {
-      await userApi.create(formData)
+      await menuApi.create(formData)
       ElMessage.success('Created successfully')
     }
     dialogVisible.value = false
     loadData()
+    loadTree()
   } catch {
     ElMessage.error('Operation failed')
   }
 }
 
-const handleDelete = async (row: User) => {
+const handleDelete = async (row: Menu) => {
   try {
-    await ElMessageBox.confirm(`Delete user ${row.username}?`, 'Confirm', { type: 'warning' })
-    await userApi.delete(row.id!)
+    await ElMessageBox.confirm(`Delete menu ${row.menuName}?`, 'Confirm', { type: 'warning' })
+    await menuApi.delete(row.id!)
     ElMessage.success('Deleted successfully')
     loadData()
+    loadTree()
   } catch {
     // cancelled
   }
@@ -180,11 +201,12 @@ const handleDelete = async (row: User) => {
 
 onMounted(() => {
   loadData()
+  loadTree()
 })
 </script>
 
 <style scoped>
-.user-list {
+.menu-list {
   padding: 20px;
 }
 
@@ -192,9 +214,5 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-}
-
-.actions {
-  text-align: right;
 }
 </style>

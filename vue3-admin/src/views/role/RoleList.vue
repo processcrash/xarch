@@ -1,15 +1,9 @@
 <template>
-  <div class="user-list">
+  <div class="role-list">
     <div class="toolbar">
       <el-form :model="queryParams" inline>
-        <el-form-item label="Username">
-          <el-input v-model="queryParams.username" placeholder="Please enter username" clearable />
-        </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="queryParams.status" placeholder="Please select" clearable style="width: 150px">
-            <el-option label="Active" value="1" />
-            <el-option label="Disabled" value="0" />
-          </el-select>
+        <el-form-item label="Role Name">
+          <el-input v-model="queryParams.roleName" placeholder="Please enter" clearable />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">Search</el-button>
@@ -17,16 +11,20 @@
         </el-form-item>
       </el-form>
       <div class="actions">
-        <el-button type="primary" @click="handleAdd">Add User</el-button>
+        <el-button type="primary" @click="handleAdd">Add Role</el-button>
       </div>
     </div>
 
     <el-table :data="tableData" v-loading="loading" stripe>
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="username" label="Username" />
-      <el-table-column prop="nickname" label="Nickname" />
-      <el-table-column prop="email" label="Email" />
-      <el-table-column prop="mobile" label="Mobile" />
+      <el-table-column prop="roleName" label="Role Name" />
+      <el-table-column prop="roleCode" label="Role Code" />
+      <el-table-column prop="roleType" label="Type" width="100">
+        <template #default="{ row }">
+          {{ row.roleType === 1 ? 'System' : 'Business' }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="description" label="Description" />
       <el-table-column prop="status" label="Status" width="100">
         <template #default="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'danger'">
@@ -55,20 +53,20 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
       <el-form :model="formData" label-width="100px">
-        <el-form-item label="Username">
-          <el-input v-model="formData.username" :disabled="!!formData.id" />
+        <el-form-item label="Role Name">
+          <el-input v-model="formData.roleName" />
         </el-form-item>
-        <el-form-item label="Password" v-if="!formData.id">
-          <el-input v-model="formData.password" type="password" show-password />
+        <el-form-item label="Role Code">
+          <el-input v-model="formData.roleCode" :disabled="!!formData.id" />
         </el-form-item>
-        <el-form-item label="Nickname">
-          <el-input v-model="formData.nickname" />
+        <el-form-item label="Type">
+          <el-radio-group v-model="formData.roleType">
+            <el-radio :label="1">System</el-radio>
+            <el-radio :label="2">Business</el-radio>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="Email">
-          <el-input v-model="formData.email" />
-        </el-form-item>
-        <el-form-item label="Mobile">
-          <el-input v-model="formData.mobile" />
+        <el-form-item label="Description">
+          <el-input v-model="formData.description" type="textarea" />
         </el-form-item>
         <el-form-item label="Status">
           <el-radio-group v-model="formData.status">
@@ -88,34 +86,33 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { userApi } from '@/api/user'
-import type { User } from '@/api/user'
+import { roleApi } from '@/api/role'
+import type { Role } from '@/api/role'
 
 const loading = ref(false)
-const tableData = ref<User[]>([])
+const tableData = ref<Role[]>([])
 const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 
 const queryParams = reactive({
-  username: '',
-  status: '',
+  roleName: '',
   pageNum: 1,
   pageSize: 10
 })
 
-const formData = reactive<User>({
-  username: '',
-  nickname: '',
-  email: '',
-  mobile: '',
+const formData = reactive<Role>({
+  roleName: '',
+  roleCode: '',
+  roleType: 2,
+  description: '',
   status: 1
 })
 
 const loadData = async () => {
   loading.value = true
   try {
-    const result = await userApi.page(queryParams)
+    const result = await roleApi.page(queryParams)
     tableData.value = result.list || []
     total.value = result.total || 0
   } catch {
@@ -131,33 +128,32 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  queryParams.username = ''
-  queryParams.status = ''
+  queryParams.roleName = ''
   queryParams.pageNum = 1
   loadData()
 }
 
 const handleAdd = () => {
   Object.keys(formData).forEach(key => {
-    (formData as any)[key] = key === 'status' ? 1 : undefined
+    (formData as any)[key] = key === 'roleType' || key === 'status' ? (key === 'roleType' ? 2 : 1) : undefined
   })
-  dialogTitle.value = 'Add User'
+  dialogTitle.value = 'Add Role'
   dialogVisible.value = true
 }
 
-const handleEdit = (row: User) => {
+const handleEdit = (row: Role) => {
   Object.assign(formData, row)
-  dialogTitle.value = 'Edit User'
+  dialogTitle.value = 'Edit Role'
   dialogVisible.value = true
 }
 
 const handleSubmit = async () => {
   try {
     if (formData.id) {
-      await userApi.update(formData.id!, formData)
+      await roleApi.update(formData.id!, formData)
       ElMessage.success('Updated successfully')
     } else {
-      await userApi.create(formData)
+      await roleApi.create(formData)
       ElMessage.success('Created successfully')
     }
     dialogVisible.value = false
@@ -167,10 +163,10 @@ const handleSubmit = async () => {
   }
 }
 
-const handleDelete = async (row: User) => {
+const handleDelete = async (row: Role) => {
   try {
-    await ElMessageBox.confirm(`Delete user ${row.username}?`, 'Confirm', { type: 'warning' })
-    await userApi.delete(row.id!)
+    await ElMessageBox.confirm(`Delete role ${row.roleName}?`, 'Confirm', { type: 'warning' })
+    await roleApi.delete(row.id!)
     ElMessage.success('Deleted successfully')
     loadData()
   } catch {
@@ -184,7 +180,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.user-list {
+.role-list {
   padding: 20px;
 }
 
@@ -192,9 +188,5 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-}
-
-.actions {
-  text-align: right;
 }
 </style>

@@ -11,26 +11,57 @@
         </div>
       </el-header>
       <el-container>
-        <el-aside width="200px">
-          <el-menu default-active="1" class="el-menu-vertical" @select="handleMenuSelect">
-            <el-menu-item index="1">
+        <el-aside width="220px">
+          <el-menu :default-active="activeMenu" class="el-menu-vertical" @select="handleMenuSelect">
+            <el-menu-item index="1" @click="router.push('/users')">
               <el-icon><User /></el-icon>
               <span>User Management</span>
             </el-menu-item>
-            <el-menu-item index="2">
+            <el-menu-item index="2" @click="router.push('/roles')">
+              <el-icon><Role /></el-icon>
+              <span>Role Management</span>
+            </el-menu-item>
+            <el-menu-item index="3" @click="router.push('/menus')">
+              <el-icon><Menu /></el-icon>
+              <span>Menu Management</span>
+            </el-menu-item>
+            <el-menu-item index="4" @click="router.push('/depts')">
+              <el-icon><Office /></el-icon>
+              <span>Dept Management</span>
+            </el-menu-item>
+            <el-menu-item index="5" @click="router.push('/dicts')">
+              <el-icon><Document /></el-icon>
+              <span>Dictionary</span>
+            </el-menu-item>
+            <el-menu-item index="6" @click="router.push('/configs')">
               <el-icon><Setting /></el-icon>
-              <span>System Settings</span>
+              <span>System Config</span>
+            </el-menu-item>
+            <el-menu-item index="7" @click="router.push('/logs')">
+              <el-icon><List /></el-icon>
+              <span>Logs</span>
             </el-menu-item>
           </el-menu>
         </el-aside>
         <el-main>
           <div class="content">
-            <h3>Welcome to xarch</h3>
-            <el-card class="box-card">
+            <h3>Welcome, {{ authStore.userInfo?.nickname || username }}</h3>
+            <el-row :gutter="20" style="margin-top: 20px">
+              <el-col :span="6" v-for="item in stats" :key="item.title">
+                <el-card shadow="hover" class="stat-card">
+                  <div class="stat-icon">
+                    <el-icon :size="32"><component :is="item.icon" /></el-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-title">{{ item.title }}</div>
+                    <div class="stat-value">{{ item.value }}</div>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+            <el-card style="margin-top: 20px">
               <template #header>
-                <div class="card-header">
-                  <span>Quick Start</span>
-                </div>
+                <span>Quick Start</span>
               </template>
               <div class="card-content">
                 <p>Enterprise Backend Development Framework</p>
@@ -38,7 +69,9 @@
                   <li>Spring Boot 4.0 + JDK 25</li>
                   <li>MySQL / PostgreSQL Support</li>
                   <li>Redis Cache Support</li>
-                  <li>Vue 3 Frontend</li>
+                  <li>Vue 3 + Element Plus Frontend</li>
+                  <li>Sa-Token Authentication</li>
+                  <li>MyBatis Plus ORM</li>
                 </ul>
               </div>
             </el-card>
@@ -50,16 +83,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { User, Setting } from '@element-plus/icons-vue'
+import { User, Role, Menu, Office, Document, Setting, List } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const activeMenu = ref('1')
 
 const username = computed(() => localStorage.getItem('username') || '')
+
+const stats = ref([
+  { title: 'Users', value: '10', icon: User },
+  { title: 'Roles', value: '5', icon: Role },
+  { title: 'Menus', value: '20', icon: Menu },
+  { title: 'Depts', value: '8', icon: Office },
+])
 
 const handleLogout = async () => {
   await authStore.logout()
@@ -68,9 +109,7 @@ const handleLogout = async () => {
 }
 
 const handleMenuSelect = (index: string) => {
-  if (index === '1') {
-    router.push('/users')
-  }
+  activeMenu.value = index
 }
 </script>
 
@@ -112,15 +151,50 @@ const handleMenuSelect = (index: string) => {
 
 .el-main {
   padding: 20px;
+  background-color: #f5f5f5;
 }
 
 .content {
-  max-width: 800px;
+  max-width: 1200px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  background: #ecf5ff;
+  color: #409eff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-title {
+  color: #909399;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #303133;
 }
 
 .card-content ul {
-  list-style: none;
-  padding: 0;
+  list-style: disc;
+  padding-left: 20px;
 }
 
 .card-content ul li {

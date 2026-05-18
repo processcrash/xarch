@@ -1,15 +1,9 @@
 <template>
-  <div class="user-list">
+  <div class="config-list">
     <div class="toolbar">
       <el-form :model="queryParams" inline>
-        <el-form-item label="Username">
-          <el-input v-model="queryParams.username" placeholder="Please enter username" clearable />
-        </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="queryParams.status" placeholder="Please select" clearable style="width: 150px">
-            <el-option label="Active" value="1" />
-            <el-option label="Disabled" value="0" />
-          </el-select>
+        <el-form-item label="Config Key">
+          <el-input v-model="queryParams.configKey" placeholder="Please enter" clearable />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">Search</el-button>
@@ -17,16 +11,16 @@
         </el-form-item>
       </el-form>
       <div class="actions">
-        <el-button type="primary" @click="handleAdd">Add User</el-button>
+        <el-button type="primary" @click="handleAdd">Add Config</el-button>
       </div>
     </div>
 
     <el-table :data="tableData" v-loading="loading" stripe>
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="username" label="Username" />
-      <el-table-column prop="nickname" label="Nickname" />
-      <el-table-column prop="email" label="Email" />
-      <el-table-column prop="mobile" label="Mobile" />
+      <el-table-column prop="configKey" label="Config Key" />
+      <el-table-column prop="configValue" label="Value" />
+      <el-table-column prop="configType" label="Type" width="100" />
+      <el-table-column prop="description" label="Description" />
       <el-table-column prop="status" label="Status" width="100">
         <template #default="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'danger'">
@@ -55,20 +49,21 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
       <el-form :model="formData" label-width="100px">
-        <el-form-item label="Username">
-          <el-input v-model="formData.username" :disabled="!!formData.id" />
+        <el-form-item label="Config Key">
+          <el-input v-model="formData.configKey" :disabled="!!formData.id" />
         </el-form-item>
-        <el-form-item label="Password" v-if="!formData.id">
-          <el-input v-model="formData.password" type="password" show-password />
+        <el-form-item label="Config Value">
+          <el-input v-model="formData.configValue" />
         </el-form-item>
-        <el-form-item label="Nickname">
-          <el-input v-model="formData.nickname" />
+        <el-form-item label="Type">
+          <el-select v-model="formData.configType" style="width: 100%">
+            <el-option label="String" value="string" />
+            <el-option label="Number" value="number" />
+            <el-option label="Boolean" value="boolean" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="Email">
-          <el-input v-model="formData.email" />
-        </el-form-item>
-        <el-form-item label="Mobile">
-          <el-input v-model="formData.mobile" />
+        <el-form-item label="Description">
+          <el-input v-model="formData.description" type="textarea" />
         </el-form-item>
         <el-form-item label="Status">
           <el-radio-group v-model="formData.status">
@@ -88,34 +83,32 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { userApi } from '@/api/user'
-import type { User } from '@/api/user'
+import { configApi, type Config } from '@/api/config'
 
 const loading = ref(false)
-const tableData = ref<User[]>([])
+const tableData = ref<Config[]>([])
 const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 
 const queryParams = reactive({
-  username: '',
-  status: '',
+  configKey: '',
   pageNum: 1,
   pageSize: 10
 })
 
-const formData = reactive<User>({
-  username: '',
-  nickname: '',
-  email: '',
-  mobile: '',
+const formData = reactive<Config>({
+  configKey: '',
+  configValue: '',
+  configType: 'string',
+  description: '',
   status: 1
 })
 
 const loadData = async () => {
   loading.value = true
   try {
-    const result = await userApi.page(queryParams)
+    const result = await configApi.page(queryParams)
     tableData.value = result.list || []
     total.value = result.total || 0
   } catch {
@@ -131,33 +124,32 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  queryParams.username = ''
-  queryParams.status = ''
+  queryParams.configKey = ''
   queryParams.pageNum = 1
   loadData()
 }
 
 const handleAdd = () => {
   Object.keys(formData).forEach(key => {
-    (formData as any)[key] = key === 'status' ? 1 : undefined
+    (formData as any)[key] = key === 'configType' || key === 'status' ? (key === 'configType' ? 'string' : 1) : undefined
   })
-  dialogTitle.value = 'Add User'
+  dialogTitle.value = 'Add Config'
   dialogVisible.value = true
 }
 
-const handleEdit = (row: User) => {
+const handleEdit = (row: Config) => {
   Object.assign(formData, row)
-  dialogTitle.value = 'Edit User'
+  dialogTitle.value = 'Edit Config'
   dialogVisible.value = true
 }
 
 const handleSubmit = async () => {
   try {
     if (formData.id) {
-      await userApi.update(formData.id!, formData)
+      await configApi.update(formData.id!, formData)
       ElMessage.success('Updated successfully')
     } else {
-      await userApi.create(formData)
+      await configApi.create(formData)
       ElMessage.success('Created successfully')
     }
     dialogVisible.value = false
@@ -167,10 +159,10 @@ const handleSubmit = async () => {
   }
 }
 
-const handleDelete = async (row: User) => {
+const handleDelete = async (row: Config) => {
   try {
-    await ElMessageBox.confirm(`Delete user ${row.username}?`, 'Confirm', { type: 'warning' })
-    await userApi.delete(row.id!)
+    await ElMessageBox.confirm(`Delete config ${row.configKey}?`, 'Confirm', { type: 'warning' })
+    await configApi.delete(row.id!)
     ElMessage.success('Deleted successfully')
     loadData()
   } catch {
@@ -184,7 +176,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.user-list {
+.config-list {
   padding: 20px;
 }
 
@@ -192,9 +184,5 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-}
-
-.actions {
-  text-align: right;
 }
 </style>
