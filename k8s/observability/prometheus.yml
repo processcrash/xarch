@@ -1,0 +1,44 @@
+# Prometheus Configuration for xarch
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # xarch-example backend service
+  - job_name: 'xarch-example'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['xarch-example:8080']
+        labels:
+          application: 'xarch-example'
+          environment: 'production'
+
+  # Spring Boot Admin
+  - job_name: 'spring-boot-admin'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['xarch-admin:8080']
+        labels:
+          application: 'xarch-admin'
+          environment: 'production'
+
+  # Nacos (if exposed)
+  - job_name: 'nacos'
+    static_configs:
+      - targets: ['nacos:8848']
+        labels:
+          application: 'nacos'
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+        labels:
+          application: 'redis'
+
+  # PostgreSQL (via postgres_exporter if available)
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          application: 'postgresql'

@@ -8,7 +8,20 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">Search</el-button>
           <el-button @click="handleReset">Reset</el-button>
-          <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">Batch Delete</el-button>
+        </el-form-item>
+        <el-form-item v-if="selectedRows.length > 0">
+          <el-dropdown @command="handleBatchCommand">
+            <el-button type="warning">
+              Batch Actions ({{ selectedRows.length }})<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="enable">Enable Selected</el-dropdown-item>
+                <el-dropdown-item command="disable">Disable Selected</el-dropdown-item>
+                <el-dropdown-item command="delete" divided>Delete Selected</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </el-form-item>
       </el-form>
       <div class="actions">
@@ -19,14 +32,18 @@
     <el-table :data="tableData" v-loading="loading" stripe @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="50" />
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="roleName" label="Role Name" />
+      <el-table-column prop="roleName" label="Role Name">
+        <template #default="{ row }">
+          <el-link type="primary" @click="handleView(row)">{{ row.roleName }}</el-link>
+        </template>
+      </el-table-column>
       <el-table-column prop="roleCode" label="Role Code" />
       <el-table-column prop="roleType" label="Type" width="100">
         <template #default="{ row }">
           {{ row.roleType === 1 ? 'System' : 'Business' }}
         </template>
       </el-table-column>
-      <el-table-column prop="description" label="Description" />
+      <el-table-column prop="remark" label="Description" />
       <el-table-column prop="status" label="Status" width="100">
         <template #default="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'danger'">
@@ -87,9 +104,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowDown } from '@element-plus/icons-vue'
 import { roleApi } from '@/api/role'
 import type { Role } from '@/api/role'
+
+const router = useRouter()
 
 const loading = ref(false)
 const tableData = ref<Role[]>([])
@@ -150,6 +171,10 @@ const handleEdit = (row: Role) => {
   dialogVisible.value = true
 }
 
+const handleView = (row: Role) => {
+  router.push(`/roles/${row.id}`)
+}
+
 const handleSubmit = async () => {
   try {
     if (formData.id) {
@@ -191,9 +216,36 @@ const handleBatchDelete = async () => {
     const ids = selectedRows.value.map(row => row.id!)
     await Promise.all(ids.map(id => roleApi.delete(id)))
     ElMessage.success(`Deleted ${ids.length} roles successfully`)
+    selectedRows.value = []
     loadData()
   } catch {
     // cancelled
+  }
+}
+
+const handleBatchCommand = async (command: string) => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('Please select roles first')
+    return
+  }
+
+  try {
+    const ids = selectedRows.value.map(row => row.id!)
+    if (command === 'enable') {
+      await Promise.all(ids.map(id => roleApi.update(id, { status: 1 } as Role)))
+      ElMessage.success(`Enabled ${ids.length} roles successfully`)
+    } else if (command === 'disable') {
+      await Promise.all(ids.map(id => roleApi.update(id, { status: 0 } as Role)))
+      ElMessage.success(`Disabled ${ids.length} roles successfully`)
+    } else if (command === 'delete') {
+      await ElMessageBox.confirm(`Delete ${ids.length} roles?`, 'Confirm', { type: 'warning' })
+      await Promise.all(ids.map(id => roleApi.delete(id)))
+      ElMessage.success(`Deleted ${ids.length} roles successfully`)
+    }
+    selectedRows.value = []
+    loadData()
+  } catch {
+    // cancelled or error
   }
 }
 

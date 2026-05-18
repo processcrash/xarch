@@ -44,3 +44,28 @@ sa:
     active-timeout: -1
   token-name: Authorization
   token-prefix: Bearer
+
+# Actuator and Prometheus monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,beans,caches,conditions,configprops,env,loggers,heapdump,threaddump
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true

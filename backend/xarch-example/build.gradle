@@ -18,6 +18,10 @@ dependencies {
     // WebSocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
+    // Actuator + Prometheus monitoring
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
 }

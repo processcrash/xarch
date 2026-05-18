@@ -16,7 +16,20 @@
           <el-button type="primary" @click="handleSearch">Search</el-button>
           <el-button @click="handleReset">Reset</el-button>
           <el-button type="info" @click="toggleAdvanced">Advanced</el-button>
-          <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">Batch Delete</el-button>
+        </el-form-item>
+        <el-form-item v-if="selectedRows.length > 0">
+          <el-dropdown @command="handleBatchCommand">
+            <el-button type="warning">
+              Batch Actions ({{ selectedRows.length }})<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="enable">Enable Selected</el-dropdown-item>
+                <el-dropdown-item command="disable">Disable Selected</el-dropdown-item>
+                <el-dropdown-item command="delete" divided>Delete Selected</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </el-form-item>
       </el-form>
       <div class="actions">
@@ -50,7 +63,11 @@
     <el-table :data="tableData" v-loading="loading" stripe @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="50" />
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="username" label="Username" />
+      <el-table-column prop="username" label="Username">
+        <template #default="{ row }">
+          <el-link type="primary" @click="handleView(row)">{{ row.username }}</el-link>
+        </template>
+      </el-table-column>
       <el-table-column prop="nickname" label="Nickname" />
       <el-table-column prop="email" label="Email" />
       <el-table-column prop="mobile" label="Mobile" />
@@ -81,23 +98,23 @@
     />
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
-      <el-form :model="formData" label-width="100px">
-        <el-form-item label="Username">
-          <el-input v-model="formData.username" :disabled="!!formData.id" />
+      <el-form :model="formData" label-width="100px" :rules="formRules" ref="formRef">
+        <el-form-item label="Username" prop="username">
+          <el-input v-model="formData.username" placeholder="4-20 characters, alphanumeric and underscore" :disabled="!!formData.id" />
         </el-form-item>
-        <el-form-item label="Password" v-if="!formData.id">
-          <el-input v-model="formData.password" type="password" show-password />
+        <el-form-item label="Password" prop="password" v-if="!formData.id">
+          <el-input v-model="formData.password" type="password" show-password placeholder="At least 6 characters" />
         </el-form-item>
-        <el-form-item label="Nickname">
-          <el-input v-model="formData.nickname" />
+        <el-form-item label="Nickname" prop="nickname">
+          <el-input v-model="formData.nickname" placeholder="Please enter nickname" />
         </el-form-item>
-        <el-form-item label="Email">
-          <el-input v-model="formData.email" />
+        <el-form-item label="Email" prop="email">
+          <el-input v-model="formData.email" placeholder="Please enter email" />
         </el-form-item>
-        <el-form-item label="Mobile">
-          <el-input v-model="formData.mobile" />
+        <el-form-item label="Mobile" prop="mobile">
+          <el-input v-model="formData.mobile" placeholder="Please enter mobile number" />
         </el-form-item>
-        <el-form-item label="Status">
+        <el-form-item label="Status" prop="status">
           <el-radio-group v-model="formData.status">
             <el-radio :label="1">Active</el-radio>
             <el-radio :label="0">Disabled</el-radio>
@@ -114,9 +131,15 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowDown } from '@element-plus/icons-vue'
 import { userApi } from '@/api/user'
 import type { User } from '@/api/user'
+import { validateEmail, validateMobile, validateUsername, validatePassword } from '@/utils/validate'
+
+const router = useRouter()
+const formRef = ref()
 
 const loading = ref(false)
 const tableData = ref<User[]>([])
@@ -143,6 +166,22 @@ const formData = reactive<User>({
   mobile: '',
   status: 1
 })
+
+const formRules = {
+  username: [
+    { required: true, message: 'Username is required', trigger: 'blur' },
+    { validator: validateUsername, trigger: 'blur' }
+  ],
+  password: [
+    { validator: validatePassword, trigger: 'blur' }
+  ],
+  email: [
+    { validator: validateEmail, trigger: 'blur' }
+  ],
+  mobile: [
+    { validator: validateMobile, trigger: 'blur' }
+  ]
+}
 
 const loadData = async () => {
   loading.value = true
@@ -190,6 +229,10 @@ const handleEdit = (row: User) => {
   dialogVisible.value = true
 }
 
+const handleView = (row: User) => {
+  router.push(`/users/${row.id}`)
+}
+
 const handleSubmit = async () => {
   try {
     if (formData.id) {
@@ -231,9 +274,36 @@ const handleBatchDelete = async () => {
     const ids = selectedRows.value.map(row => row.id!)
     await Promise.all(ids.map(id => userApi.delete(id)))
     ElMessage.success(`Deleted ${ids.length} users successfully`)
+    selectedRows.value = []
     loadData()
   } catch {
     // cancelled
+  }
+}
+
+const handleBatchCommand = async (command: string) => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('Please select users first')
+    return
+  }
+
+  try {
+    const ids = selectedRows.value.map(row => row.id!)
+    if (command === 'enable') {
+      await Promise.all(ids.map(id => userApi.update(id, { status: 1 } as User)))
+      ElMessage.success(`Enabled ${ids.length} users successfully`)
+    } else if (command === 'disable') {
+      await Promise.all(ids.map(id => userApi.update(id, { status: 0 } as User)))
+      ElMessage.success(`Disabled ${ids.length} users successfully`)
+    } else if (command === 'delete') {
+      await ElMessageBox.confirm(`Delete ${ids.length} users?`, 'Confirm', { type: 'warning' })
+      await Promise.all(ids.map(id => userApi.delete(id)))
+      ElMessage.success(`Deleted ${ids.length} users successfully`)
+    }
+    selectedRows.value = []
+    loadData()
+  } catch {
+    // cancelled or error
   }
 }
 
