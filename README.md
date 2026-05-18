@@ -36,19 +36,20 @@ xarch 不仅是一个框架，更是一套 **AI 时代企业后台管理的标�
 ```
 xarch/
 ├── backend/                                    # Spring Boot 后端 (Gradle)
-│   ├── xarch-bom/                              # Bill of Materials 版本管理
-│   ├── xarch-core-spring-boot-starter/        # 核心模块：工具类、注解、实体基类
-│   ├── xarch-db-spring-boot-starter/          # 数据库模块：MyBatis Plus、Druid 连接池
-│   ├── xarch-web-spring-boot-starter/         # Web 模块：REST API、Swagger、Sa-Token 认证
-│   ├── xarch-cache-spring-boot-starter/       # 缓存模块：Redis、Redisson 分布式锁
-│   ├── xarch-cloud/                            # Spring Cloud 微服务模块
-│   │   ├── xarch-cloud-starter-nacos/         # Nacos 服务注册（含 MCP 服务注册）
-│   │   ├── xarch-cloud-starter-gateway/        # API Gateway 路由配置
-│   │   └── xarch-cloud-starter-mcp/            # MCP 协议核心
-│   ├── xarch-mcp/                              # MCP Servers 模块
-│   │   ├── xarch-mcp-database/                 # 数据库 MCP Server
-│   │   ├── xarch-mcp-knowledge/                # 知识库 MCP Server (RAG)
-│   │   └── xarch-mcp-filesystem/               # 文件系统 MCP Server
+│   ├── xarch-spring-boot-starter/              # Spring Boot Starter 模块
+│   │   ├── xarch-core-spring-boot-starter/    # 核心模块：工具类、注解、实体基类
+│   │   ├── xarch-db-spring-boot-starter/      # 数据库模块：MyBatis Plus、Druid 连接池
+│   │   ├── xarch-web-spring-boot-starter/     # Web 模块：REST API、Swagger、Sa-Token 认证
+│   │   ├── xarch-cache-spring-boot-starter/    # 缓存模块：Redis、Redisson 分布式锁
+│   │   └── xarch-mcp/                          # MCP Servers 模块
+│   │       ├── xarch-mcp-database/             # 数据库 MCP Server
+│   │       ├── xarch-mcp-knowledge/            # 知识库 MCP Server (RAG)
+│   │       └── xarch-mcp-filesystem/           # 文件系统 MCP Server
+│   ├── xarch-spring-cloud/                     # Spring Cloud 微服务模块
+│   │   └── xarch-cloud/
+│   │       ├── xarch-cloud-starter-nacos/     # Nacos 服务注册（含 MCP 服务注册）
+│   │       ├── xarch-cloud-starter-gateway/   # API Gateway 路由配置
+│   │       └── xarch-cloud-starter-mcp/        # MCP 协议核心
 │   └── xarch-example/                          # 示例应用（22 个控制器）
 │
 ├── vue3-admin/                                 # Vue 3 前端

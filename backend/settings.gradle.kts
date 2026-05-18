@@ -11,17 +11,17 @@ pluginManagement {
 rootProject.name = "xarch"
 
 include(
-    "xarch-core-spring-boot-starter",
-    "xarch-db-spring-boot-starter",
-    "xarch-web-spring-boot-starter",
-    "xarch-cache-spring-boot-starter",
+    "xarch-spring-boot-starter:xarch-core-spring-boot-starter",
+    "xarch-spring-boot-starter:xarch-db-spring-boot-starter",
+    "xarch-spring-boot-starter:xarch-web-spring-boot-starter",
+    "xarch-spring-boot-starter:xarch-cache-spring-boot-starter",
     "xarch-example",
     // Spring Cloud modules
-    "xarch-cloud:xarch-cloud-starter-nacos",
-    "xarch-cloud:xarch-cloud-starter-gateway",
-    "xarch-cloud:xarch-cloud-starter-mcp",
+    "xarch-spring-cloud:xarch-cloud:xarch-cloud-starter-nacos",
+    "xarch-spring-cloud:xarch-cloud:xarch-cloud-starter-gateway",
+    "xarch-spring-cloud:xarch-cloud:xarch-cloud-starter-mcp",
     // MCP Servers
-    "xarch-mcp:xarch-mcp-database",
-    "xarch-mcp:xarch-mcp-knowledge",
-    "xarch-mcp:xarch-mcp-filesystem"
+    "xarch-spring-boot-starter:xarch-mcp:xarch-mcp-database",
+    "xarch-spring-boot-starter:xarch-mcp:xarch-mcp-knowledge",
+    "xarch-spring-boot-starter:xarch-mcp:xarch-mcp-filesystem"
 )
