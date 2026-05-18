@@ -41,7 +41,7 @@ xarch/
 │   │   ├── xarch-db-spring-boot-starter/      # 数据库模块：MyBatis Plus、Druid 连接池
 │   │   ├── xarch-web-spring-boot-starter/     # Web 模块：REST API、Swagger、Sa-Token 认证
 │   │   ├── xarch-cache-spring-boot-starter/    # 缓存模块：Redis、Redisson 分布式锁
-│   │   └── xarch-mcp/                          # MCP Servers 模块
+│   │   └── xarch-mcp/                          # MCP Servers 模块（Java）
 │   │       ├── xarch-mcp-database/             # 数据库 MCP Server
 │   │       ├── xarch-mcp-knowledge/            # 知识库 MCP Server (RAG)
 │   │       └── xarch-mcp-filesystem/           # 文件系统 MCP Server
@@ -50,7 +50,12 @@ xarch/
 │   │       ├── xarch-cloud-starter-nacos/     # Nacos 服务注册（含 MCP 服务注册）
 │   │       ├── xarch-cloud-starter-gateway/   # API Gateway 路由配置
 │   │       └── xarch-cloud-starter-mcp/        # MCP 协议核心
-│   └── xarch-example/                          # 示例应用（22 个控制器）
+│   └── xarch-example/                          # 示例应用（23 个控制器）
+│
+├── mcp-servers/                                 # Node.js MCP Servers (TypeScript)
+│   ├── database-mcp/                          # 数据库 MCP Server
+│   ├── knowledge-mcp/                         # 知识库 MCP Server (RAG)
+│   └── filesystem-mcp/                         # 文件系统 MCP Server
 │
 ├── vue3-admin/                                 # Vue 3 前端
 │   ├── src/
@@ -62,8 +67,14 @@ xarch/
 │   ├── nginx/                                 # Nginx 配置
 │   └── Dockerfile                             # 容器化部署
 │
+├── k8s/                                         # Kubernetes 部署配置
+│   └── base/
+│       ├── postgresql.yaml                    # PostgreSQL 数据库
+│       └── ...
+│
 ├── docker-compose.yml                          # Docker 编排
-└── init.sql                                    # 数据库初始化脚本
+├── init.sql                                    # MySQL 初始化脚本
+└── init-postgresql.sql                          # PostgreSQL 初始化脚本
 ```
 
 ---
@@ -77,7 +88,7 @@ xarch/
 | **Runtime** | Java 25 / Spring Boot 4.0 | 最新 LTS 版本 |
 | **Build** | Gradle (Kotlin DSL) | 现代构建工具 |
 | **ORM** | MyBatis Plus 3.5+ | 简化 CRUD 操作 |
-| **Database** | MySQL 8.0 / PostgreSQL / MongoDB / SQL Server | 多数据库支持 |
+| **Database** | PostgreSQL 16 / MySQL 8.0 / MongoDB / SQL Server | 多数据库支持（默认 PostgreSQL） |
 | **Connection** | Druid | 监控型连接池 |
 | **Cache** | Redis 7 + Redisson | 分布式缓存与锁 |
 | **Auth** | Sa-Token (JWT) | 无状态认证 |
@@ -193,6 +204,46 @@ MCP Server 是 AI 与企业系统连接的桥梁，xarch 提供三个开箱即�
 | `move_file` | 移动文件 |
 
 **端点：** `POST /mcp/filesystem/tools/{tool_name}`
+
+---
+
+## Node.js MCP Servers (TypeScript)
+
+除了 Java 实现的 MCP Server，xarch 还提供 Node.js + TypeScript 实现的 MCP Server，具有完整的 MCP 协议支持：
+
+### 1. Database MCP Server (`mcp-servers/database-mcp`)
+
+**技术栈：** Node.js + TypeScript + @modelcontextprotocol/sdk
+
+**支持的数据库：**
+- MySQL
+- PostgreSQL（默认）
+- MongoDB
+- Microsoft SQL Server
+
+**MCP 工具：** query_execute, schema_get, table_list, table_describe, index_list, execute_update, configure, health
+
+**启动：** `npm install && npm run dev`
+
+### 2. Knowledge Base MCP Server (`mcp-servers/knowledge-mcp`)
+
+**技术栈：** Node.js + TypeScript + @modelcontextprotocol/sdk
+
+**功能：** 企业级 RAG 知识库，支持语义搜索
+
+**MCP 工具：** kb_index_document, kb_index_file, kb_search, kb_get_document, kb_delete, kb_list, kb_update, kb_stats, health
+
+**启动：** `npm install && npm run dev`
+
+### 3. Filesystem MCP Server (`mcp-servers/filesystem-mcp`)
+
+**技术栈：** Node.js + TypeScript + @modelcontextprotocol/sdk
+
+**功能：** 安全文件操作（路径遍历防护）
+
+**MCP 工具：** list_directory, read_file, write_file, delete, create_directory, search_files, get_file_info, copy_file, move_file, health
+
+**启动：** `npm install && npm run dev`
 
 ---
 
