@@ -247,6 +247,63 @@ MCP Server 是 AI 与企业系统连接的桥梁，xarch 提供三个开箱即�
 
 ---
 
+## Python MCP Servers
+
+xarch 还提供 Python 实现的 MCP Server，使用标准库实现，可直接运行无需额外依赖：
+
+### 1. Database MCP Server (`mcp-servers/python/database_mcp`)
+
+**支持的数据库：**
+- MySQL
+- PostgreSQL
+- MongoDB
+- Microsoft SQL Server
+
+**MCP 工具：** configure, query_execute, execute_update, schema_get, table_list, table_describe, index_list, health
+
+**启动：**
+
+```bash
+cd mcp-servers/python
+python -m database_mcp
+```
+
+**可选依赖：**
+```bash
+pip install mysql-connector-python  # MySQL 支持
+pip install psycopg2-binary        # PostgreSQL 支持
+pip install pymongo                 # MongoDB 支持
+pip install pymssql                # SQL Server 支持
+```
+
+### 2. Knowledge Base MCP Server (`mcp-servers/python/knowledge_mcp`)
+
+**功能：** 企业级 RAG 知识库，使用 TF-IDF 算法实现语义搜索
+
+**MCP 工具：** kb_index_document, kb_index_file, kb_search, kb_get_document, kb_delete, kb_list, kb_update, kb_stats, health
+
+**启动：**
+
+```bash
+cd mcp-servers/python
+python -m knowledge_mcp
+```
+
+### 3. Filesystem MCP Server (`mcp-servers/python/filesystem_mcp`)
+
+**功能：** 安全文件操作，支持路径遍历防护
+
+**MCP 工具：** list_directory, read_file, write_file, delete, create_directory, search_files, get_file_info, copy_file, move_file, health
+
+**启动：**
+
+```bash
+cd mcp-servers/python
+python -m filesystem_mcp
+```
+
+---
+
 ## Nacos MCP 服务注册
 
 MCP Server 可注册为 Nacos 服务，实现服务发现：

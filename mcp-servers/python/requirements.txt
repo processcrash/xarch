@@ -1,0 +1,8 @@
+# xarch Python MCP Servers
+# Requirements for Python MCP Server implementations
+
+# Optional database drivers - install only what you need
+mysql-connector-python>=8.0.0
+psycopg2-binary>=2.9.0
+pymongo>=4.0.0
+pymssql>=2.2.0
