@@ -9,10 +9,10 @@ COPY build.gradle settings.gradle.kts ./
 COPY gradle gradle
 
 # Copy project structure
-COPY xarch-starter-core xarch-starter-core
-COPY xarch-starter-db xarch-starter-db
-COPY xarch-starter-web xarch-starter-web
-COPY xarch-starter-cache xarch-starter-cache
+COPY xarch-core-spring-boot-starter xarch-core-spring-boot-starter
+COPY xarch-db-spring-boot-starter xarch-db-spring-boot-starter
+COPY xarch-web-spring-boot-starter xarch-web-spring-boot-starter
+COPY xarch-cache-spring-boot-starter xarch-cache-spring-boot-starter
 COPY xarch-example xarch-example
 
 # Build application

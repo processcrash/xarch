@@ -10,4 +10,10 @@ pluginManagement {
 
 rootProject.name = "xarch"
 
-include("xarch-starter-core", "xarch-starter-db", "xarch-starter-web", "xarch-starter-cache", "xarch-example")
+include(
+    "xarch-core-spring-boot-starter",
+    "xarch-db-spring-boot-starter",
+    "xarch-web-spring-boot-starter",
+    "xarch-cache-spring-boot-starter",
+    "xarch-example"
+)

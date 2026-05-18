@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation project(':xarch-starter-core')
-    implementation project(':xarch-starter-db')
-    implementation project(':xarch-starter-web')
-    implementation project(':xarch-starter-cache')
+    implementation project(':xarch-core-spring-boot-starter')
+    implementation project(':xarch-db-spring-boot-starter')
+    implementation project(':xarch-web-spring-boot-starter')
+    implementation project(':xarch-cache-spring-boot-starter')
 
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
