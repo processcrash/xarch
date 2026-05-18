@@ -1,5 +1,6 @@
 <template>
   <div class="user-list">
+    <!-- Basic Search Toolbar -->
     <div class="toolbar">
       <el-form :model="queryParams" inline>
         <el-form-item label="Username">
@@ -14,6 +15,8 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">Search</el-button>
           <el-button @click="handleReset">Reset</el-button>
+          <el-button type="info" @click="toggleAdvanced">Advanced</el-button>
+          <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">Batch Delete</el-button>
         </el-form-item>
       </el-form>
       <div class="actions">
@@ -21,7 +24,31 @@
       </div>
     </div>
 
-    <el-table :data="tableData" v-loading="loading" stripe>
+    <!-- Advanced Search Panel -->
+    <div v-if="showAdvanced" class="advanced-search">
+      <el-form :model="queryParams" inline>
+        <el-form-item label="Email">
+          <el-input v-model="queryParams.email" placeholder="Please enter email" clearable />
+        </el-form-item>
+        <el-form-item label="Mobile">
+          <el-input v-model="queryParams.mobile" placeholder="Please enter mobile" clearable />
+        </el-form-item>
+        <el-form-item label="Created Date">
+          <el-date-picker
+            v-model="queryParams.dateRange"
+            type="daterange"
+            range-separator="to"
+            start-placeholder="Start date"
+            end-placeholder="End date"
+            value-format="YYYY-MM-DD"
+            style="width: 240px"
+          />
+        </el-form-item>
+      </el-form>
+    </div>
+
+    <el-table :data="tableData" v-loading="loading" stripe @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="50" />
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="username" label="Username" />
       <el-table-column prop="nickname" label="Nickname" />
@@ -96,10 +123,15 @@ const tableData = ref<User[]>([])
 const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
+const selectedRows = ref<User[]>([])
+const showAdvanced = ref(false)
 
 const queryParams = reactive({
   username: '',
   status: '',
+  email: '',
+  mobile: '',
+  dateRange: [],
   pageNum: 1,
   pageSize: 10
 })
@@ -133,8 +165,15 @@ const handleSearch = () => {
 const handleReset = () => {
   queryParams.username = ''
   queryParams.status = ''
+  queryParams.email = ''
+  queryParams.mobile = ''
+  queryParams.dateRange = []
   queryParams.pageNum = 1
   loadData()
+}
+
+const toggleAdvanced = () => {
+  showAdvanced.value = !showAdvanced.value
 }
 
 const handleAdd = () => {
@@ -178,6 +217,26 @@ const handleDelete = async (row: User) => {
   }
 }
 
+const handleSelectionChange = (rows: User[]) => {
+  selectedRows.value = rows
+}
+
+const handleBatchDelete = async () => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('Please select users to delete')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`Delete ${selectedRows.value.length} users?`, 'Confirm', { type: 'warning' })
+    const ids = selectedRows.value.map(row => row.id!)
+    await Promise.all(ids.map(id => userApi.delete(id)))
+    ElMessage.success(`Deleted ${ids.length} users successfully`)
+    loadData()
+  } catch {
+    // cancelled
+  }
+}
+
 onMounted(() => {
   loadData()
 })
@@ -196,5 +255,12 @@ onMounted(() => {
 
 .actions {
   text-align: right;
+}
+
+.advanced-search {
+  padding: 15px;
+  margin-bottom: 15px;
+  background: #f5f7fa;
+  border-radius: 4px;
 }
 </style>

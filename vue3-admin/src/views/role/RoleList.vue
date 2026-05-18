@@ -8,6 +8,7 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">Search</el-button>
           <el-button @click="handleReset">Reset</el-button>
+          <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">Batch Delete</el-button>
         </el-form-item>
       </el-form>
       <div class="actions">
@@ -15,7 +16,8 @@
       </div>
     </div>
 
-    <el-table :data="tableData" v-loading="loading" stripe>
+    <el-table :data="tableData" v-loading="loading" stripe @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="50" />
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="roleName" label="Role Name" />
       <el-table-column prop="roleCode" label="Role Code" />
@@ -94,6 +96,7 @@ const tableData = ref<Role[]>([])
 const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
+const selectedRows = ref<Role[]>([])
 
 const queryParams = reactive({
   roleName: '',
@@ -168,6 +171,26 @@ const handleDelete = async (row: Role) => {
     await ElMessageBox.confirm(`Delete role ${row.roleName}?`, 'Confirm', { type: 'warning' })
     await roleApi.delete(row.id!)
     ElMessage.success('Deleted successfully')
+    loadData()
+  } catch {
+    // cancelled
+  }
+}
+
+const handleSelectionChange = (rows: Role[]) => {
+  selectedRows.value = rows
+}
+
+const handleBatchDelete = async () => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('Please select roles to delete')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`Delete ${selectedRows.value.length} roles?`, 'Confirm', { type: 'warning' })
+    const ids = selectedRows.value.map(row => row.id!)
+    await Promise.all(ids.map(id => roleApi.delete(id)))
+    ElMessage.success(`Deleted ${ids.length} roles successfully`)
     loadData()
   } catch {
     // cancelled
