@@ -1,0 +1,22 @@
+{
+  "name": "@xarch/filesystem-mcp",
+  "version": "1.0.0",
+  "description": "xarch Filesystem MCP Server with secure file operations",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "keywords": ["mcp", "filesystem", "file-operations"],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "tsx": "^4.7.0"
+  }
+}

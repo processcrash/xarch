@@ -10,7 +10,7 @@ resources:
   # 命名空间、ConfigMap、Secret、ServiceAccount
   - namespace-config.yaml
   # 基础设施服务
-  - mysql.yaml
+  - postgresql.yaml  # 默认使用 PostgreSQL
   - redis.yaml
   # Nacos 服务注册中心
   - nacos.yaml
