@@ -343,6 +343,12 @@ dependencies {
 | `TempFileController` | `/tempFile/*` | 临时文件：上传管理 |
 | `CommonController` | `/common/*` | 通用操作：文件上传下载 |
 
+### Excel 模块
+
+| 控制器 | 端点 | 功能说明 |
+|--------|------|---------|
+| `ExcelController` | `/excel/*` | Excel 导入导出 |
+
 ---
 
 ## API 响应格式
