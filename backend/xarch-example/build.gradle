@@ -8,6 +8,9 @@ dependencies {
     implementation project(':xarch-web-spring-boot-starter')
     implementation project(':xarch-cache-spring-boot-starter')
 
+    // Excel import/export
+    implementation 'com.alibaba:easyexcel:3.3.3'
+
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
 }
