@@ -1,0 +1,62 @@
+# Prometheus Configuration for xarch
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Load rules from this directory
+rule_files: []
+
+# Scrape configuration
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Spring Boot Admin Server
+  - job_name: 'xarch-admin-server'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['admin-server:8090']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'xarch-admin'
+
+  # xarch-example service
+  - job_name: 'xarch-example'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'xarch-example'
+
+  # Spring Boot Actuator endpoints (any service with actuator)
+  - job_name: 'spring-boot-actuator'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - 'admin-server:8090'
+          - 'gateway:8080'
+        labels:
+          group: 'spring-cloud'
+
+  # Docker containers (via Alloy/Prometheus)
+  - job_name: 'docker-containers'
+    static_configs:
+      - targets: ['alloy:9090']
+    relabel_configs:
+      - source_labels: [__meta_docker_container_label_service]
+        target_label: service
+      - source_labels: [__meta_docker_container_label_app]
+        target_label: app

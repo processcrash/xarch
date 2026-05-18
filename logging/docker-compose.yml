@@ -1,0 +1,99 @@
+# xarch Observability Stack - Docker Compose
+# Includes: Grafana, Loki, Alloy (log collection), Prometheus
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # Grafana - Metrics and Logs Visualization
+  # ===========================================
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: xarch-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-data:/var/lib/grafana
+    networks:
+      - xarch-observability
+    depends_on:
+      - loki
+      - prometheus
+
+  # ===========================================
+  # Loki - Log Aggregation
+  # ===========================================
+  loki:
+    image: grafana/loki:3.2.0
+    container_name: xarch-loki
+    ports:
+      - "3100:3100"
+      - "9096:9096"
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml
+      - loki-data:/tmp/loki
+    networks:
+      - xarch-observability
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # Alloy - Log Collection Agent
+  # ===========================================
+  alloy:
+    image: grafana/alloy:1.4.0
+    container_name: xarch-alloy
+    ports:
+      - "12345:12345"  # Metrics endpoint
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LOKI_ENDPOINT=http://loki:3100/loki/api/v1/push
+      - CLUSTER_NAME=xarch-docker
+      - ENVIRONMENT=docker-compose
+    volumes:
+      - ./alloy/alloy-config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - xarch-observability
+    depends_on:
+      - loki
+
+  # ===========================================
+  # Prometheus - Metrics Collection
+  # ===========================================
+  prometheus:
+    image: prom/prometheus:v2.54.0
+    container_name: xarch-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - xarch-observability
+
+networks:
+  xarch-observability:
+    driver: bridge
+
+volumes:
+  grafana-data:
+  loki-data:
+  prometheus-data:

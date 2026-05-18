@@ -1,0 +1,155 @@
+// xarch Alloy Configuration for Log Collection
+// Alloy is Grafana's telemetry collector (successor to Grafana Agent)
+// Supports: Docker, Docker Compose, Kubernetes, bare metal
+
+// Global settings
+global {
+    // scrape_interval = "15s"
+    // external_labels = { cluster = "xarch", environment = "production" }
+}
+
+// Docker Log Receiver - collects container logs
+// Configure DOCKER_HOST environment variable if not on localhost
+local.docker_logs "docker_containers" {
+    // Path to Docker socket
+    // Linux: /var/run/docker.sock
+    // macOS/Windows (Docker Desktop): unix:///home/docker/desktop/docker.sock
+    // Or use TCP: tcp://localhost:2375
+    host = "${DOCKER_HOST:unix:///var/run/docker.sock}"
+
+    // Label filters - only collect from containers with these labels
+    // Uncomment to filter:
+    // label_include = ["xarch.log=true"]
+
+    // Add service name as label
+    add_service_label = true
+
+    // Forward to Loki
+    forward_to = [loki.receive]
+}
+
+// Kubernetes Discovery - discovers pods and containers
+discovery.kubernetes "pods" {
+    role = "pod"
+
+    // Namespace filter (empty = all namespaces)
+    namespace_filter = ""
+
+    // Pod label filter
+    // label_filter = "app.kubernetes.io/name=~xarch.*"
+}
+
+// Kubernetes Logs Receiver - collects logs from K8s pods
+loki.process "kubernetes_logs" {
+    // Process Kubernetes logs
+    stage.docker { }
+
+    stage.labels {
+        // Map Kubernetes labels to Loki labels
+        keep = ["app", "app.kubernetes.io/name", "app.kubernetes.io/component", "app.kubernetes.io/instance", "namespace"]
+    }
+
+    // Add metadata
+    stage.timestamp {
+        source = "time"
+        format = "RFC3339"
+    }
+
+    // Forward to Loki
+    forward_to = [loki.receive]
+}
+
+// Docker Compose Log Receiver
+loki.process "docker_compose_logs" {
+    // Add container name as label
+    stage.labels {
+        keep = ["container_name", "container_id", "image_name", "compose_project"]
+    }
+
+    // Parse common log formats
+    stage.json {
+        expressions = {
+            timestamp = "time",
+            message = "message",
+            level = "level",
+        }
+    }
+
+    // Convert timestamp
+    stage.timestamp {
+        source = "timestamp"
+        format = "RFC3339Nano"
+    }
+
+    // Forward to Loki
+    forward_to = [loki.receive]
+}
+
+// Local File Log Receiver - for bare metal / VM deployments
+loki.process "local_files" {
+    // Parse common formats
+    stage.json {
+        expressions = {
+            timestamp = "@timestamp",
+            message = "message",
+            level = "level",
+            service = "service",
+        }
+    }
+
+    // Parse Syslog format (common in Linux)
+    stage.regex {
+        source = "message"
+        expression = "(?P<timestamp>\\S+\\s+\\S+\\s+\\S+)\\s+(?P<hostname>\\S+)\\s+(?P<service>[^\\[]+)\\[(?P<pid>\\d+)\\]:\\s+(?P<message>.*)"
+    }
+
+    // Convert timestamp
+    stage.timestamp {
+        source = "timestamp"
+        format = "2006-01-02 15:04:05"
+    }
+
+    // Forward to Loki
+    forward_to = [loki.receive]
+}
+
+// Loki Write Endpoint - sends to Loki
+loki.write "loki" {
+    // Loki endpoint (Grafana Cloud or self-hosted)
+    endpoint = "${LOKI_ENDPOINT:http://localhost:3100/loki/api/v1/push}"
+
+    // Authentication (for Grafana Cloud)
+    // header = "Authorization", value = "Bearer ${LOKI_API_KEY}"
+
+    // Retry configuration
+    retry {
+        max_retries = 5
+        initial_interval = "1s"
+        max_interval = "30s"
+    }
+
+    // Batch configuration
+    batch {
+        max_age = "10s"
+        max_size = "1MB"
+    }
+
+    // External labels
+    external_labels = {
+        cluster = "${CLUSTER_NAME:xarch}",
+        environment = "${ENVIRONMENT:production}",
+    }
+}
+
+// Loki Receive (receiver for other components)
+loki.receive "loki" {
+    // Store logs in memory temporarily
+    // Forward to write endpoint
+    forward_to = [loki.write.loki]
+}
+
+// Telemetry for Alloy itself
+metrics "default" {
+    // Report metrics to Prometheus/Grafana
+    forward = []
+}

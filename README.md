@@ -514,6 +514,95 @@ xarch 提供企业级文件管理中心，支持多种存储后端：
 
 ---
 
+## 监控与日志
+
+### Spring Boot Admin
+
+Spring Boot Admin 提供企业级服务监控能力：
+
+**Admin Server** (`xarch-cloud-admin-server`):
+- 端口: 8090
+- 访问地址: http://localhost:8090/
+
+**监控功能:**
+- 服务注册与健康状态
+- 实时日志查看
+- 线程转储 / Heap 转储
+- Metrics 可视化
+- 环境变量查看
+- 配置详情
+
+**启动 Admin Server:**
+
+```bash
+cd backend/xarch-spring-cloud/xarch-cloud-admin-server
+./gradlew bootRun
+
+# 访问 http://localhost:8090/
+# 默认用户: admin / admin123
+```
+
+### Alloy + Loki + Grafana 日志收集
+
+xarch 提供完整的日志收集解决方案：
+
+**技术栈:**
+| 组件 | 说明 | 端口 |
+|------|------|------|
+| Alloy | 日志收集 Agent (替代 Grafana Agent) | 12345 |
+| Loki | 日志聚合存储 | 3100 |
+| Grafana | 可视化面板 | 3001 |
+| Prometheus | Metrics 收集 | 9090 |
+
+**Docker Compose 快速启动:**
+
+```bash
+cd logging
+docker-compose up -d
+
+# 访问:
+# - Grafana: http://localhost:3001 (admin/admin123)
+# - Prometheus: http://localhost:9090
+# - Loki: http://localhost:3100
+```
+
+**Kubernetes 部署:**
+
+```bash
+kubectl apply -f k8s/overlays/observability/
+
+# 添加 hosts:
+# 127.0.0.1 grafana.xarch.local
+# 访问: http://grafana.xarch.local
+```
+
+**日志查询示例 (Loki):**
+
+```logql
+# 查询所有 xarch 服务日志
+{service=~"xarch.*"}
+
+# 查询错误日志
+{service=~"xarch.*"} |= "ERROR"
+
+# 查询最近 5 分钟
+{service=~"xarch.*"} | json | level="error" | __error__=""
+```
+
+### 服务监控
+
+所有 xarch 服务已集成 Spring Boot Actuator 和 Admin Client：
+
+| 服务 | 监控端点 |
+|------|---------|
+| xarch-example | http://localhost:8080/actuator |
+| xarch-admin-server | http://localhost:8090/actuator |
+| xarch-mcp-database | http://localhost:9090/actuator |
+| xarch-mcp-knowledge | http://localhost:9091/actuator |
+| xarch-cloud-gateway | http://localhost:8080/actuator |
+
+---
+
 ## API 响应格式
 
 统一响应结构 `ApiResult<T>`：

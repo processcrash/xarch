@@ -22,6 +22,9 @@ resources:
   - xarch-mcp-filesystem.yaml
   # API 网关
   - xarch-cloud-gateway.yaml
+  # 监控与日志 (在 overlays/dev 或 overlays/prod 中按需引入)
+  # - observability/observability.yaml
+  # - observability/configmaps.yaml
   # Ingress 和 HPA（在 overlays 中按需引入）
   # - ingress.yaml
 
