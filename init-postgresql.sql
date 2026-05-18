@@ -450,3 +450,148 @@ INSERT INTO sys_config (config_name, config_key, config_value, config_type, crea
 ('Main framework page - Sidebar skin', 'sys.index.skinName', 'skin-blue', 'Y', 'admin', CURRENT_TIMESTAMP, 'Sidebar skin'),
 ('Captcha switch', 'sys.account.captchaEnabled', 'true', 'Y', 'admin', CURRENT_TIMESTAMP, 'Captcha enabled'),
 ('Username retrieval', 'sys.account.userNameEnabled', 'false', 'Y', 'admin', CURRENT_TIMESTAMP, 'Username retrieval enabled');
+
+-- ======================
+-- AI Server Management Tables
+-- ======================
+
+-- AI Server table (ai_server)
+CREATE TABLE IF NOT EXISTS ai_server (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    host VARCHAR(255) NOT NULL,
+    port INT DEFAULT 22,
+    username VARCHAR(100) NOT NULL,
+    auth_type VARCHAR(20) DEFAULT 'password',
+    password VARCHAR(255) DEFAULT NULL,
+    private_key TEXT DEFAULT NULL,
+    passphrase VARCHAR(255) DEFAULT NULL,
+    description VARCHAR(500) DEFAULT NULL,
+    server_group VARCHAR(100) DEFAULT 'default',
+    os_type VARCHAR(50) DEFAULT NULL,
+    tags VARCHAR(500) DEFAULT NULL,
+    status INT DEFAULT 0,
+    last_connected_time TIMESTAMP DEFAULT NULL,
+    last_error TEXT DEFAULT NULL,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT NULL,
+    del_flag INT DEFAULT 0
+);
+
+COMMENT ON TABLE ai_server IS 'AI Server management table';
+COMMENT ON COLUMN ai_server.name IS 'Server name';
+COMMENT ON COLUMN ai_server.host IS 'Server host IP';
+COMMENT ON COLUMN ai_server.port IS 'SSH port';
+COMMENT ON COLUMN ai_server.username IS 'SSH username';
+COMMENT ON COLUMN ai_server.auth_type IS 'Auth type: password, key';
+COMMENT ON COLUMN ai_server.password IS 'SSH password (encrypted)';
+COMMENT ON COLUMN ai_server.private_key IS 'SSH private key';
+COMMENT ON COLUMN ai_server.passphrase IS 'Private key passphrase';
+COMMENT ON COLUMN ai_server.server_group IS 'Server group';
+COMMENT ON COLUMN ai_server.os_type IS 'OS type: Linux, Ubuntu, CentOS, etc.';
+COMMENT ON COLUMN ai_server.status IS 'Status: 0=disconnected, 1=connected, 2=error';
+COMMENT ON COLUMN ai_server.last_connected_time IS 'Last connected time';
+COMMENT ON COLUMN ai_server.last_error IS 'Last connection error';
+
+CREATE INDEX idx_ai_server_name ON ai_server(name);
+CREATE INDEX idx_ai_server_host ON ai_server(host);
+CREATE INDEX idx_ai_server_group ON ai_server(server_group);
+CREATE INDEX idx_ai_server_status ON ai_server(status);
+
+-- AI Command History table (ai_command_history)
+CREATE TABLE IF NOT EXISTS ai_command_history (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    server_id BIGINT NOT NULL,
+    server_name VARCHAR(100) DEFAULT NULL,
+    user_id BIGINT DEFAULT NULL,
+    user_name VARCHAR(100) DEFAULT NULL,
+    command TEXT NOT NULL,
+    ai_generated_command TEXT DEFAULT NULL,
+    ai_prompt TEXT DEFAULT NULL,
+    output TEXT DEFAULT NULL,
+    session_id VARCHAR(100) DEFAULT NULL,
+    working_dir VARCHAR(500) DEFAULT NULL,
+    user_ip VARCHAR(50) DEFAULT NULL,
+    exit_code INT DEFAULT NULL,
+    status INT DEFAULT 0,
+    duration BIGINT DEFAULT 0,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    del_flag INT DEFAULT 0
+);
+
+COMMENT ON TABLE ai_command_history IS 'AI Command execution history';
+COMMENT ON COLUMN ai_command_history.server_id IS 'Server ID';
+COMMENT ON COLUMN ai_command_history.command IS 'Executed command';
+COMMENT ON COLUMN ai_command_history.ai_generated_command IS 'AI generated command';
+COMMENT ON COLUMN ai_command_history.ai_prompt IS 'User natural language prompt';
+COMMENT ON COLUMN ai_command_history.output IS 'Command output';
+COMMENT ON COLUMN ai_command_history.session_id IS 'Session ID for grouping commands';
+COMMENT ON COLUMN ai_command_history.status IS 'Status: 0=running, 1=success, 2=failed';
+COMMENT ON COLUMN ai_command_history.duration IS 'Execution duration in milliseconds';
+
+CREATE INDEX idx_ai_command_history_server_id ON ai_command_history(server_id);
+CREATE INDEX idx_ai_command_history_session_id ON ai_command_history(session_id);
+CREATE INDEX idx_ai_command_history_user_id ON ai_command_history(user_id);
+CREATE INDEX idx_ai_command_history_create_time ON ai_command_history(create_time);
+
+-- AI Command Session table (ai_command_session)
+CREATE TABLE IF NOT EXISTS ai_command_session (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    session_id VARCHAR(100) NOT NULL,
+    server_id BIGINT NOT NULL,
+    user_id BIGINT DEFAULT NULL,
+    user_name VARCHAR(100) DEFAULT NULL,
+    title VARCHAR(255) DEFAULT NULL,
+    last_command TEXT DEFAULT NULL,
+    command_count INT DEFAULT 0,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT NULL,
+    del_flag INT DEFAULT 0
+);
+
+COMMENT ON TABLE ai_command_session IS 'AI Command session';
+COMMENT ON COLUMN ai_command_session.session_id IS 'Unique session ID';
+COMMENT ON COLUMN ai_command_session.server_id IS 'Server ID';
+COMMENT ON COLUMN ai_command_session.title IS 'Session title';
+COMMENT ON COLUMN ai_command_session.command_count IS 'Total commands in session';
+
+CREATE INDEX idx_ai_command_session_session_id ON ai_command_session(session_id);
+CREATE INDEX idx_ai_command_session_server_id ON ai_command_session(server_id);
+
+-- AI Command Audit table (ai_command_audit)
+CREATE TABLE IF NOT EXISTS ai_command_audit (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    server_id BIGINT NOT NULL,
+    server_name VARCHAR(100) DEFAULT NULL,
+    user_id BIGINT DEFAULT NULL,
+    user_name VARCHAR(100) DEFAULT NULL,
+    command TEXT NOT NULL,
+    ai_generated_command TEXT DEFAULT NULL,
+    ai_prompt TEXT DEFAULT NULL,
+    output TEXT DEFAULT NULL,
+    exit_code INT DEFAULT NULL,
+    duration BIGINT DEFAULT 0,
+    session_id VARCHAR(100) DEFAULT NULL,
+    user_ip VARCHAR(50) DEFAULT NULL,
+    user_agent VARCHAR(500) DEFAULT NULL,
+    risk_level INT DEFAULT 0,
+    approval_status INT DEFAULT 0,
+    approved_by BIGINT DEFAULT NULL,
+    approved_by_name VARCHAR(100) DEFAULT NULL,
+    approved_time TIMESTAMP DEFAULT NULL,
+    approval_comment TEXT DEFAULT NULL,
+    status INT DEFAULT 0,
+    del_flag INT DEFAULT 0,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT NULL
+);
+
+COMMENT ON TABLE ai_command_audit IS 'AI Command audit log for compliance';
+COMMENT ON COLUMN ai_command_audit.risk_level IS 'Risk level: 0=safe, 1=low, 2=medium, 3=high';
+COMMENT ON COLUMN ai_command_audit.approval_status IS 'Approval status: 0=pending, 1=approved, 2=rejected, 3=bypassed';
+
+CREATE INDEX idx_ai_command_audit_server_id ON ai_command_audit(server_id);
+CREATE INDEX idx_ai_command_audit_user_id ON ai_command_audit(user_id);
+CREATE INDEX idx_ai_command_audit_risk_level ON ai_command_audit(risk_level);
+CREATE INDEX idx_ai_command_audit_approval_status ON ai_command_audit(approval_status);
+CREATE INDEX idx_ai_command_audit_create_time ON ai_command_audit(create_time);

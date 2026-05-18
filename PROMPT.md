@@ -33,8 +33,9 @@
 - spring cloud 中增加 spring boot admin 服务，使用 spring-boot-admin 这个工具实现对所有 spring cloud 中的服务监控的能力
 - 增加 alloy + loki + grafana 日志收集的 spring cloud 服务，支持收集 docker 运行的容器、docker compose 运行、k8s 运行的容器运行日志的能力
 ---
-实现企业级 Linux 服务器管理 AI Agent 平台、
+增加实现企业级 Linux 服务器管理 AI Agent 平台，至少包含如下功能
 - 在线管理所有的 Linux 服务器
 - AI Agent 不直接运行在服务器上，但可远程执行命令，管理服务器
 - 所有命令都记录成历史
+- 实现完后使用 brainstorming skill 调研市面上的 linux 服务器管理 AI Agent 平台，借鉴并实现完整的平台功能
 ---

@@ -93,6 +93,18 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/files',
+    name: 'FileManagement',
+    component: () => import('@/views/file/FileList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/ai/servers',
+    name: 'AIServerManagement',
+    component: () => import('@/views/ai/ServerList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/NotFound.vue')

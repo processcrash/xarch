@@ -11,6 +11,13 @@ dependencies {
     // Excel import/export
     implementation 'com.alibaba:easyexcel:3.3.3'
 
+    // Spring AI for LLM-based command generation
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M6'
+    implementation 'org.springframework.ai:spring-ai-anthropic-spring-boot-starter:1.0.0-M6'
+
+    // WebSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
 }
