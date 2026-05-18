@@ -62,4 +62,22 @@ public class UserController {
     public ApiResult<List<User>> options() {
         return ApiResult.ok(userService.list());
     }
+
+    /**
+     * Get roles assigned to a user (for transfer component)
+     */
+    @GetMapping("/{id}/roles")
+    public ApiResult<List<Long>> getUserRoles(@PathVariable Long id) {
+        return ApiResult.ok(userService.getRoleIds(id));
+    }
+
+    /**
+     * Assign roles to a user (for transfer component)
+     */
+    @PutMapping("/{id}/roles")
+    @XarchLog(value = "Assign user roles", type = "UPDATE")
+    public ApiResult<Void> assignRoles(@PathVariable Long id, @RequestBody List<Long> roleIds) {
+        userService.assignRoles(id, roleIds);
+        return ApiResult.ok();
+    }
 }

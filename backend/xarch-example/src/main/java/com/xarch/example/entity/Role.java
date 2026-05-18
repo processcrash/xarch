@@ -25,6 +25,16 @@ public class Role implements Serializable {
 
     private Integer status;
 
+    /**
+     * Menu IDs assigned to this role (comma-separated for transfer component)
+     */
+    private String menuIds;
+
+    /**
+     * Department IDs for data permission (comma-separated)
+     */
+    private String deptIds;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 

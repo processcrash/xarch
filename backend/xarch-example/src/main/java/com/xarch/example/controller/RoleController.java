@@ -61,4 +61,40 @@ public class RoleController {
     public ApiResult<List<Role>> options() {
         return ApiResult.ok(roleService.list());
     }
+
+    /**
+     * Get menus assigned to a role (for menu transfer component)
+     */
+    @GetMapping("/{id}/menus")
+    public ApiResult<List<Long>> getRoleMenus(@PathVariable Long id) {
+        return ApiResult.ok(roleService.getMenuIds(id));
+    }
+
+    /**
+     * Assign menus to a role (for menu transfer component)
+     */
+    @PutMapping("/{id}/menus")
+    @XarchLog(value = "Assign role menus", type = "UPDATE")
+    public ApiResult<Void> assignMenus(@PathVariable Long id, @RequestBody List<Long> menuIds) {
+        roleService.assignMenus(id, menuIds);
+        return ApiResult.ok();
+    }
+
+    /**
+     * Get departments assigned to a role (for data permission)
+     */
+    @GetMapping("/{id}/depts")
+    public ApiResult<List<Long>> getRoleDepts(@PathVariable Long id) {
+        return ApiResult.ok(roleService.getDeptIds(id));
+    }
+
+    /**
+     * Assign departments to a role (for data permission)
+     */
+    @PutMapping("/{id}/depts")
+    @XarchLog(value = "Assign role departments", type = "UPDATE")
+    public ApiResult<Void> assignDepts(@PathVariable Long id, @RequestBody List<Long> deptIds) {
+        roleService.assignDepts(id, deptIds);
+        return ApiResult.ok();
+    }
 }

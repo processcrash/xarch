@@ -22,3 +22,7 @@
 - 在 Spring Cloud 体系中增加企业级知识库的功能模块实现，将这个功能模块做成 MCP Server 实现，并实现注册成 Nacos MCP 服务，可在 Spring Cloud 体系中调用
 - 直到这些所有的功能都实现并测试好为止！
 ---
+所有的服务都支持 K8s 部署，将部署文件写好，并且写好注释
+---
+根据我之前提出的需求，重新整理 REQUIREMENTS.md 文件，整理完后，根据 REQUIREMENTS.md 文件和 TODO.md 文件的内容整理需要做事，依次做完
+---
