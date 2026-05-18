@@ -63,6 +63,36 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/posts',
+    name: 'PostManagement',
+    component: () => import('@/views/system/post/PostList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/notices',
+    name: 'NoticeManagement',
+    component: () => import('@/views/system/notice/NoticeList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/online',
+    name: 'OnlineUsers',
+    component: () => import('@/views/monitor/online/OnlineList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/jobs',
+    name: 'JobManagement',
+    component: () => import('@/views/monitor/job/JobList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/jobLogs',
+    name: 'JobLogManagement',
+    component: () => import('@/views/monitor/job/JobLogList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/NotFound.vue')
