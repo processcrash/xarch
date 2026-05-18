@@ -13,7 +13,11 @@
 ---
 参考这个仓库的代码，D:\workspace\gitee.com\y_project\RuoYi-Vue，把这个仓库代码的功能全部实现！
 ---
+项目最重要要说清楚 xarch 是 AI 时代企业级后台管理项目规范！
+---
 - 在此基础上，增加 spring cloud 的支持，业务可快速 spring cloud 化
 - 增加 Nacos 3.2 的支持，Nacos 不仅管理微服务体系，也要实现管理 MCP 服务
 - 增加数据库对接 MCP Server 服务，支持市面上绝大多数的数据库，包含但不限于Mysql、postgresql、Mongodb、Oracle、DB2、Microsoft SQL Server
 - 利用在 brainstorming 这个 Skill 调研网络上、软件市场上、 GitHub 上常用的 MCP Server 实现，增加至少三个最常用的 MCP Server 实现，注意实现要支持注册成 Nacos MCP 服务，可在 Spring Cloud 体系中调用
+- 在 Spring Cloud 体系中增加企业级知识库的功能模块实现，将这个功能模块做成 MCP Server 实现，并实现注册成 Nacos MCP 服务，可在 Spring Cloud 体系中调用
+---
