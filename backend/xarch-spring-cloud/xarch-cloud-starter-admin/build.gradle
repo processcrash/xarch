@@ -1,0 +1,43 @@
+/*
+ * xarch Spring Cloud Starter Admin
+ * Spring Boot Admin for service monitoring
+ *
+ * Usage:
+ * Add to your build.gradle:
+ *   implementation("com.xarch:xarch-cloud-starter-admin:1.0.0")
+ *
+ * Enable in application.yml:
+ *   spring.boot.admin:
+ *     enabled: true
+ *     ui:
+ *       title: xarch Services Monitor
+ */
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // Spring Boot Admin Server
+    api 'de.codecentric:boot-admin-server:2.12.2'
+
+    // Spring Boot Admin Server UI (Thymeleaf)
+    api 'de.codecentric:boot-admin-server-ui:2.12.2'
+
+    // Spring Boot Admin Client
+    api 'de.codecentric:boot-admin-client:2.12.2'
+
+    // Spring Boot Actuator (required for health endpoints)
+    api 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Spring Boot Admin API discovery
+    api 'org.springframework.boot:spring-boot-starter-web'
+
+    // Security (optional - for Spring Security integration)
+    // api 'org.springframework.boot:spring-boot-starter-security'
+
+    // Spring Cloud Client (for service registration)
+    api 'org.springframework.cloud:spring-cloud-starter'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}

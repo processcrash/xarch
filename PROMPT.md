@@ -13,7 +13,9 @@
 ---
 参考这个仓库的代码，D:\workspace\gitee.com\y_project\RuoYi-Vue，把这个仓库代码的功能全部实现！
 ---
-项目最重要要说清楚 xarch 是 AI 时代企业级后台管理项目规范！
+项目最重要要说清楚 xarch 是：
+- AI 时代企业级后台管理项目规范！
+- 企业级最佳实践的标准。
 ---
 - 在此基础上，增加 spring cloud 的支持，业务可快速 spring cloud 化
 - 增加 Nacos 3.2 的支持，Nacos 不仅管理微服务体系，也要实现管理 MCP 服务
