@@ -188,25 +188,25 @@ public class KnowledgeMcpController { }
 
 ---
 
-## 功能模块（22 个控制器）
+## 功能模块（23 个控制器）
 
 ### 系统管理
 
 | 控制器 | 端点 | 功能说明 |
 |--------|------|---------|
-| UserController | /system/user/* | 用户管理：CRUD、角色分配 |
-| RoleController | /system/role/* | 角色管理：权限分配、数据范围 |
-| MenuController | /system/menu/* | 菜单管理：树形结构、权限标识 |
-| DeptController | /system/dept/* | 部门管理：组织架构树 |
-| PostController | /system/post/* | 岗位管理：职位设置 |
-| NoticeController | /system/notice/* | 通知公告：信息发布 |
+| UserController | /api/users/* | 用户管理：CRUD、角色分配 |
+| RoleController | /api/roles/* | 角色管理：权限分配、数据范围 |
+| MenuController | /api/menus/* | 菜单管理：树形结构、权限标识 |
+| DeptController | /api/depts/* | 部门管理：组织架构树 |
+| PostController | /api/posts/* | 岗位管理：职位设置 |
+| NoticeController | /api/notices/* | 通知公告：信息发布 |
 
 ### 系统配置
 
 | 控制器 | 端点 | 功能说明 |
 |--------|------|---------|
-| DictController | /system/dict/* | 字典管理：类型与数据 |
-| ConfigController | /system/config/* | 参数配置：系统参数 |
+| DictController | /api/dicts/* | 字典管理：类型与数据 |
+| ConfigController | /api/configs/* | 参数配置：系统参数 |
 
 ### 日志管理
 
@@ -235,6 +235,12 @@ public class KnowledgeMcpController { }
 | ResourceController | /resource/* | 资源管理：文件资源 |
 | TempFileController | /tempFile/* | 临时文件：上传管理 |
 | CommonController | /common/* | 通用操作：文件上传下载 |
+
+### Excel 模块
+
+| 控制器 | 端点 | 功能说明 |
+|--------|------|---------|
+| ExcelController | /api/excel/* | Excel 导入导出 |
 
 ---
 
