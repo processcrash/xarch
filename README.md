@@ -1,6 +1,6 @@
 # xarch - AI-Enabled Enterprise Backend Framework
 
-> xarch 是 AI 时代企业级后台管理项目规范，基于 Spring Boot 4.0 + Vue 3 + MyBatis Plus 构建，为 AI 原生企业应用提供开箱即用的后台管理解决方案。
+> xarch 是 AI 时代企业级后台管理项目规范，基于 Spring Boot 4.0 + Spring Cloud + Vue 3 + MyBatis Plus 构建，为 AI 原生企业应用提供开箱即用的后台管理解决方案。
 
 ---
 
@@ -10,6 +10,8 @@ xarch 不仅是一个框架，更是一套 **AI 时代企业后台管理的标�
 
 - **AI-First Architecture** - 内置 AI 能力集成接口，支持智能辅助、内容生成、语义理解等 AI 功能
 - **Enterprise-Grade** - 面向生产环境设计，提供完整的企业级功能：权限管理、操作审计、数据可视化
+- **Spring Cloud Native** - 原生支持 Spring Cloud 微服务架构，Nacos 3.2 服务注册与发现
+- **MCP Server 集成** - 内置 MCP (Model Context Protocol) 服务器，支持 AI 与企业系统的无缝连接
 - **Modular Design** - 采用 Spring Boot Starter 架构，可按需引入，灵活组合
 - **Convention Over Configuration** - 约定优于配置，极简开发体验
 
@@ -19,7 +21,9 @@ xarch 不仅是一个框架，更是一套 **AI 时代企业后台管理的标�
 
 | 特性 | xarch | 传统方案 |
 |------|-------|---------|
-| AI 能力集成 | 内置 AI 服务接口，开箱即用 | 需自行集成，复杂度高 |
+| AI 能力集成 | 内置 MCP Server 接口，开箱即用 | 需自行集成，复杂度高 |
+| Spring Cloud | 原生支持 Nacos 3.2 服务注册 | 无原生支持 |
+| MCP 协议 | 支持数据库、知识库、文件系统 MCP | 不支持 |
 | 开发效率 | Starter 按需引入，5 分钟启动 | 搭建繁琐，重复造轮子 |
 | 代码规范 | 统一分包、命名、架构规范 | 无统一标准，质量参差 |
 | 可维护性 | 分层清晰，模块解耦 | 容易形成巨石应用 |
@@ -37,6 +41,14 @@ xarch/
 │   ├── xarch-db-spring-boot-starter/          # 数据库模块：MyBatis Plus、Druid 连接池
 │   ├── xarch-web-spring-boot-starter/         # Web 模块：REST API、Swagger、Sa-Token 认证
 │   ├── xarch-cache-spring-boot-starter/       # 缓存模块：Redis、Redisson 分布式锁
+│   ├── xarch-cloud/                            # Spring Cloud 微服务模块
+│   │   ├── xarch-cloud-starter-nacos/         # Nacos 服务注册（含 MCP 服务注册）
+│   │   ├── xarch-cloud-starter-gateway/        # API Gateway 路由配置
+│   │   └── xarch-cloud-starter-mcp/            # MCP 协议核心
+│   ├── xarch-mcp/                              # MCP Servers 模块
+│   │   ├── xarch-mcp-database/                 # 数据库 MCP Server
+│   │   ├── xarch-mcp-knowledge/                # 知识库 MCP Server (RAG)
+│   │   └── xarch-mcp-filesystem/               # 文件系统 MCP Server
 │   └── xarch-example/                          # 示例应用（22 个控制器）
 │
 ├── vue3-admin/                                 # Vue 3 前端
@@ -64,12 +76,15 @@ xarch/
 | **Runtime** | Java 25 / Spring Boot 4.0 | 最新 LTS 版本 |
 | **Build** | Gradle (Kotlin DSL) | 现代构建工具 |
 | **ORM** | MyBatis Plus 3.5+ | 简化 CRUD 操作 |
-| **Database** | MySQL 8.0 / PostgreSQL | 多数据库支持 |
+| **Database** | MySQL 8.0 / PostgreSQL / MongoDB / SQL Server | 多数据库支持 |
 | **Connection** | Druid | 监控型连接池 |
 | **Cache** | Redis 7 + Redisson | 分布式缓存与锁 |
 | **Auth** | Sa-Token (JWT) | 无状态认证 |
 | **API Docs** | Knife4j (Swagger 3.0) | API 文档生成 |
 | **Pagination** | PageHelper | 分页插件 |
+| **Spring Cloud** | Spring Cloud 2025.0.0.0 | 微服务架构 |
+| **Service Registry** | Nacos 3.2 | 服务发现与配置 |
+| **API Gateway** | Spring Cloud Gateway | 统一入口 |
 
 ### Frontend
 
@@ -83,71 +98,138 @@ xarch/
 
 ---
 
-## 模块详解
+## Spring Cloud + Nacos 3.2 架构
 
-### xarch-core-spring-boot-starter
-
-核心基础模块，提供通用工具和注解。
-
-**注解：**
-- `@XarchLog` - 操作日志记录
-- `@Debounce` - 防重复提交
-- `@NotZero` - 参数校验
-
-**工具类：**
-- `IdUtil` - ID 生成器
-- `JsonUtil` - JSON 序列化
-- `ResultUtil` - 响应构建
-
-**实体基类：**
-- `BaseEntity` - 基础实体，含创建时间、更新时间
-- `PageQuery` - 分页查询
-- `LoginUser` - 登录用户信息
-
-### xarch-db-spring-boot-starter
-
-数据访问层模块，封装数据库操作。
-
-**特性：**
-- Druid 连接池自动配置
-- MyBatis Plus 增强 CRUD
-- PageHelper 分页插件
-- 多数据源支持
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/xarch
-    username: root
-    password: root123
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      API Gateway (Spring Cloud Gateway)     │
+│                         Port: 8080                          │
+└─────────────────────────────────────────────────────────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         ▼                    ▼                    ▼
+┌─────────────┐       ┌─────────────┐       ┌─────────────┐
+│   Nacos 3.2 │       │  MCP Server │       │  Business   │
+│  (Registry  │       │  Registry   │       │  Services   │
+│  + Config)  │       │             │       │             │
+│   Port:8848 │       │             │       │             │
+└─────────────┘       └─────────────┘       └─────────────┘
+         │                    │                    │
+         │            ┌──────┴──────┐            │
+         │            ▼             ▼            ▼
+         │     ┌───────────┐  ┌───────────┐  ┌───────────┐
+         │     │ Database  │  │ Knowledge │  │ Filesystem│
+         │     │   MCP     │  │    MCP    │  │    MCP    │
+         │     │ Server    │  │ Server    │  │ Server    │
+         │     └───────────┘  └───────────┘  └───────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Supported Databases                      │
+│  MySQL │ PostgreSQL │ MongoDB │ Redis │ SQL Server        │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### xarch-web-spring-boot-starter
+---
 
-Web 服务层模块，提供 REST API 能力。
+## MCP Server 模块
 
-**特性：**
-- Knife4j API 文档 (`/doc.html`)
-- Sa-Token 认证鉴权
-- CORS 跨域配置
-- 全局异常处理
-- AOP 操作审计
-- 验证码生成
+### MCP (Model Context Protocol) 服务
 
-**认证接口：**
-- `POST /auth/login` - 用户登录
-- `POST /auth/logout` - 用户登出
-- `GET /auth/captcha` - 获取验证码
+MCP Server 是 AI 与企业系统连接的桥梁，xarch 提供三个开箱即用的 MCP Server：
 
-### xarch-cache-spring-boot-starter
+### 1. Database MCP Server (`xarch-mcp-database`)
 
-缓存服务模块，提供 Redis 能力。
+**支持的数据库：**
+- MySQL
+- PostgreSQL
+- MongoDB
+- Microsoft SQL Server
 
-**特性：**
-- RedisTemplate 自动配置
-- Redisson 分布式锁
-- 缓存键前缀管理
-- TTL 过期策略
+**提供的工具：**
+| 工具名称 | 功能说明 |
+|----------|---------|
+| `query_execute` | 执行 SQL 查询 |
+| `schema_get` | 获取数据库架构 |
+| `table_list` | 列出所有表 |
+| `table_describe` | 描述表结构 |
+| `index_list` | 列出索引 |
+| `execute_update` | 执行 INSERT/UPDATE/DELETE |
+
+**端点：** `POST /mcp/database/tools/{tool_name}`
+
+### 2. Knowledge Base MCP Server (`xarch-mcp-knowledge`)
+
+企业级知识库，支持 RAG (Retrieval Augmented Generation)。
+
+**提供的工具：**
+| 工具名称 | 功能说明 |
+|----------|---------|
+| `kb_index_document` | 索引文档 |
+| `kb_index_file` | 索引文件（支持 PDF、Markdown、TXT） |
+| `kb_search` | 语义搜索 |
+| `kb_get_document` | 获取文档 |
+| `kb_delete` | 删除文档 |
+| `kb_list` | 列出所有文档 |
+
+**端点：** `POST /mcp/knowledge/tools/{tool_name}`
+
+### 3. Filesystem MCP Server (`xarch-mcp-filesystem`)
+
+安全的企业级文件系统操作。
+
+**提供的工具：**
+| 工具名称 | 功能说明 |
+|----------|---------|
+| `list_directory` | 列出目录内容 |
+| `read_file` | 读取文件内容 |
+| `write_file` | 写入文件内容 |
+| `delete` | 删除文件或目录 |
+| `create_directory` | 创建目录 |
+| `search_files` | 搜索文件 |
+| `get_file_info` | 获取文件信息 |
+| `copy_file` | 复制文件 |
+| `move_file` | 移动文件 |
+
+**端点：** `POST /mcp/filesystem/tools/{tool_name}`
+
+---
+
+## Nacos MCP 服务注册
+
+MCP Server 可注册为 Nacos 服务，实现服务发现：
+
+```yaml
+# application.yml
+spring:
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        namespace: xarch-cloud
+        group: MCP
+
+xarch:
+  mcp:
+    nacos:
+      enabled: true
+      service-name: xarch-mcp-database
+      service-type: database
+```
+
+使用 `@McpServer` 注解自动注册：
+
+```java
+@McpServer(
+    name = "xarch-mcp-knowledge",
+    type = "knowledge-base",
+    port = 9091,
+    capabilities = {"vector-search", "rag", "document-processing"}
+)
+public class KnowledgeMcpController {
+    // ...
+}
+```
 
 ---
 
@@ -194,9 +276,19 @@ docker-compose up -d
 ```kotlin
 // build.gradle.kts
 dependencies {
+    // 基础 Starter
     implementation("com.xarch:xarch-db-spring-boot-starter:1.0.0")
     implementation("com.xarch:xarch-web-spring-boot-starter:1.0.0")
     implementation("com.xarch:xarch-cache-spring-boot-starter:1.0.0")
+
+    // Spring Cloud + Nacos
+    implementation("com.xarch:xarch-cloud-starter-nacos:1.0.0")
+    implementation("com.xarch:xarch-cloud-starter-gateway:1.0.0")
+
+    // MCP Servers
+    implementation("com.xarch:xarch-mcp-database:1.0.0")
+    implementation("com.xarch:xarch-mcp-knowledge:1.0.0")
+    implementation("com.xarch:xarch-mcp-filesystem:1.0.0")
 }
 ```
 
@@ -221,7 +313,6 @@ dependencies {
 |--------|------|---------|
 | `DictController` | `/system/dict/*` | 字典管理：类型与数据 |
 | `ConfigController` | `/system/config/*` | 参数配置：系统参数 |
-| `SysConfigController` | `/system/config/*` | 参数配置（新版） |
 
 ### 日志管理
 
@@ -289,15 +380,24 @@ spring:
   application:
     name: xarch-example
 
+  # Nacos 服务注册
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        namespace: xarch-cloud
+        group: DEFAULT_GROUP
+
+  # 数据源配置
   datasource:
     url: jdbc:mysql://localhost:3306/xarch
     username: root
     password: root123
 
+  # Redis 配置
   redis:
     host: localhost
     port: 6379
-    password:
     database: 0
 
 # Sa-Token 配置
@@ -354,7 +454,7 @@ sys_job_log      # 任务日志
 
 ## 单元测试
 
-22 个控制器全部配置单元测试：
+25+ 个控制器全部配置单元测试：
 
 ```bash
 cd backend
@@ -373,7 +473,10 @@ cd backend
 - SysServerControllerTest    # 服务器监控测试
 - SysCacheControllerTest     # 缓存监控测试
 - SysUserOnlineControllerTest # 在线用户测试
-... 共 22 个测试类
+- DatabaseMcpControllerTest  # 数据库 MCP 测试
+- KnowledgeMcpControllerTest # 知识库 MCP 测试
+- FilesystemMcpControllerTest # 文件系统 MCP 测试
+... 共 25+ 个测试类
 ```
 
 ---
@@ -384,7 +487,9 @@ cd backend
 
 ```
 com.xarch.starter.*   # 框架 Starter 模块
-com.xarch.example.*    # 业务应用模块
+com.xarch.cloud.*     # Spring Cloud 模块
+com.xarch.mcp.*       # MCP Server 模块
+com.xarch.example.*   # 业务应用模块
 ```
 
 ### 分层架构
@@ -417,4 +522,4 @@ MIT License - 自由使用，商用免费
 
 ---
 
-**xarch - 让企业后台开发更简单，让 AI 集成更容易。**
+**xarch - 让企业后台开发更简单，让 AI 集成更容易，让微服务治理更轻松。**
