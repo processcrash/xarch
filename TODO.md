@@ -25,9 +25,9 @@
 - [x] xarch-mcp-filesystem: 文件系统 MCP Server（安全文件操作）
 - [x] @McpServer 注解实现 Nacos MCP 服务注册
 
-### 功能模块 (xarch-example - 22 个控制器)
-- [x] 用户管理 (UserController) - CRUD + 分页
-- [x] 角色管理 (RoleController) - CRUD + 分页
+### 功能模块 (xarch-example - 23 个控制器)
+- [x] 用户管理 (UserController) - CRUD + 分页 + 角色分配
+- [x] 角色管理 (RoleController) - CRUD + 分页 + 菜单分配 + 数据权限
 - [x] 菜单管理 (MenuController) - CRUD + 树形结构
 - [x] 部门管理 (DeptController) - CRUD + 树形结构
 - [x] 岗位管理 (PostController) - CRUD + 分页
@@ -48,11 +48,15 @@
 - [x] 资源管理 (ResourceController) - 文件资源
 - [x] 临时文件 (TempFileController) - 上传管理
 - [x] 通用操作 (CommonController) - 文件上传下载
+- [x] Excel 导入导出 (ExcelController) - 用户导入导出
 
 ### 单元测试
 - [x] DatabaseMcpControllerTest - 数据库 MCP 测试
 - [x] KnowledgeMcpControllerTest - 知识库 MCP 测试
 - [x] FilesystemMcpControllerTest - 文件系统 MCP 测试
+- [x] UserControllerTest - 用户管理测试（含角色分配）
+- [x] RoleControllerTest - 角色管理测试（含菜单/部门分配）
+- [x] ExcelControllerTest - Excel 导入导出测试
 
 ### 前端 (Vue 3 + Element Plus)
 - [x] 登录页面
@@ -82,17 +86,11 @@
 - [x] REQUIREMENTS.md - 需求规格说明书
 - [x] TODO.md - 开发任务跟踪
 - [x] k8s/README.md - K8s 部署说明
+- [x] API Swagger 文档分组配置
 
 ---
 
 ## 待完成
-
-### 功能完善
-- [ ] 用户角色分配（穿梭框）
-- [ ] 角色菜单分配
-- [ ] 数据权限支持
-- [ ] 导入/导出功能（Excel）
-- [ ] 文件上传/下载完善
 
 ### 前端完善
 - [ ] 详情页/编辑页分离
@@ -107,9 +105,7 @@
 - [ ] XSS防护
 
 ### 测试与文档
-- [ ] 后端单元测试覆盖（当前仅 MCP Server 有测试）
 - [ ] 集成测试
-- [ ] API 接口文档完善（ Knife4j 分组配置）
 - [ ] 部署文档完善
 
 ### Spring Cloud 生产完善
