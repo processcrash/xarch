@@ -177,19 +177,19 @@
 
 ### 前端体验优化
 
-- [ ] 添加详情页/编辑页分离（UserDetail, RoleDetail 等）
-- [ ] 表单验证完善（增加更多校验规则）
-- [ ] 批量操作优化（批量启用/禁用）
+- [x] 添加详情页/编辑页分离（UserDetail, RoleDetail 等）
+- [x] 表单验证完善（增加更多校验规则）
+- [x] 批量操作优化（批量启用/禁用）
 
 ### 后端优化
 
-- [ ] 服务监控完善（Spring Cloud Actuator + Prometheus）
-- [ ] Nacos 持久化配置（使用外部 MySQL）
-- [ ] Gateway 路由动态配置
-- [ ] 集成测试（使用 Testcontainers）
+- [x] 服务监控完善（Spring Cloud Actuator + Prometheus）
+- [x] Nacos 持久化配置（使用外部 MySQL）
+- [x] Gateway 路由动态配置
+- [x] 集成测试（使用 Testcontainers）
 
 ### 文档完善
 
-- [ ] API 接口详细文档
-- [ ] 部署文档（生产环境最佳实践）
-- [ ] 开发者快速入门指南
+- [x] API 接口详细文档
+- [x] 部署文档（生产环境最佳实践）
+- [x] 开发者快速入门指南
