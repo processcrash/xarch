@@ -154,8 +154,11 @@ public class ServerManageController {
     @GetMapping("/history/{id}")
     @Operation(summary = "Get command history detail")
     public ApiResult<CommandHistory> getHistoryDetail(@PathVariable Long id) {
-        // commandHistoryMapper.selectById(id)
-        return ApiResult.success(null);
+        CommandHistory history = serverManageService.getHistoryById(id);
+        if (history == null) {
+            return ApiResult.fail("Command history not found");
+        }
+        return ApiResult.success(history);
     }
 
     // ==================== AI Agent ====================

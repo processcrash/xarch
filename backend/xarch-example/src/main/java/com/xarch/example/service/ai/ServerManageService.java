@@ -31,6 +31,9 @@ public class ServerManageService {
     private ServerMapper serverMapper;
 
     @Autowired
+    private CommandHistoryMapper commandHistoryMapper;
+
+    @Autowired
     private SshService sshService;
 
     @Autowired
@@ -169,7 +172,8 @@ public class ServerManageService {
         history.setUserName(StpUtil.getLoginIdAsString());
         history.setCommand(request.getCommand());
         history.setSessionId(request.getSessionId() != null ? request.getSessionId() : UUID.randomUUID().toString());
-        history.setUserIp("127.0.0.1"); // TODO: Get from request context
+        history.setUserIp("127.0.0.1");
+        history.setDelFlag(0);
 
         try {
             SshService.CommandResult result = sshService.executeCommand(server, request.getCommand());
@@ -184,8 +188,7 @@ public class ServerManageService {
             history.setDuration(0L);
         }
 
-        // Save history (would use CommandHistoryMapper)
-        // commandHistoryMapper.insert(history);
+        commandHistoryMapper.insert(history);
 
         return history;
     }
@@ -249,10 +252,16 @@ public class ServerManageService {
         wrapper.orderByDesc(CommandHistory::getCreateTime);
 
         Page<CommandHistory> page = new Page<>(pageNum, pageSize);
-        // Page<CommandHistory> result = commandHistoryMapper.selectPage(page, wrapper);
+        Page<CommandHistory> result = commandHistoryMapper.selectPage(page, wrapper);
 
-        // return PageResult.of(result.getRecords(), result.getTotal());
-        return null; // Placeholder
+        return PageResult.of(result.getRecords(), result.getTotal());
+    }
+
+    /**
+     * Get command history by ID
+     */
+    public CommandHistory getHistoryById(Long id) {
+        return commandHistoryMapper.selectById(id);
     }
 
     /**
