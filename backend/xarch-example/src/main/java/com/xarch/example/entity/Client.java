@@ -1,6 +1,8 @@
 package com.xarch.example.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatis.flex.core.annotation.Column;
+import com.mybatis.flex.core.annotation.Id;
+import com.mybatis.flex.core.annotation.Table;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,10 +11,10 @@ import java.time.LocalDateTime;
  * Client entity for OAuth/sso client management
  */
 @Data
-@TableName("sys_client")
+@Table("sys_client")
 public class Client implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long id;
 
     private String clientId;
@@ -31,10 +33,10 @@ public class Client implements Serializable {
 
     private String description;
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(onInsertValue = "NOW()")
     private LocalDateTime createTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @Column(onUpdateValue = "NOW()")
     private LocalDateTime updateTime;
 
     private Integer delFlag;

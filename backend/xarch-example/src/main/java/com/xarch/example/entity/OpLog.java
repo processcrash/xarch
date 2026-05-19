@@ -1,6 +1,8 @@
 package com.xarch.example.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatis.flex.core.annotation.Column;
+import com.mybatis.flex.core.annotation.Id;
+import com.mybatis.flex.core.annotation.Table;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,10 +11,10 @@ import java.time.LocalDateTime;
  * Operation log entity
  */
 @Data
-@TableName("sys_op_log")
+@Table("sys_op_log")
 public class OpLog implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long id;
 
     private String username;
@@ -35,5 +37,6 @@ public class OpLog implements Serializable {
 
     private Long costTime;
 
+    @Column(onInsertValue = "NOW()")
     private LocalDateTime createTime;
 }

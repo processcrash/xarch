@@ -1,6 +1,8 @@
 package com.xarch.example.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatis.flex.core.annotation.Column;
+import com.mybatis.flex.core.annotation.Id;
+import com.mybatis.flex.core.annotation.Table;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,10 +11,10 @@ import java.time.LocalDateTime;
  * Import batch entity for tracking import operations
  */
 @Data
-@TableName("sys_import_batch")
+@Table("sys_import_batch")
 public class ImportBatch implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long id;
 
     private String batchNo;
@@ -31,9 +33,9 @@ public class ImportBatch implements Serializable {
 
     private Long createUserId;
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(onInsertValue = "NOW()")
     private LocalDateTime createTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @Column(onUpdateValue = "NOW()")
     private LocalDateTime updateTime;
 }

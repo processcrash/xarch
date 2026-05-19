@@ -1,20 +1,17 @@
 package com.xarch.starter.db.mapper;
 
-import java.util.List;
+import com.mybatis.flex.core.mapper.BaseMapper;
 
 /**
- * Generic base mapper for MyBatis Plus
+ * Generic base mapper for MybatisFlex
  * @param <T> entity type
  */
-public interface BaseMapper<T> {
+public interface BaseMapper<T> extends com.mybatis.flex.core.mapper.BaseMapper<T> {
 
-    int insert(T entity);
-
-    int updateById(T entity);
-
-    int deleteById(Long id);
-
-    T selectById(Long id);
-
-    List<T> selectList();
+    /**
+     * Insert entity and get generated ID
+     */
+    default int insertAndGetId(T entity) {
+        return insert(entity);
+    }
 }

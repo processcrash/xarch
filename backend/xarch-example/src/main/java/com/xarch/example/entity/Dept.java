@@ -1,6 +1,8 @@
 package com.xarch.example.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatis.flex.core.annotation.Column;
+import com.mybatis.flex.core.annotation.Id;
+import com.mybatis.flex.core.annotation.Table;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,10 +11,10 @@ import java.time.LocalDateTime;
  * Department entity
  */
 @Data
-@TableName("sys_dept")
+@Table("sys_dept")
 public class Dept implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long id;
 
     private Long parentId;
@@ -29,10 +31,10 @@ public class Dept implements Serializable {
 
     private Integer status;
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(onInsertValue = "NOW()")
     private LocalDateTime createTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @Column(onUpdateValue = "NOW()")
     private LocalDateTime updateTime;
 
     private Integer delFlag;

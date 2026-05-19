@@ -1,23 +1,19 @@
 package com.xarch.example.entity;
 
-import com.xarch.starter.core.entity.BaseEntity;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-
+import com.mybatis.flex.core.annotation.Id;
+import com.mybatis.flex.core.annotation.Table;
+import lombok.Data;
 import java.util.Date;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * 定时任务调度表 sys_job
  */
-@TableName("sys_job")
-public class SysJob extends BaseEntity {
-    private static final long serialVersionUID = 1L;
+@Data
+@Table("sys_job")
+public class SysJob {
 
     /** 任务ID */
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long jobId;
 
     /** 任务名称 */
@@ -41,72 +37,7 @@ public class SysJob extends BaseEntity {
     /** 任务状态（0正常 1暂停） */
     private String status;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public Date getNextValidTime() {
         return null;
-    }
-
-    public Long getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(Long jobId) {
-        this.jobId = jobId;
-    }
-
-    public String getJobName() {
-        return jobName;
-    }
-
-    public void setJobName(String jobName) {
-        this.jobName = jobName;
-    }
-
-    public String getJobGroup() {
-        return jobGroup;
-    }
-
-    public void setJobGroup(String jobGroup) {
-        this.jobGroup = jobGroup;
-    }
-
-    public String getInvokeTarget() {
-        return invokeTarget;
-    }
-
-    public void setInvokeTarget(String invokeTarget) {
-        this.invokeTarget = invokeTarget;
-    }
-
-    public String getCronExpression() {
-        return cronExpression;
-    }
-
-    public void setCronExpression(String cronExpression) {
-        this.cronExpression = cronExpression;
-    }
-
-    public String getMisfirePolicy() {
-        return misfirePolicy;
-    }
-
-    public void setMisfirePolicy(String misfirePolicy) {
-        this.misfirePolicy = misfirePolicy;
-    }
-
-    public String getConcurrent() {
-        return concurrent;
-    }
-
-    public void setConcurrent(String concurrent) {
-        this.concurrent = concurrent;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 }

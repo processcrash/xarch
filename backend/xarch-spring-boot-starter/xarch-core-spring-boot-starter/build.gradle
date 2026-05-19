@@ -1,5 +1,6 @@
 dependencies {
-    api 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
     compileOnly 'org.springframework.boot:spring-boot-starter'
 

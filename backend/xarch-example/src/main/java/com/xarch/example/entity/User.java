@@ -1,6 +1,9 @@
 package com.xarch.example.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatis.flex.core.annotation.Column;
+import com.mybatis.flex.core.annotation.Id;
+import com.mybatis.flex.core.annotation.Table;
+import com.mybatis.flex.core.annotation.Version;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,12 +12,13 @@ import java.time.LocalDateTime;
  * User entity
  */
 @Data
-@TableName("sys_user")
+@Table("sys_user")
 public class User implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long id;
 
+    @Column(onInsertValue = "NOW()")
     private String username;
 
     private String password;
@@ -33,10 +37,10 @@ public class User implements Serializable {
 
     private String roleIds;
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(onInsertValue = "NOW()")
     private LocalDateTime createTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @Column(onUpdateValue = "NOW()")
     private LocalDateTime updateTime;
 
     private Integer delFlag;

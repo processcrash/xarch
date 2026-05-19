@@ -1,13 +1,12 @@
 package com.xarch.example.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xarch.example.entity.User;
+import com.xarch.starter.db.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Insert;
 
 import java.util.List;
 
@@ -33,7 +32,6 @@ public interface UserMapper extends BaseMapper<User> {
      * Insert a user-role relation
      */
     @Insert("INSERT INTO sys_user_role (user_id, role_id) VALUES (#{userId}, #{roleId})")
-    @Options(useGeneratedKeys = true, keyProperty = "userId")
     int insertUserRole(@Param("userId") Long userId, @Param("roleId") Long roleId);
 
     /**
