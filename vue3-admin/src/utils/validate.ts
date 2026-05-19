@@ -116,6 +116,83 @@ export const validateUrl = (rule: any, value: string, callback: any) => {
   }
 }
 
+export const validatePasswordStrength = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    callback()
+    return
+  }
+  if (value.length < 8) {
+    callback(new Error('Password must be at least 8 characters'))
+    return
+  }
+  const hasUpper = /[A-Z]/.test(value)
+  const hasLower = /[a-z]/.test(value)
+  const hasNumber = /\d/.test(value)
+  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value)
+  const strength = [hasUpper, hasLower, hasNumber, hasSpecial].filter(Boolean).length
+  if (strength < 3) {
+    callback(new Error('Password must contain at least 3 of: uppercase, lowercase, number, special character'))
+    return
+  }
+  callback()
+}
+
+export const validateNickname = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    callback()
+    return
+  }
+  if (value.length < 2 || value.length > 30) {
+    callback(new Error('Nickname must be 2-30 characters'))
+    return
+  }
+  const nicknameRegex = /^[一-龥a-zA-Z0-9_\-\s]+$/
+  if (!nicknameRegex.test(value)) {
+    callback(new Error('Nickname can contain Chinese, letters, numbers, underscore and hyphen'))
+  } else {
+    callback()
+  }
+}
+
+export const validateIdCard = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    callback()
+    return
+  }
+  const idCardRegex = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/
+  if (!idCardRegex.test(value)) {
+    callback(new Error('Please enter a valid ID card number'))
+  } else {
+    callback()
+  }
+}
+
+export const validatePostCode = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    callback()
+    return
+  }
+  const postCodeRegex = /^\d{6}$/
+  if (!postCodeRegex.test(value)) {
+    callback(new Error('Please enter a valid 6-digit post code'))
+  } else {
+    callback()
+  }
+}
+
+export const validateQQ = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    callback()
+    return
+  }
+  const qqRegex = /^[1-9]\d{4,10}$/
+  if (!qqRegex.test(value)) {
+    callback(new Error('Please enter a valid QQ number'))
+  } else {
+    callback()
+  }
+}
+
 /**
  * Common validation rules for reuse
  */
@@ -131,6 +208,33 @@ export const commonRules = {
   ],
   password: [
     { required: false, validator: validatePassword, trigger: 'blur' }
+  ],
+  passwordStrength: [
+    { required: false, validator: validatePasswordStrength, trigger: 'blur' }
+  ],
+  nickname: [
+    { required: false, validator: validateNickname, trigger: 'blur' }
+  ],
+  idCard: [
+    { required: false, validator: validateIdCard, trigger: 'blur' }
+  ],
+  postCode: [
+    { required: false, validator: validatePostCode, trigger: 'blur' }
+  ],
+  qq: [
+    { required: false, validator: validateQQ, trigger: 'blur' }
+  ],
+  ip: [
+    { required: false, validator: validateIP, trigger: 'blur' }
+  ],
+  url: [
+    { required: false, validator: validateUrl, trigger: 'blur' }
+  ],
+  port: [
+    { required: false, validator: validatePort, trigger: 'blur' }
+  ],
+  roleCode: [
+    { required: true, validator: validateRoleCode, trigger: 'blur' }
   ],
   required: [
     { required: true, message: 'This field is required', trigger: 'blur' }
