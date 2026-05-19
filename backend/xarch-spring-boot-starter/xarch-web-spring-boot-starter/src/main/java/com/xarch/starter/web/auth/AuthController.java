@@ -1,6 +1,5 @@
 package com.xarch.starter.web.auth;
 
-import cn.dev33.satoken.context SaHolder;
 import cn.dev33.satoken.stp.StpUtil;
 import com.xarch.starter.core.annotation.XarchLog;
 import com.xarch.starter.core.entity.LoginUser;
@@ -70,7 +69,7 @@ public class AuthController {
             userInfo.getNickname()
         );
 
-        SaHolder.getSession().set("userInfo", userInfo);
+        StpUtil.getSession().set("userInfo", userInfo);
 
         return ResultUtil.ok(response);
     }
@@ -88,7 +87,7 @@ public class AuthController {
         if (loginId == null) {
             return ResultUtil.fail("4010", "Unauthorized");
         }
-        LoginUser userInfo = (LoginUser) SaHolder.getSession().get("userInfo");
+        LoginUser userInfo = (LoginUser) StpUtil.getSession().get("userInfo");
         return ResultUtil.ok(userInfo);
     }
 

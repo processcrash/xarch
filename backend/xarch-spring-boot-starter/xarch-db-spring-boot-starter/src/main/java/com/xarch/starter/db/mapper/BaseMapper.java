@@ -1,12 +1,10 @@
 package com.xarch.starter.db.mapper;
 
-import com.mybatis.flex.core.mapper.BaseMapper;
-
 /**
  * Generic base mapper for MybatisFlex
  * @param <T> entity type
  */
-public interface BaseMapper<T> extends com.mybatis.flex.core.mapper.BaseMapper<T> {
+public interface BaseMapper<T> extends com.mybatisflex.core.BaseMapper<T> {
 
     /**
      * Insert entity and get generated ID
