@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation project(':xarch-core-spring-boot-starter')
-    implementation project(':xarch-db-spring-boot-starter')
-    implementation project(':xarch-web-spring-boot-starter')
-    implementation project(':xarch-cache-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-db-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-web-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-cache-spring-boot-starter')
 
     // Excel import/export
     implementation 'com.alibaba:easyexcel:3.3.3'

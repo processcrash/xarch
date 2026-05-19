@@ -15,6 +15,12 @@ import java.util.Map;
 public class StorageFactory {
 
     private final Map<StorageType, StorageStrategy> strategies = new HashMap<>();
+    private final StorageConfigService storageConfigService;
+
+    @Autowired
+    public StorageFactory(StorageConfigService storageConfigService) {
+        this.storageConfigService = storageConfigService;
+    }
 
     @Autowired
     public void setStrategies(
@@ -53,8 +59,10 @@ public class StorageFactory {
      * Get default storage strategy
      */
     public StorageStrategy getDefaultStrategy() {
-        // TODO: Get from StorageConfigService to find default config
-        // For now, return local
+        StorageConfig defaultConfig = storageConfigService.getGlobalDefaultConfig();
+        if (defaultConfig != null) {
+            return getStrategy(StorageType.fromCode(defaultConfig.getStorageType()));
+        }
         return strategies.get(StorageType.LOCAL);
     }
 }

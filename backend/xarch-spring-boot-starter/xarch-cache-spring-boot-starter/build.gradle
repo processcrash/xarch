@@ -1,5 +1,5 @@
 dependencies {
-    api project(':xarch-starter-core')
+    api project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
 
     compileOnly 'org.springframework.boot:spring-boot-starter-data-redis'
     api 'org.redisson:redisson-spring-boot-starter:3.37.0'

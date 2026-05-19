@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation project(':xarch-core-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
     implementation 'org.springframework.boot:spring-boot-starter-web:3.4.0'
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.postgresql:postgresql:42.7.0'
@@ -15,7 +15,6 @@ dependencies {
 }
 
 java {
-    library {
-        jvmVersion = 25
-    }
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }

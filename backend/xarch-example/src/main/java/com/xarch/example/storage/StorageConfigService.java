@@ -29,6 +29,18 @@ public class StorageConfigService {
     }
 
     /**
+     * Get global default storage config (regardless of type)
+     */
+    public StorageConfig getGlobalDefaultConfig() {
+        LambdaQueryWrapper<StorageConfig> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(StorageConfig::getIsDefault, 1)
+                .eq(StorageConfig::getStatus, 1)
+                .eq(StorageConfig::getDelFlag, 0)
+                .last("LIMIT 1");
+        return storageConfigMapper.selectOne(wrapper);
+    }
+
+    /**
      * Get default storage config
      */
     public StorageConfig getDefaultConfig(StorageType type) {

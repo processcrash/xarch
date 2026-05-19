@@ -1,5 +1,5 @@
 dependencies {
-    api project(':xarch-starter-core')
+    api project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
 
     compileOnly 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.springframework.boot:spring-boot-starter-validation'
