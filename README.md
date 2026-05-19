@@ -60,11 +60,21 @@ xarch/
 │   │   └── xarch-mcp/                          # MCP Servers (Java)
 │   │       ├── xarch-mcp-database/             # 数据库 MCP
 │   │       ├── xarch-mcp-knowledge/            # 知识库 MCP (RAG)
-│   │       └── xarch-mcp-filesystem/           # 文件系统 MCP
+│   │       ├── xarch-mcp-filesystem/           # 文件系统 MCP
+│   │       └── xarch-mcp-vector/               # 向量数据库 MCP
 │   ├── xarch-spring-cloud/             # Spring Cloud 模块
 │   │   └── xarch-cloud-starter-nacos/  # Nacos 服务注册
 │   │       └── xarch-cloud-admin-server/  # Spring Boot Admin
 │   └── xarch-example/                  # 示例应用 (23 个控制器)
+│
+├── node-mcp-servers/                   # Node.js MCP Servers (TypeScript)
+│   ├── database-mcp/                   # 数据库 MCP
+│   ├── knowledge-mcp/                 # 知识库 MCP (RAG)
+│   ├── filesystem-mcp/                 # 文件系统 MCP
+│   └── vector-mcp/                      # 向量数据库 MCP
+│
+├── python/                              # Python MCP Servers
+│   └── vector_mcp/                     # 向量数据库 MCP
 │
 ├── vue3-admin/                         # Vue 3 前端
 │   ├── src/
@@ -112,11 +122,26 @@ MCP (Model Context Protocol) 是 AI 与企业系统连接的桥梁。
 | Database MCP | 9090 | SQL 查询、架构管理、多数据库支持 |
 | Knowledge MCP | 9091 | RAG 知识库、文档索引、语义搜索 |
 | Filesystem MCP | 9092 | 安全文件操作、路径遍历防护 |
+| Vector MCP | 9093 | 向量数据库、RAG 语义搜索 |
 
 **技术实现：**
 - Java 实现 (Spring Boot)
 - Node.js 实现 (TypeScript)
 - Python 实现 (标准库)
+
+**支持的向量数据库：**
+
+| 数据库 | 说明 |
+|--------|------|
+| Qdrant | 高性能向量数据库，支持云端部署 |
+| Milvus | 开源向量数据库，大规模向量检索 |
+| Chroma | 轻量级向量数据库，简化部署 |
+| Weaviate | 云原生向量数据库，支持混合搜索 |
+| Pinecone | 云端向量数据库，托管服务 |
+| PGvector | PostgreSQL 向量扩展，SQL 融合 |
+| OpenSearch | KNN 向量搜索，分布式引擎 |
+| Elasticsearch | 密集向量搜索，企业级支持 |
+| FAISS | Facebook AI 向量库，本地嵌入 |
 
 ### 2. 企业级文件管理中心
 
@@ -254,7 +279,7 @@ docker-compose up -d
 |--------|------|---------|
 | `FileController` | `/file/*` | 企业级文件管理 |
 
-### MCP 模块
+| `VectorMcpController` | `/mcp/vector/*` | 向量数据库 MCP |
 | 控制器 | 端点 | 功能说明 |
 |--------|------|---------|
 | `DatabaseMcpController` | `/mcp/database/*` | 数据库 MCP |
@@ -287,11 +312,26 @@ docker-compose up -d
          │     │   MCP     │  │    MCP    │  │    MCP    │
          │     │  Port:9090│  │  Port:9091│  │  Port:9092│
          │     └───────────┘  └───────────┘  └───────────┘
+         │                         │
+         │                   ┌─────┴─────┐
+         │                   ▼           ▼
+         │            ┌───────────┐  ┌───────────┐
+         │            │  Vector   │  │           │
+         │            │    MCP    │  │           │
+         │            │  Port:9093│  │           │
+         │            └───────────┘  └───────────┘
          │
          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                    Supported Databases                      │
 │  MySQL │ PostgreSQL │ MongoDB │ Redis │ SQL Server        │
+└─────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Supported Vector Databases                │
+│  Qdrant │ Milvus │ Chroma │ Weaviate │ Pinecone │ PGvector │
+│  OpenSearch │ Elasticsearch │ FAISS                         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
