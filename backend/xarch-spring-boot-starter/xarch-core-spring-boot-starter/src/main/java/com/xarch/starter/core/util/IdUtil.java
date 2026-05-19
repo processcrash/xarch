@@ -1,7 +1,5 @@
 package com.xarch.starter.core.util;
 
-import cn.hutool.core.util.IdUtil;
-
 import java.util.UUID;
 
 /**
@@ -14,7 +12,7 @@ public class IdUtil {
     }
 
     public static long snowflakeId() {
-        return IdUtil.getSnowflakeNextId();
+        return cn.hutool.core.util.IdUtil.getSnowflakeNextId();
     }
 
     public static String snowflakeIdStr() {

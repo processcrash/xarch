@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @Schema(description = "Login user info")
-public class LoginUser implements BaseUserInfo {
+public class LoginUser extends BaseUserInfo {
 
     @Schema(description = "User type: 1=admin, 2=normal")
     private Integer userType = 2;

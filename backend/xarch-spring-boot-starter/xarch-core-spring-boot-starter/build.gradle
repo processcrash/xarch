@@ -4,8 +4,11 @@ dependencies {
     compileOnly 'org.springframework.boot:spring-boot-starter'
 
     api 'com.fasterxml.jackson.core:jackson-databind'
+    api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     api 'cn.hutool:hutool-core:5.8.26'
     api 'cn.hutool:hutool-crypto:5.8.26'
     api 'cn.hutool:hutool-json:5.8.26'
     api 'org.slf4j:slf4j-api'
+    api 'jakarta.validation:jakarta.validation-api'
+    api 'io.swagger.core.v3:swagger-annotations'
 }
