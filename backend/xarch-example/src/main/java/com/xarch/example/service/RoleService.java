@@ -1,7 +1,7 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.Role;
 import com.xarch.example.mapper.RoleMapper;
 import com.xarch.starter.core.result.PageResult;
@@ -24,19 +24,17 @@ public class RoleService {
     private RoleMapper roleMapper;
 
     public PageResult<Role> page(String roleName, String roleCode, int pageNum, int pageSize) {
-        LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_role").where("del_flag = 0");
         if (StringUtils.hasText(roleName)) {
-            wrapper.like(Role::getRoleName, roleName);
+            wrapper.and("role_name LIKE ?", "%" + roleName + "%");
         }
         if (StringUtils.hasText(roleCode)) {
-            wrapper.eq(Role::getRoleCode, roleCode);
+            wrapper.and("role_code = ?", roleCode);
         }
-        wrapper.orderByDesc(Role::getCreateTime);
+        wrapper.orderBy("create_time", false);
 
-        Page<Role> page = new Page<>(pageNum, pageSize);
-        Page<Role> result = roleMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<Role> page = roleMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public Role getById(Long id) {
@@ -44,7 +42,8 @@ public class RoleService {
     }
 
     public List<Role> list() {
-        return roleMapper.selectList(null);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_role").where("del_flag = 0");
+        return roleMapper.selectListByQuery(wrapper);
     }
 
     public void create(Role role) {

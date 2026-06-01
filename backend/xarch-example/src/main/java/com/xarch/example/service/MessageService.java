@@ -1,11 +1,13 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.Message;
 import com.xarch.example.mapper.MessageMapper;
 import com.xarch.starter.core.result.PageResult;
+import com.mybatisflex.core.paginate.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -19,16 +21,14 @@ public class MessageService {
     private MessageMapper messageMapper;
 
     public PageResult<Message> page(String msgType, int pageNum, int pageSize) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Message>();
-        if (msgType != null && !msgType.isEmpty()) {
-            wrapper.eq(Message::getMsgType, msgType);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_message").where("del_flag = 0");
+        if (StringUtils.hasText(msgType)) {
+            wrapper.and("msg_type = ?", msgType);
         }
-        wrapper.orderByDesc(Message::getCreateTime);
+        wrapper.orderBy("create_time", false);
 
-        Page<Message> page = new Page<>(pageNum, pageSize);
-        Page<Message> result = messageMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<Message> page = messageMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public Message getById(Long id) {
@@ -36,26 +36,27 @@ public class MessageService {
     }
 
     public List<Message> listByUser(Long userId, String category) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Message>();
-        wrapper.eq(Message::getSenderId, userId);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_message")
+                .where("sender_id = ?", userId);
         if ("todo".equals(category)) {
-            wrapper.eq(Message::getIsRead, 0);
+            wrapper.and("is_read = 0");
         }
-        wrapper.orderByDesc(Message::getCreateTime);
-        return messageMapper.selectList(wrapper);
+        wrapper.orderBy("create_time", false);
+        return messageMapper.selectListByQuery(wrapper);
     }
 
     public List<Message> listByUser(Long userId) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Message>();
-        wrapper.eq(Message::getSenderId, userId);
-        wrapper.orderByDesc(Message::getCreateTime);
-        return messageMapper.selectList(wrapper);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_message")
+                .where("sender_id = ?", userId)
+                .orderBy("create_time", false);
+        return messageMapper.selectListByQuery(wrapper);
     }
 
     public long countUnread(Long userId) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Message>();
-        wrapper.eq(Message::getSenderId, userId).eq(Message::getIsRead, 0);
-        return messageMapper.selectCount(wrapper);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_message")
+                .where("sender_id = ?", userId)
+                .and("is_read = 0");
+        return messageMapper.selectCountByQuery(wrapper);
     }
 
     public void create(Message message) {

@@ -1,6 +1,8 @@
 package com.xarch.example.entity.ai;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,10 +11,10 @@ import java.time.LocalDateTime;
  * Command history - records all command executions
  */
 @Data
-@TableName("ai_command_history")
+@Table("ai_command_history")
 public class CommandHistory implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long id;
 
     /** Server ID */
@@ -57,7 +59,7 @@ public class CommandHistory implements Serializable {
     /** IP address of the user */
     private String userIp;
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(onInsertValue = "NOW()")
     private LocalDateTime createTime;
 
     /** Delete flag: 0-normal, 1-deleted */

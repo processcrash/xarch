@@ -1,6 +1,6 @@
 package com.xarch.example.storage;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.StorageConfig;
 import com.xarch.example.mapper.StorageConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,36 +21,30 @@ public class StorageConfigService {
      * Get all enabled storage configs
      */
     public List<StorageConfig> listEnabled() {
-        LambdaQueryWrapper<StorageConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StorageConfig::getStatus, 1)
-                .eq(StorageConfig::getDelFlag, 0)
-                .orderByDesc(StorageConfig::getIsDefault);
-        return storageConfigMapper.selectList(wrapper);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_storage_config")
+                .where("status = 1 AND del_flag = 0")
+                .orderBy("is_default", false);
+        return storageConfigMapper.selectListByQuery(wrapper);
     }
 
     /**
      * Get global default storage config (regardless of type)
      */
     public StorageConfig getGlobalDefaultConfig() {
-        LambdaQueryWrapper<StorageConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StorageConfig::getIsDefault, 1)
-                .eq(StorageConfig::getStatus, 1)
-                .eq(StorageConfig::getDelFlag, 0)
-                .last("LIMIT 1");
-        return storageConfigMapper.selectOne(wrapper);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_storage_config")
+                .where("is_default = 1 AND status = 1 AND del_flag = 0")
+                .limit(1);
+        return storageConfigMapper.selectOneByQuery(wrapper);
     }
 
     /**
      * Get default storage config
      */
     public StorageConfig getDefaultConfig(StorageType type) {
-        LambdaQueryWrapper<StorageConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StorageConfig::getStorageType, type.getCode())
-                .eq(StorageConfig::getIsDefault, 1)
-                .eq(StorageConfig::getStatus, 1)
-                .eq(StorageConfig::getDelFlag, 0)
-                .last("LIMIT 1");
-        return storageConfigMapper.selectOne(wrapper);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_storage_config")
+                .where("storage_type = ? AND is_default = 1 AND status = 1 AND del_flag = 0", type.getCode())
+                .limit(1);
+        return storageConfigMapper.selectOneByQuery(wrapper);
     }
 
     /**
@@ -118,10 +112,9 @@ public class StorageConfigService {
     }
 
     private void clearDefault(String storageType) {
-        LambdaQueryWrapper<StorageConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(StorageConfig::getStorageType, storageType)
-                .eq(StorageConfig::getIsDefault, 1);
-        List<StorageConfig> configs = storageConfigMapper.selectList(wrapper);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_storage_config")
+                .where("storage_type = ? AND is_default = 1", storageType);
+        List<StorageConfig> configs = storageConfigMapper.selectListByQuery(wrapper);
         for (StorageConfig config : configs) {
             config.setIsDefault(0);
             storageConfigMapper.updateById(config);

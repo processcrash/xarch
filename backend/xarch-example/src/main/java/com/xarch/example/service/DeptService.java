@@ -1,11 +1,13 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.Dept;
 import com.xarch.example.mapper.DeptMapper;
 import com.xarch.starter.core.result.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -19,16 +21,14 @@ public class DeptService {
     private DeptMapper deptMapper;
 
     public PageResult<Dept> page(String deptName, int pageNum, int pageSize) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Dept>();
-        if (deptName != null && !deptName.isEmpty()) {
-            wrapper.like(Dept::getDeptName, deptName);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_dept").where("del_flag = 0");
+        if (StringUtils.hasText(deptName)) {
+            wrapper.and("dept_name LIKE ?", "%" + deptName + "%");
         }
-        wrapper.orderByAsc(Dept::getSortOrder);
+        wrapper.orderBy("sort_order", true);
 
-        Page<Dept> page = new Page<>(pageNum, pageSize);
-        Page<Dept> result = deptMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<Dept> page = deptMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public Dept getById(Long id) {
@@ -36,10 +36,10 @@ public class DeptService {
     }
 
     public List<Dept> list() {
-        return deptMapper.selectList(
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Dept>()
-                .orderByAsc(Dept::getSortOrder)
-        );
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_dept")
+                .where("del_flag = 0")
+                .orderBy("sort_order", true);
+        return deptMapper.selectListByQuery(wrapper);
     }
 
     public List<Dept> tree() {

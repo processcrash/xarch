@@ -1,6 +1,8 @@
 package com.xarch.example.entity.ai;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -10,10 +12,10 @@ import java.time.LocalDateTime;
  * Records all command executions for compliance and security
  */
 @Data
-@TableName("ai_command_audit")
+@Table("ai_command_audit")
 public class CommandAudit {
 
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long id;
 
     private Long serverId;
@@ -44,6 +46,9 @@ public class CommandAudit {
     private Integer status; // 0=running, 1=success, 2=failed, 3=cancelled
     private Integer delFlag;
 
+    @Column(onInsertValue = "NOW()")
     private LocalDateTime createTime;
+
+    @Column(onUpdateValue = "NOW()")
     private LocalDateTime updateTime;
 }

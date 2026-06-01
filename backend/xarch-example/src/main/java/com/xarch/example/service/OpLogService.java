@@ -1,11 +1,13 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.OpLog;
 import com.xarch.example.mapper.OpLogMapper;
 import com.xarch.starter.core.result.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Operation log service
@@ -17,16 +19,14 @@ public class OpLogService {
     private OpLogMapper opLogMapper;
 
     public PageResult<OpLog> page(String username, int pageNum, int pageSize) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<OpLog>();
-        if (username != null && !username.isEmpty()) {
-            wrapper.like(OpLog::getUsername, username);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_op_log");
+        if (StringUtils.hasText(username)) {
+            wrapper.where("username LIKE ?", "%" + username + "%");
         }
-        wrapper.orderByDesc(OpLog::getCreateTime);
+        wrapper.orderBy("create_time", false);
 
-        Page<OpLog> page = new Page<>(pageNum, pageSize);
-        Page<OpLog> result = opLogMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<OpLog> page = opLogMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public void save(OpLog opLog) {

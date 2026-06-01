@@ -18,15 +18,12 @@ spring:
       host: localhost
       port: 6379
 
-mybatis-plus:
+mybatis-flex:
   configuration:
     map-underscore-to-camel-case: true
   global-config:
     db-config:
       id-type: auto
-      logic-delete-field: delFlag
-      logic-delete-value: 1
-      logic-not-delete-value: 0
 
 sa:
   token:

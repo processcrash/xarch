@@ -1,6 +1,8 @@
 package com.xarch.example.entity.ai;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,10 +11,10 @@ import java.time.LocalDateTime;
  * Server entity for Linux server management
  */
 @Data
-@TableName("ai_server")
+@Table("ai_server")
 public class Server implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long id;
 
     /** Server name */
@@ -66,10 +68,10 @@ public class Server implements Serializable {
     /** Create user name */
     private String createUserName;
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(onInsertValue = "NOW()")
     private LocalDateTime createTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @Column(onUpdateValue = "NOW()")
     private LocalDateTime updateTime;
 
     /** Delete flag: 0-normal, 1-deleted */

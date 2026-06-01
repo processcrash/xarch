@@ -1,6 +1,7 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.Client;
 import com.xarch.example.mapper.ClientMapper;
 import com.xarch.starter.core.result.PageResult;
@@ -20,19 +21,17 @@ public class ClientService {
     private ClientMapper clientMapper;
 
     public PageResult<Client> page(String clientName, String clientId, int pageNum, int pageSize) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Client>();
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_client").where("del_flag = 0");
         if (StringUtils.hasText(clientName)) {
-            wrapper.like(Client::getClientName, clientName);
+            wrapper.and("client_name LIKE ?", "%" + clientName + "%");
         }
         if (StringUtils.hasText(clientId)) {
-            wrapper.eq(Client::getClientId, clientId);
+            wrapper.and("client_id = ?", clientId);
         }
-        wrapper.orderByDesc(Client::getCreateTime);
+        wrapper.orderBy("create_time", false);
 
-        Page<Client> page = new Page<>(pageNum, pageSize);
-        Page<Client> result = clientMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<Client> page = clientMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public Client getById(Long id) {
@@ -40,7 +39,8 @@ public class ClientService {
     }
 
     public List<Client> list() {
-        return clientMapper.selectList(null);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_client").where("del_flag = 0");
+        return clientMapper.selectListByQuery(wrapper);
     }
 
     public void create(Client client) {

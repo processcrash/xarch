@@ -1,6 +1,7 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.Dict;
 import com.xarch.example.entity.DictData;
 import com.xarch.example.mapper.DictMapper;
@@ -8,6 +9,7 @@ import com.xarch.example.mapper.DictDataMapper;
 import com.xarch.starter.core.result.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -24,16 +26,14 @@ public class DictService {
     private DictDataMapper dictDataMapper;
 
     public PageResult<Dict> page(String dictName, int pageNum, int pageSize) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Dict>();
-        if (dictName != null && !dictName.isEmpty()) {
-            wrapper.like(Dict::getDictName, dictName);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_dict").where("del_flag = 0");
+        if (StringUtils.hasText(dictName)) {
+            wrapper.and("dict_name LIKE ?", "%" + dictName + "%");
         }
-        wrapper.orderByDesc(Dict::getCreateTime);
+        wrapper.orderBy("create_time", false);
 
-        Page<Dict> page = new Page<>(pageNum, pageSize);
-        Page<Dict> result = dictMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<Dict> page = dictMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public Dict getById(Long id) {
@@ -41,30 +41,29 @@ public class DictService {
     }
 
     public List<Dict> list() {
-        return dictMapper.selectList(null);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_dict").where("del_flag = 0");
+        return dictMapper.selectListByQuery(wrapper);
     }
 
     public List<DictData> getDataByDictCode(String dictCode) {
-        Dict dict = dictMapper.selectList(
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Dict>()
-                .eq(Dict::getDictCode, dictCode)
-        ).stream().findFirst().orElse(null);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_dict")
+                .where("dict_code = ?", dictCode)
+                .limit(1);
+        Dict dict = dictMapper.selectOneByQuery(wrapper);
 
         if (dict == null) return List.of();
 
-        return dictDataMapper.selectList(
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<DictData>()
-                .eq(DictData::getDictId, dict.getId())
-                .orderByAsc(DictData::getSortOrder)
-        );
+        QueryWrapper dataWrapper = QueryWrapper.create().from("sys_dict_data")
+                .where("dict_id = ?", dict.getId())
+                .orderBy("sort_order", true);
+        return dictDataMapper.selectListByQuery(dataWrapper);
     }
 
     public List<DictData> getDataByDictId(Long dictId) {
-        return dictDataMapper.selectList(
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<DictData>()
-                .eq(DictData::getDictId, dictId)
-                .orderByAsc(DictData::getSortOrder)
-        );
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_dict_data")
+                .where("dict_id = ?", dictId)
+                .orderBy("sort_order", true);
+        return dictDataMapper.selectListByQuery(wrapper);
     }
 
     public void create(Dict dict) {

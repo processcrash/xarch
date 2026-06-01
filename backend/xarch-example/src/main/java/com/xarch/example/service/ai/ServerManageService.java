@@ -1,8 +1,8 @@
 package com.xarch.example.service.ai;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.ai.CommandHistory;
 import com.xarch.example.entity.ai.Server;
 import com.xarch.example.mapper.ai.ServerMapper;
@@ -17,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -43,27 +42,22 @@ public class ServerManageService {
      * Page query servers
      */
     public PageResult<Server> page(String keyword, String serverGroup, Integer status, int pageNum, int pageSize) {
-        LambdaQueryWrapper<Server> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Server::getDelFlag, 0);
+        QueryWrapper wrapper = QueryWrapper.create().from("ai_server").where("del_flag = 0");
 
         if (keyword != null && !keyword.isEmpty()) {
-            wrapper.and(w -> w.like(Server::getName, keyword)
-                    .or().like(Server::getHost, keyword)
-                    .or().like(Server::getDescription, keyword));
+            wrapper.and("(name LIKE ? OR host LIKE ? OR description LIKE ?)",
+                    "%" + keyword + "%", "%" + keyword + "%", "%" + keyword + "%");
         }
         if (serverGroup != null && !serverGroup.isEmpty()) {
-            wrapper.eq(Server::getServerGroup, serverGroup);
+            wrapper.and("server_group = ?", serverGroup);
         }
         if (status != null) {
-            wrapper.eq(Server::getStatus, status);
+            wrapper.and("status = ?", status);
         }
+        wrapper.orderBy("create_time", false);
 
-        wrapper.orderByDesc(Server::getCreateTime);
-
-        Page<Server> page = new Page<>(pageNum, pageSize);
-        Page<Server> result = serverMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<Server> page = serverMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     /**
@@ -77,7 +71,6 @@ public class ServerManageService {
      * Create server
      */
     public void create(Server server) {
-        // Test connection before saving
         if (testConnection(server)) {
             server.setStatus(1);
             server.setLastConnectedTime(LocalDateTime.now());
@@ -101,7 +94,6 @@ public class ServerManageService {
     public void delete(Long id) {
         Server server = serverMapper.selectById(id);
         if (server != null) {
-            // Disconnect first
             sshService.disconnect(id);
             server.setDelFlag(1);
             serverMapper.updateById(server);
@@ -202,7 +194,6 @@ public class ServerManageService {
             throw new RuntimeException("Server not found");
         }
 
-        // Generate command using AI
         AiAgentService.AiCommandResult aiResult = aiAgentService.generateCommand(naturalLanguage, server);
 
         if (aiResult.getCommand() == null) {
@@ -239,22 +230,18 @@ public class ServerManageService {
      * Get command history for server
      */
     public PageResult<CommandHistory> getCommandHistory(Long serverId, String sessionId, int pageNum, int pageSize) {
-        LambdaQueryWrapper<CommandHistory> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(CommandHistory::getDelFlag, 0);
+        QueryWrapper wrapper = QueryWrapper.create().from("ai_command_history").where("del_flag = 0");
 
         if (serverId != null) {
-            wrapper.eq(CommandHistory::getServerId, serverId);
+            wrapper.and("server_id = ?", serverId);
         }
         if (sessionId != null && !sessionId.isEmpty()) {
-            wrapper.eq(CommandHistory::getSessionId, sessionId);
+            wrapper.and("session_id = ?", sessionId);
         }
+        wrapper.orderBy("create_time", false);
 
-        wrapper.orderByDesc(CommandHistory::getCreateTime);
-
-        Page<CommandHistory> page = new Page<>(pageNum, pageSize);
-        Page<CommandHistory> result = commandHistoryMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<CommandHistory> page = commandHistoryMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     /**

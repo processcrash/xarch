@@ -1,6 +1,8 @@
 package com.xarch.example.entity.ai;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,10 +11,10 @@ import java.time.LocalDateTime;
  * Command session - groups commands for a specific interaction
  */
 @Data
-@TableName("ai_command_session")
+@Table("ai_command_session")
 public class CommandSession implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    @Id(auto = true)
     private Long id;
 
     /** Session unique identifier */
@@ -42,13 +44,13 @@ public class CommandSession implements Serializable {
     /** Total duration in milliseconds */
     private Long totalDuration;
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(onInsertValue = "NOW()")
     private LocalDateTime createTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @Column(onUpdateValue = "NOW()")
     private LocalDateTime updateTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @Column(onUpdateValue = "NOW()")
     private LocalDateTime lastActivityTime;
 
     /** Delete flag */

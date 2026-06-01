@@ -1,11 +1,13 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.Menu;
 import com.xarch.example.mapper.MenuMapper;
 import com.xarch.starter.core.result.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -19,16 +21,14 @@ public class MenuService {
     private MenuMapper menuMapper;
 
     public PageResult<Menu> page(String menuName, int pageNum, int pageSize) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Menu>();
-        if (menuName != null && !menuName.isEmpty()) {
-            wrapper.like(Menu::getMenuName, menuName);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_menu").where("del_flag = 0");
+        if (StringUtils.hasText(menuName)) {
+            wrapper.and("menu_name LIKE ?", "%" + menuName + "%");
         }
-        wrapper.orderByAsc(Menu::getSortOrder);
+        wrapper.orderBy("sort_order", true);
 
-        Page<Menu> page = new Page<>(pageNum, pageSize);
-        Page<Menu> result = menuMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<Menu> page = menuMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public Menu getById(Long id) {
@@ -36,10 +36,10 @@ public class MenuService {
     }
 
     public List<Menu> list() {
-        return menuMapper.selectList(
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Menu>()
-                .orderByAsc(Menu::getSortOrder)
-        );
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_menu")
+                .where("del_flag = 0")
+                .orderBy("sort_order", true);
+        return menuMapper.selectListByQuery(wrapper);
     }
 
     public List<Menu> tree() {

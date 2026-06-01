@@ -1,7 +1,7 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.User;
 import com.xarch.example.mapper.UserMapper;
 import com.xarch.starter.core.result.PageResult;
@@ -24,19 +24,20 @@ public class UserService {
     private UserMapper userMapper;
 
     public PageResult<User> page(String username, String status, int pageNum, int pageSize) {
-        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        QueryWrapper wrapper = QueryWrapper.create()
+                .select()
+                .from("sys_user")
+                .where("del_flag = 0");
         if (StringUtils.hasText(username)) {
-            wrapper.like(User::getUsername, username);
+            wrapper.and("username LIKE ?", "%" + username + "%");
         }
         if (StringUtils.hasText(status)) {
-            wrapper.eq(User::getStatus, status);
+            wrapper.and("status = ?", status);
         }
-        wrapper.orderByDesc(User::getCreateTime);
+        wrapper.orderBy("create_time", false);
 
-        Page<User> page = new Page<>(pageNum, pageSize);
-        Page<User> result = userMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<User> page = userMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public User getById(Long id) {
@@ -69,7 +70,8 @@ public class UserService {
     }
 
     public List<User> list() {
-        return userMapper.selectList(null);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_user").where("del_flag = 0");
+        return userMapper.selectListByQuery(wrapper);
     }
 
     /**

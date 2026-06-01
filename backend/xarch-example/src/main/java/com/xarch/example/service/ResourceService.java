@@ -1,7 +1,6 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.Resource;
 import com.xarch.example.entity.StorageConfig;
 import com.xarch.example.mapper.ResourceMapper;
@@ -18,9 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -44,26 +40,22 @@ public class ResourceService {
      * Page query resources
      */
     public PageResult<Resource> page(String sceneCode, String storageType, String keyword, int pageNum, int pageSize) {
-        LambdaQueryWrapper<Resource> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Resource::getDelFlag, 0);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_resource")
+                .where("del_flag = 0");
 
         if (sceneCode != null && !sceneCode.isEmpty()) {
-            wrapper.like(Resource::getSceneCode, sceneCode);
+            wrapper.and("scene_code = ?", sceneCode);
         }
         if (storageType != null && !storageType.isEmpty()) {
-            wrapper.eq(Resource::getStorageType, storageType);
+            wrapper.and("storage_type = ?", storageType);
         }
         if (keyword != null && !keyword.isEmpty()) {
-            wrapper.and(w -> w.like(Resource::getResourceName, keyword)
-                    .or().like(Resource::getObjectKey, keyword));
+            wrapper.and("(resource_name LIKE ? OR object_key LIKE ?)", "%" + keyword + "%", "%" + keyword + "%");
         }
+        wrapper.orderBy("create_time", false);
 
-        wrapper.orderByDesc(Resource::getCreateTime);
-
-        Page<Resource> page = new Page<>(pageNum, pageSize);
-        Page<Resource> result = resourceMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        com.mybatisflex.core.paginate.Page<Resource> page = resourceMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     /**
@@ -77,10 +69,10 @@ public class ResourceService {
      * List all resources
      */
     public List<Resource> list() {
-        LambdaQueryWrapper<Resource> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Resource::getDelFlag, 0);
-        wrapper.orderByDesc(Resource::getCreateTime);
-        return resourceMapper.selectList(wrapper);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_resource")
+                .where("del_flag = 0")
+                .orderBy("create_time", false);
+        return resourceMapper.selectListByQuery(wrapper);
     }
 
     /**
@@ -88,10 +80,7 @@ public class ResourceService {
      */
     public Resource upload(String sceneCode, String bizKey, String storageTypeCode, MultipartFile file,
                            Long createUserId, String createUserName) throws IOException {
-        // Determine storage type
         StorageType storageType = StorageType.fromCode(storageTypeCode);
-
-        // Get storage strategy
         StorageConfig config = storageConfigService.getDefaultConfig(storageType);
         StorageStrategy strategy;
         String actualStorageType;
@@ -100,12 +89,10 @@ public class ResourceService {
             strategy = storageFactory.getStrategy(storageType);
             actualStorageType = storageTypeCode;
         } else {
-            // Fallback to local storage
             strategy = storageFactory.getStrategy(StorageType.LOCAL);
             actualStorageType = StorageType.LOCAL.getCode();
         }
 
-        // Generate object key
         String originalFilename = file.getOriginalFilename();
         String extension = "";
         if (originalFilename != null && originalFilename.contains(".")) {
@@ -113,14 +100,12 @@ public class ResourceService {
         }
         String objectKey = generateObjectKey(sceneCode, bizKey, extension);
 
-        // Upload to storage
         InputStream inputStream = file.getInputStream();
         long contentLength = file.getSize();
         String contentType = file.getContentType();
 
         String accessUrl = strategy.upload(objectKey, inputStream, contentLength, contentType);
 
-        // Create resource record
         Resource resource = new Resource();
         resource.setResourceName(originalFilename);
         resource.setObjectKey(objectKey);
@@ -161,12 +146,10 @@ public class ResourceService {
     public void delete(Long id) {
         Resource resource = resourceMapper.selectById(id);
         if (resource != null) {
-            // Soft delete
             resource.setDelFlag(1);
             resource.setUpdateTime(LocalDateTime.now());
             resourceMapper.updateById(resource);
 
-            // Also delete from storage
             StorageType storageType = StorageType.fromCode(resource.getStorageType());
             StorageStrategy strategy = storageFactory.getStrategy(storageType);
             try {
@@ -221,23 +204,19 @@ public class ResourceService {
     public StorageStats getStats() {
         StorageStats stats = new StorageStats();
 
-        // Count by storage type
-        LambdaQueryWrapper<Resource> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Resource::getDelFlag, 0);
+        QueryWrapper localWrapper = QueryWrapper.create().from("sys_resource")
+                .where("del_flag = 0 AND storage_type = ?", StorageType.LOCAL.getCode());
+        QueryWrapper minioWrapper = QueryWrapper.create().from("sys_resource")
+                .where("del_flag = 0 AND storage_type = ?", StorageType.MINIO.getCode());
+        QueryWrapper ossWrapper = QueryWrapper.create().from("sys_resource")
+                .where("del_flag = 0 AND storage_type = ?", StorageType.ALIYUN_OSS.getCode());
 
-        Long localCount = resourceMapper.selectCount(
-                new LambdaQueryWrapper<Resource>().eq(Resource::getStorageType, StorageType.LOCAL.getCode()));
-        Long minioCount = resourceMapper.selectCount(
-                new LambdaQueryWrapper<Resource>().eq(Resource::getStorageType, StorageType.MINIO.getCode()));
-        Long ossCount = resourceMapper.selectCount(
-                new LambdaQueryWrapper<Resource>().eq(Resource::getStorageType, StorageType.ALIYUN_OSS.getCode()));
+        stats.setLocalCount(resourceMapper.selectCountByQuery(localWrapper));
+        stats.setMinioCount(resourceMapper.selectCountByQuery(minioWrapper));
+        stats.setOssCount(resourceMapper.selectCountByQuery(ossWrapper));
 
-        stats.setLocalCount(localCount);
-        stats.setMinioCount(minioCount);
-        stats.setOssCount(ossCount);
-
-        // Total size
-        List<Resource> resources = resourceMapper.selectList(wrapper);
+        QueryWrapper allWrapper = QueryWrapper.create().from("sys_resource").where("del_flag = 0");
+        List<Resource> resources = resourceMapper.selectListByQuery(allWrapper);
         long totalSize = resources.stream().mapToLong(r -> r.getFileSize() != null ? r.getFileSize() : 0).sum();
         stats.setTotalSize(totalSize);
 
@@ -247,8 +226,7 @@ public class ResourceService {
     private String generateObjectKey(String sceneCode, String bizKey, String extension) {
         String datePath = java.time.LocalDate.now().toString().replace("-", "/");
         String uuid = UUID.randomUUID().toString().replace("-", "");
-        String key = (sceneCode != null ? sceneCode + "/" : "") + datePath + "/" + uuid + extension;
-        return key;
+        return (sceneCode != null ? sceneCode + "/" : "") + datePath + "/" + uuid + extension;
     }
 
     /**

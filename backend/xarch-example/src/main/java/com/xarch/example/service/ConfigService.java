@@ -1,11 +1,13 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.Config;
 import com.xarch.example.mapper.ConfigMapper;
 import com.xarch.starter.core.result.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Config service
@@ -17,16 +19,14 @@ public class ConfigService {
     private ConfigMapper configMapper;
 
     public PageResult<Config> page(String configKey, int pageNum, int pageSize) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Config>();
-        if (configKey != null && !configKey.isEmpty()) {
-            wrapper.like(Config::getConfigKey, configKey);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_config").where("del_flag = 0");
+        if (StringUtils.hasText(configKey)) {
+            wrapper.and("config_key LIKE ?", "%" + configKey + "%");
         }
-        wrapper.orderByDesc(Config::getCreateTime);
+        wrapper.orderBy("create_time", false);
 
-        Page<Config> page = new Page<>(pageNum, pageSize);
-        Page<Config> result = configMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<Config> page = configMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public Config getById(Long id) {
@@ -34,10 +34,10 @@ public class ConfigService {
     }
 
     public String getValue(String configKey) {
-        Config config = configMapper.selectList(
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Config>()
-                .eq(Config::getConfigKey, configKey)
-        ).stream().findFirst().orElse(null);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_config")
+                .where("config_key = ?", configKey)
+                .limit(1);
+        Config config = configMapper.selectOneByQuery(wrapper);
         return config != null ? config.getConfigValue() : null;
     }
 

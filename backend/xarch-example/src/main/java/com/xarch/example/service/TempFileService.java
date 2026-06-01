@@ -1,11 +1,13 @@
 package com.xarch.example.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.TempFile;
 import com.xarch.example.mapper.TempFileMapper;
 import com.xarch.starter.core.result.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -26,16 +28,14 @@ public class TempFileService {
     private static final String UPLOAD_DIR = "/tmp/xarch-temp-files/";
 
     public PageResult<TempFile> page(String fileName, int pageNum, int pageSize) {
-        var wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<TempFile>();
-        if (fileName != null && !fileName.isEmpty()) {
-            wrapper.like(TempFile::getFileName, fileName);
+        QueryWrapper wrapper = QueryWrapper.create().from("sys_temp_file").where("del_flag = 0");
+        if (StringUtils.hasText(fileName)) {
+            wrapper.and("file_name LIKE ?", "%" + fileName + "%");
         }
-        wrapper.orderByDesc(TempFile::getCreateTime);
+        wrapper.orderBy("create_time", false);
 
-        Page<TempFile> page = new Page<>(pageNum, pageSize);
-        Page<TempFile> result = tempFileMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<TempFile> page = tempFileMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     public TempFile getById(Long id) {

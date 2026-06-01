@@ -1,10 +1,9 @@
 package com.xarch.example.service.ai;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.ai.CommandAudit;
-import com.xarch.example.entity.ai.Server;
 import com.xarch.example.mapper.ai.CommandAuditMapper;
 import com.xarch.starter.core.result.PageResult;
 import lombok.Data;
@@ -49,16 +48,13 @@ public class CommandAuditService {
         audit.setUserAgent(context.getUserAgent());
         audit.setStatus(context.getStatus());
         audit.setDelFlag(0);
-        audit.setCreateTime(LocalDateTime.now());
 
-        // Risk assessment
         AiAgentService.SafetyValidation validation = aiAgentService.validateCommand(context.getCommand());
         audit.setRiskLevel(mapSafetyToRiskLevel(validation.getLevel()));
-        audit.setApprovalStatus(0); // Pending by default for high-risk commands
+        audit.setApprovalStatus(0);
 
-        // Auto-approve low-risk commands
         if (audit.getRiskLevel() <= 1) {
-            audit.setApprovalStatus(1); // Approved
+            audit.setApprovalStatus(1);
         }
 
         auditMapper.insert(audit);
@@ -74,7 +70,7 @@ public class CommandAuditService {
     public void requestApproval(Long auditId, String reason) {
         CommandAudit audit = auditMapper.selectById(auditId);
         if (audit != null) {
-            audit.setApprovalStatus(0); // Pending
+            audit.setApprovalStatus(0);
             audit.setApprovalComment(reason);
             auditMapper.updateById(audit);
             log.info("Approval requested for audit: {}", auditId);
@@ -88,7 +84,7 @@ public class CommandAuditService {
         CommandAudit audit = auditMapper.selectById(auditId);
         if (audit == null) return false;
 
-        audit.setApprovalStatus(1); // Approved
+        audit.setApprovalStatus(1);
         audit.setApprovedBy(StpUtil.getLoginIdAsLong());
         audit.setApprovedByName(StpUtil.getLoginIdAsString());
         audit.setApprovedTime(LocalDateTime.now());
@@ -106,7 +102,7 @@ public class CommandAuditService {
         CommandAudit audit = auditMapper.selectById(auditId);
         if (audit == null) return false;
 
-        audit.setApprovalStatus(2); // Rejected
+        audit.setApprovalStatus(2);
         audit.setApprovedBy(StpUtil.getLoginIdAsLong());
         audit.setApprovedByName(StpUtil.getLoginIdAsString());
         audit.setApprovedTime(LocalDateTime.now());
@@ -121,49 +117,42 @@ public class CommandAuditService {
      * Get pending approvals
      */
     public PageResult<CommandAudit> getPendingApprovals(int pageNum, int pageSize) {
-        LambdaQueryWrapper<CommandAudit> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(CommandAudit::getApprovalStatus, 0)
-               .eq(CommandAudit::getDelFlag, 0)
-               .orderByDesc(CommandAudit::getCreateTime);
+        QueryWrapper wrapper = QueryWrapper.create().from("ai_command_audit")
+                .where("approval_status = 0 AND del_flag = 0")
+                .orderBy("create_time", false);
 
-        Page<CommandAudit> page = new Page<>(pageNum, pageSize);
-        Page<CommandAudit> result = auditMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<CommandAudit> page = auditMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     /**
      * Get audit logs with filters
      */
     public PageResult<CommandAudit> getAuditLogs(AuditQueryParams params) {
-        LambdaQueryWrapper<CommandAudit> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(CommandAudit::getDelFlag, 0);
+        QueryWrapper wrapper = QueryWrapper.create().from("ai_command_audit").where("del_flag = 0");
 
         if (params.getServerId() != null) {
-            wrapper.eq(CommandAudit::getServerId, params.getServerId());
+            wrapper.and("server_id = ?", params.getServerId());
         }
         if (params.getUserId() != null) {
-            wrapper.eq(CommandAudit::getUserId, params.getUserId());
+            wrapper.and("user_id = ?", params.getUserId());
         }
         if (params.getRiskLevel() != null) {
-            wrapper.eq(CommandAudit::getRiskLevel, params.getRiskLevel());
+            wrapper.and("risk_level = ?", params.getRiskLevel());
         }
         if (params.getApprovalStatus() != null) {
-            wrapper.eq(CommandAudit::getApprovalStatus, params.getApprovalStatus());
+            wrapper.and("approval_status = ?", params.getApprovalStatus());
         }
         if (params.getStartTime() != null) {
-            wrapper.ge(CommandAudit::getCreateTime, params.getStartTime());
+            wrapper.and("create_time >= ?", params.getStartTime());
         }
         if (params.getEndTime() != null) {
-            wrapper.le(CommandAudit::getCreateTime, params.getEndTime());
+            wrapper.and("create_time <= ?", params.getEndTime());
         }
+        wrapper.orderBy("create_time", false);
 
-        wrapper.orderByDesc(CommandAudit::getCreateTime);
-
-        Page<CommandAudit> page = new Page<>(params.getPageNum(), params.getPageSize());
-        Page<CommandAudit> result = auditMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<CommandAudit> page = auditMapper.paginate(params.getPageNum(), params.getPageSize(), wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     /**
@@ -177,27 +166,23 @@ public class CommandAuditService {
      * Get user's command history
      */
     public PageResult<CommandAudit> getUserHistory(Long userId, int pageNum, int pageSize) {
-        LambdaQueryWrapper<CommandAudit> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(CommandAudit::getUserId, userId)
-               .eq(CommandAudit::getDelFlag, 0)
-               .orderByDesc(CommandAudit::getCreateTime);
+        QueryWrapper wrapper = QueryWrapper.create().from("ai_command_audit")
+                .where("user_id = ? AND del_flag = 0", userId)
+                .orderBy("create_time", false);
 
-        Page<CommandAudit> page = new Page<>(pageNum, pageSize);
-        Page<CommandAudit> result = auditMapper.selectPage(page, wrapper);
-
-        return PageResult.of(result.getRecords(), result.getTotal());
+        Page<CommandAudit> page = auditMapper.paginate(pageNum, pageSize, wrapper);
+        return PageResult.of(page.getRecords(), page.getTotalRow());
     }
 
     /**
      * Get compliance statistics
      */
     public ComplianceStats getComplianceStats(LocalDateTime start, LocalDateTime end) {
-        LambdaQueryWrapper<CommandAudit> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(CommandAudit::getDelFlag, 0);
-        if (start != null) wrapper.ge(CommandAudit::getCreateTime, start);
-        if (end != null) wrapper.le(CommandAudit::getCreateTime, end);
+        QueryWrapper wrapper = QueryWrapper.create().from("ai_command_audit").where("del_flag = 0");
+        if (start != null) wrapper.and("create_time >= ?", start);
+        if (end != null) wrapper.and("create_time <= ?", end);
 
-        List<CommandAudit> audits = auditMapper.selectList(wrapper);
+        List<CommandAudit> audits = auditMapper.selectListByQuery(wrapper);
 
         ComplianceStats stats = new ComplianceStats();
         stats.setTotalCommands(audits.size());
@@ -224,9 +209,6 @@ public class CommandAuditService {
         };
     }
 
-    /**
-     * Command execution context
-     */
     @Data
     public static class CommandExecutionContext {
         private Long serverId;
@@ -243,9 +225,6 @@ public class CommandAuditService {
         private Integer status;
     }
 
-    /**
-     * Audit query params
-     */
     @Data
     public static class AuditQueryParams {
         private Long serverId;
@@ -258,9 +237,6 @@ public class CommandAuditService {
         private int pageSize = 20;
     }
 
-    /**
-     * Compliance statistics
-     */
     @Data
     public static class ComplianceStats {
         private int totalCommands;
