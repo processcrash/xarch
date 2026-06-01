@@ -120,14 +120,23 @@ public interface UserMapper extends BaseMapper<User> {
 
 ```java
 @Data
-@TableName("sys_user")
-public class User extends BaseEntity {
+@Table("sys_user")
+public class User {
+
+    @Id(auto = true)
+    private Long id;
 
     private String username;
     private String password;
     private String email;
     private String phone;
     private Integer status;
+
+    @Column(onInsertValue = "NOW()")
+    private LocalDateTime createTime;
+
+    @Column(onUpdateValue = "NOW()")
+    private LocalDateTime updateTime;
 }
 ```
 

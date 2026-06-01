@@ -247,14 +247,17 @@ public interface XxxMapper extends BaseMapper<Xxx> {
 ```java
 // src/main/java/com/xarch/example/entity/Xxx.java
 @Data
-@TableName("sys_xxx")
-public class Xxx extends BaseEntity {
+@Table("sys_xxx")
+public class Xxx {
+    @Id(auto = true)
+    private Long id;
+
     private String name;
     private Integer status;
 }
 ```
 
-### Adding CRUD API with MyBatis Plus
+### Adding CRUD API with MyBatisFlex
 
 ```java
 @RestController
