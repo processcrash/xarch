@@ -1,15 +1,21 @@
 {
   "name": "@xarch/knowledge-mcp",
   "version": "1.0.0",
-  "description": "xarch Knowledge Base MCP Server with RAG support",
+  "description": "xarch Knowledge Base MCP Server with RAG support (Node.js / Bun)",
   "main": "dist/index.js",
   "type": "module",
+  "bin": {
+    "xarch-knowledge-mcp": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsx watch src/index.ts"
+    "start:bun": "bun run dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "dev:bun": "bun --watch run src/index.ts",
+    "dev:node": "node --watch --loader tsx src/index.ts"
   },
-  "keywords": ["mcp", "knowledge-base", "rag", "vector-search", "embedding"],
+  "keywords": ["mcp", "knowledge-base", "rag", "vector-search", "embedding", "bun"],
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
@@ -17,9 +23,14 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/bun": "^1.1.0",
     "@types/node": "^20.10.0",
     "@types/uuid": "^9.0.0",
     "typescript": "^5.3.0",
     "tsx": "^4.7.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "bun": ">=1.0.0"
   }
 }
