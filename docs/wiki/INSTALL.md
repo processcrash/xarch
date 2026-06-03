@@ -123,7 +123,7 @@ CREATE DATABASE xarch;
 \q
 
 # 执行初始化脚本
-psql -U postgres -d xarch -f init-postgresql.sql
+psql -U postgres -d xarch -f docs/db/init-postgresql.sql
 ```
 
 ### 3. 构建后端

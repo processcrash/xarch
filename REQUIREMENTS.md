@@ -83,7 +83,10 @@ xarch/
 ├── vue3-admin/                                 # Vue 3 前端
 ├── k8s/                                         # Kubernetes 部署配置
 ├── docker-compose.yml                          # Docker 编排
-└── init-postgresql.sql                         # PostgreSQL 初始化脚本
+└── docs/
+    └── db/
+        ├── init-mysql.sql                         # MySQL 初始化脚本
+        └── init-postgresql.sql                    # PostgreSQL 初始化脚本
 ```
 
 ---

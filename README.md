@@ -105,8 +105,10 @@ xarch/
 │   └── specs/                         # 设计文档
 │
 ├── docker-compose.yml                 # Docker 编排
-├── init.sql                           # MySQL 初始化脚本
-└── init-postgresql.sql                # PostgreSQL 初始化脚本
+└── docs/
+    └── db/
+        ├── init-mysql.sql                # MySQL 初始化脚本
+        └── init-postgresql.sql            # PostgreSQL 初始化脚本
 ```
 
 ---

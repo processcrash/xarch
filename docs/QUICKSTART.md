@@ -58,7 +58,7 @@ docker run -d --name xarch-redis \
   redis:7-alpine
 
 # Import schema
-mysql -h localhost -u root -proot123 xarch < init.sql
+mysql -h localhost -u root -proot123 xarch < docs/db/init-mysql.sql
 ```
 
 ### 2. Build Backend
