@@ -36,13 +36,18 @@ public class AliyunOssStorageStrategy implements StorageStrategy {
                     config.getSecretKey()
             );
 
+            com.aliyun.oss.model.ObjectMetadata metadata = new com.aliyun.oss.model.ObjectMetadata();
+            metadata.setContentLength(contentLength > 0 ? contentLength : -1);
+            if (contentType != null) {
+                metadata.setContentType(contentType);
+            }
+
             PutObjectRequest request = new PutObjectRequest(
                     config.getBucketName(),
                     objectKey,
                     inputStream,
-                    contentLength > 0 ? contentLength : -1
+                    metadata
             );
-            request.setContentType(contentType);
 
             ossClient.putObject(request);
 

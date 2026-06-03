@@ -117,7 +117,7 @@ public class ServerManageController {
 
     @PostMapping("/command")
     @Operation(summary = "Execute command on server")
-    public ApiResult<CommandHistory> executeCommand(@RequestBody CommandRequest request) {
+    public ApiResult<CommandHistory> executeCommand(@RequestBody ServerManageService.CommandRequest request) {
         try {
             CommandHistory history = serverManageService.executeCommand(request);
             return ApiResult.success(history);

@@ -23,9 +23,9 @@ public class SysNoticeController {
      * 查询公告列表
      */
     @GetMapping("/list")
-    public PageResult<List<SysNotice>> list(SysNotice notice) {
+    public PageResult<SysNotice> list(SysNotice notice) {
         List<SysNotice> list = noticeService.selectNoticeList(notice);
-        return PageResult.ok(list);
+        return PageResult.of(list, list.size());
     }
 
     /**
@@ -33,7 +33,7 @@ public class SysNoticeController {
      */
     @GetMapping(value = "/{noticeId}")
     public ApiResult<SysNotice> getInfo(@PathVariable("noticeId") Long noticeId) {
-        return ApiResult.success(noticeService.selectNoticeById(noticeId));
+        return ApiResult.ok(noticeService.selectNoticeById(noticeId));
     }
 
     /**
@@ -41,7 +41,8 @@ public class SysNoticeController {
      */
     @PostMapping
     public ApiResult<Void> add(@RequestBody SysNotice notice) {
-        return ApiResult.success(noticeService.insertNotice(notice) > 0);
+        noticeService.insertNotice(notice);
+        return ApiResult.ok();
     }
 
     /**
@@ -49,7 +50,8 @@ public class SysNoticeController {
      */
     @PutMapping
     public ApiResult<Void> edit(@RequestBody SysNotice notice) {
-        return ApiResult.success(noticeService.updateNotice(notice) > 0);
+        noticeService.updateNotice(notice);
+        return ApiResult.ok();
     }
 
     /**
@@ -57,6 +59,7 @@ public class SysNoticeController {
      */
     @DeleteMapping("/{noticeIds}")
     public ApiResult<Void> remove(@PathVariable Long[] noticeIds) {
-        return ApiResult.success(noticeService.deleteNoticeByIds(noticeIds) > 0);
+        noticeService.deleteNoticeByIds(noticeIds);
+        return ApiResult.ok();
     }
 }

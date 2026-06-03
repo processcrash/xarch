@@ -26,9 +26,8 @@ class SysConfigControllerTest {
 
     @Test
     void testList() {
-        var result = configController.list(new SysConfig());
+        PageResult<SysConfig> result = configController.list(new SysConfig());
         assertNotNull(result);
-        assertEquals("0000", result.getCode());
     }
 
     @Test

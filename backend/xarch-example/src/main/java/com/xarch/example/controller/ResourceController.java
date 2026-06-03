@@ -29,9 +29,11 @@ public class ResourceController {
     @XarchLog(value = "Query resource list", type = "QUERY")
     public ApiResult<PageResult<Resource>> page(
             @RequestParam(required = false) String sceneCode,
+            @RequestParam(required = false) String storageType,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
-        return ApiResult.ok(resourceService.page(sceneCode, pageNum, pageSize));
+        return ApiResult.ok(resourceService.page(sceneCode, storageType, keyword, pageNum, pageSize));
     }
 
     @GetMapping("/{id}")
@@ -43,13 +45,12 @@ public class ResourceController {
     @Debounce
     @XarchLog(value = "Upload resource", type = "CREATE")
     public ApiResult<Map<String, Object>> upload(
-            @RequestParam String sceneCode,
+            @RequestParam(required = false) String sceneCode,
             @RequestParam(required = false) String bizKey,
-            @RequestParam(required = false) String pathSegments,
+            @RequestParam(required = false) String storageType,
             @RequestPart MultipartFile file) throws IOException {
 
-        String[] segments = pathSegments != null && !pathSegments.isBlank() ? pathSegments.split(",") : new String[0];
-        Resource resource = resourceService.upload(sceneCode, bizKey, file, segments);
+        Resource resource = resourceService.upload(sceneCode, bizKey, storageType, file, null, null);
 
         Map<String, Object> result = new HashMap<>();
         result.put("objectKey", resource.getObjectKey());
@@ -65,15 +66,13 @@ public class ResourceController {
     @Debounce
     @XarchLog(value = "Batch upload resources", type = "CREATE")
     public ApiResult<List<Map<String, Object>>> batchUpload(
-            @RequestParam String sceneCode,
-            @RequestParam(required = false) String pathSegments,
+            @RequestParam(required = false) String sceneCode,
+            @RequestParam(required = false) String storageType,
             @RequestPart List<MultipartFile> files) throws IOException {
 
-        String[] segments = pathSegments != null && !pathSegments.isBlank() ? pathSegments.split(",") : new String[0];
         List<Map<String, Object>> results = new java.util.ArrayList<>();
-
         for (MultipartFile file : files) {
-            Resource resource = resourceService.upload(sceneCode, null, file, segments);
+            Resource resource = resourceService.upload(sceneCode, null, storageType, file, null, null);
             Map<String, Object> item = new HashMap<>();
             item.put("objectKey", resource.getObjectKey());
             item.put("accessUrl", resource.getAccessUrl());
@@ -84,21 +83,6 @@ public class ResourceController {
         }
 
         return ApiResult.ok(results);
-    }
-
-    @PostMapping
-    @XarchLog(value = "Create resource", type = "CREATE")
-    public ApiResult<Void> create(@RequestBody Resource resource) {
-        resourceService.create(resource);
-        return ApiResult.ok();
-    }
-
-    @PutMapping("/{id}")
-    @XarchLog(value = "Update resource", type = "UPDATE")
-    public ApiResult<Void> update(@PathVariable Long id, @RequestBody Resource resource) {
-        resource.setId(id);
-        resourceService.update(resource);
-        return ApiResult.ok();
     }
 
     @DeleteMapping("/{id}")

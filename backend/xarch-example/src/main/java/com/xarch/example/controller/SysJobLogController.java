@@ -23,9 +23,9 @@ public class SysJobLogController {
      * 查询定时任务日志列表
      */
     @GetMapping("/list")
-    public PageResult<List<SysJobLog>> list(SysJobLog jobLog) {
+    public PageResult<SysJobLog> list(SysJobLog jobLog) {
         List<SysJobLog> list = jobLogService.selectJobLogList(jobLog);
-        return PageResult.ok(list);
+        return PageResult.of(list, list.size());
     }
 
     /**
@@ -33,7 +33,7 @@ public class SysJobLogController {
      */
     @GetMapping(value = "/{jobLogId}")
     public ApiResult<SysJobLog> getInfo(@PathVariable("jobLogId") Long jobLogId) {
-        return ApiResult.success(jobLogService.selectJobLogById(jobLogId));
+        return ApiResult.ok(jobLogService.selectJobLogById(jobLogId));
     }
 
     /**
@@ -41,7 +41,8 @@ public class SysJobLogController {
      */
     @DeleteMapping("/{jobLogIds}")
     public ApiResult<Void> remove(@PathVariable Long[] jobLogIds) {
-        return ApiResult.success(jobLogService.deleteJobLogByIds(jobLogIds) > 0);
+        jobLogService.deleteJobLogByIds(jobLogIds);
+        return ApiResult.ok();
     }
 
     /**
@@ -50,6 +51,6 @@ public class SysJobLogController {
     @DeleteMapping("/clean")
     public ApiResult<Void> clean() {
         jobLogService.cleanJobLog();
-        return ApiResult.success(true);
+        return ApiResult.ok();
     }
 }

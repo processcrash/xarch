@@ -110,8 +110,8 @@ public class LlmAiAgentService {
         }
 
         // Fallback: return the input as-is if it looks like a command
-        if (isLikelyShellCommand(naturalLanguage)) {
-            return new AiCommandResult(naturalLanguage, "manual", 0.5, SafetyLevel.WARNING);
+        if (isLikelyShellCommand(lowerInput)) {
+            return new AiCommandResult(lowerInput, "manual", 0.5, SafetyLevel.WARNING);
         }
 
         // Cannot generate

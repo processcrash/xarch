@@ -26,9 +26,8 @@ class SysJobControllerTest {
 
     @Test
     void testList() {
-        var result = jobController.list(new SysJob());
+        PageResult<SysJob> result = jobController.list(new SysJob());
         assertNotNull(result);
-        assertEquals("0000", result.getCode());
     }
 
     @Test

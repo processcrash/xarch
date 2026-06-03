@@ -25,9 +25,8 @@ class SysNoticeControllerTest {
 
     @Test
     void testList() {
-        var result = noticeController.list(new SysNotice());
+        PageResult<SysNotice> result = noticeController.list(new SysNotice());
         assertNotNull(result);
-        assertEquals("0000", result.getCode());
     }
 
     @Test

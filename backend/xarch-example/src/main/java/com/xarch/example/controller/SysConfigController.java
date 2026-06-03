@@ -23,9 +23,9 @@ public class SysConfigController {
      * 查询参数配置列表
      */
     @GetMapping("/list")
-    public PageResult<List<SysConfig>> list(SysConfig config) {
+    public PageResult<SysConfig> list(SysConfig config) {
         List<SysConfig> list = configService.selectConfigList(config);
-        return PageResult.ok(list);
+        return PageResult.of(list, list.size());
     }
 
     /**
@@ -33,7 +33,7 @@ public class SysConfigController {
      */
     @GetMapping(value = "/{configId}")
     public ApiResult<SysConfig> getInfo(@PathVariable("configId") Long configId) {
-        return ApiResult.success(configService.selectConfigById(configId));
+        return ApiResult.ok(configService.selectConfigById(configId));
     }
 
     /**
@@ -41,7 +41,7 @@ public class SysConfigController {
      */
     @GetMapping(value = "/key/{configKey}")
     public ApiResult<String> getConfigKey(@PathVariable("configKey") String configKey) {
-        return ApiResult.success(configService.selectConfigByKey(configKey));
+        return ApiResult.ok(configService.selectConfigByKey(configKey));
     }
 
     /**
@@ -49,7 +49,8 @@ public class SysConfigController {
      */
     @PostMapping
     public ApiResult<Void> add(@RequestBody SysConfig config) {
-        return ApiResult.success(configService.insertConfig(config) > 0);
+        configService.insertConfig(config);
+        return ApiResult.ok();
     }
 
     /**
@@ -57,7 +58,8 @@ public class SysConfigController {
      */
     @PutMapping
     public ApiResult<Void> edit(@RequestBody SysConfig config) {
-        return ApiResult.success(configService.updateConfig(config) > 0);
+        configService.updateConfig(config);
+        return ApiResult.ok();
     }
 
     /**
@@ -66,7 +68,7 @@ public class SysConfigController {
     @DeleteMapping("/{configIds}")
     public ApiResult<Void> remove(@PathVariable Long[] configIds) {
         configService.deleteConfigByIds(configIds);
-        return ApiResult.success(true);
+        return ApiResult.ok();
     }
 
     /**
@@ -75,6 +77,6 @@ public class SysConfigController {
     @DeleteMapping("/refresh")
     public ApiResult<Void> refresh() {
         configService.resetConfigCache();
-        return ApiResult.success(true);
+        return ApiResult.ok();
     }
 }

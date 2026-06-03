@@ -32,7 +32,7 @@ public class SysUserOnlineController {
      * 查询在线用户列表
      */
     @GetMapping("/list")
-    public PageResult<List<SysUserOnline>> list(String ipaddr, String userName) {
+    public PageResult<SysUserOnline> list(String ipaddr, String userName) {
         Collection<String> keys = redisTemplate.keys(LOGIN_TOKEN_KEY + "*");
         List<SysUserOnline> userOnlineList = new ArrayList<>();
         for (String key : keys) {

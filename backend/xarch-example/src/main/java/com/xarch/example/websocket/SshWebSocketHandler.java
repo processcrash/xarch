@@ -82,15 +82,15 @@ public class SshWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        var server = serverMapper.selectById(serverId);
+        final var server = serverMapper.selectById(serverId);
         if (server == null) {
             session.sendMessage(new TextMessage("{\"type\":\"error\",\"message\":\"Server not found\"}"));
             return;
         }
 
         try {
-            SshService.Session sshSession = SshService.createSession(server);
-            SshSessionHandler handler = new SshSessionHandler(session, sshSession);
+            Session sshSession = SshService.createSession(server);
+            SshSessionHandler handler = new SshSessionHandler(session, sshSession, server);
             sessionHandlers.put(session.getId(), handler);
 
             session.sendMessage(new TextMessage("{\"type\":\"session_created\",\"serverId\":" + serverId + ",\"serverName\":\"" + server.getName() + "\"}"));
@@ -235,11 +235,13 @@ public class SshWebSocketHandler extends TextWebSocketHandler {
     private static class SshSessionHandler {
         private final WebSocketSession session;
         private final Session sshSession;
+        private final com.xarch.example.entity.ai.Server server;
         private boolean executing = false;
 
-        public SshSessionHandler(WebSocketSession session, Session sshSession) {
+        public SshSessionHandler(WebSocketSession session, Session sshSession, com.xarch.example.entity.ai.Server server) {
             this.session = session;
             this.sshSession = sshSession;
+            this.server = server;
         }
 
         public synchronized void executeCommand(String command, CommandCallback callback) {
@@ -255,7 +257,8 @@ public class SshWebSocketHandler extends TextWebSocketHandler {
             executing = true;
             new Thread(() -> {
                 try {
-                    SshService.CommandResult result = sshSession.executeCommand(command);
+                    com.xarch.example.service.ai.SshService.CommandResult result =
+                        com.xarch.example.service.ai.SshService.executeCommandOnSession(server, command);
                     callback.onResult(result);
                 } catch (Exception e) {
                     try {

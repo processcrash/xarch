@@ -25,7 +25,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     public List<UserExcel> exportUsers() {
-        List<User> users = userMapper.selectList(null);
+        List<User> users = userMapper.selectList();
         return users.stream()
                 .map(this::convertToExcel)
                 .collect(Collectors.toList());

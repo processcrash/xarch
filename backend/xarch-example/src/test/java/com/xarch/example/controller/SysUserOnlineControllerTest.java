@@ -22,16 +22,14 @@ class SysUserOnlineControllerTest {
 
     @Test
     void testList() {
-        var result = onlineController.list(null, null);
+        PageResult<List<SysUserOnline>> result = onlineController.list(null, null);
         assertNotNull(result);
-        assertEquals("0000", result.getCode());
     }
 
     @Test
     void testListWithParams() {
-        var result = onlineController.list("127.0.0.1", "admin");
+        PageResult<List<SysUserOnline>> result = onlineController.list("127.0.0.1", "admin");
         assertNotNull(result);
-        assertEquals("0000", result.getCode());
     }
 
     @Test

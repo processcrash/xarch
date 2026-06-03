@@ -23,9 +23,9 @@ public class SysJobController {
      * 查询定时任务列表
      */
     @GetMapping("/list")
-    public PageResult<List<SysJob>> list(SysJob job) {
+    public PageResult<SysJob> list(SysJob job) {
         List<SysJob> list = jobService.selectJobList(job);
-        return PageResult.ok(list);
+        return PageResult.of(list, list.size());
     }
 
     /**
@@ -33,7 +33,7 @@ public class SysJobController {
      */
     @GetMapping(value = "/{jobId}")
     public ApiResult<SysJob> getInfo(@PathVariable("jobId") Long jobId) {
-        return ApiResult.success(jobService.selectJobById(jobId));
+        return ApiResult.ok(jobService.selectJobById(jobId));
     }
 
     /**
@@ -41,7 +41,8 @@ public class SysJobController {
      */
     @PostMapping
     public ApiResult<Void> add(@RequestBody SysJob job) {
-        return ApiResult.success(jobService.insertJob(job) > 0);
+        jobService.insertJob(job);
+        return ApiResult.ok();
     }
 
     /**
@@ -49,7 +50,8 @@ public class SysJobController {
      */
     @PutMapping
     public ApiResult<Void> edit(@RequestBody SysJob job) {
-        return ApiResult.success(jobService.updateJob(job) > 0);
+        jobService.updateJob(job);
+        return ApiResult.ok();
     }
 
     /**
@@ -57,7 +59,8 @@ public class SysJobController {
      */
     @PutMapping("/changeStatus")
     public ApiResult<Void> changeStatus(@RequestBody SysJob job) {
-        return ApiResult.success(jobService.changeStatus(job) > 0);
+        jobService.changeStatus(job);
+        return ApiResult.ok();
     }
 
     /**
@@ -65,7 +68,8 @@ public class SysJobController {
      */
     @PutMapping("/run")
     public ApiResult<Void> run(@RequestBody SysJob job) {
-        return ApiResult.success(jobService.run(job));
+        jobService.run(job);
+        return ApiResult.ok();
     }
 
     /**
@@ -74,6 +78,6 @@ public class SysJobController {
     @DeleteMapping("/{jobIds}")
     public ApiResult<Void> remove(@PathVariable Long[] jobIds) {
         jobService.deleteJobByIds(jobIds);
-        return ApiResult.success(true);
+        return ApiResult.ok();
     }
 }

@@ -23,9 +23,9 @@ public class SysPostController {
      * 查询岗位列表
      */
     @GetMapping("/list")
-    public PageResult<List<SysPost>> list(SysPost post) {
+    public PageResult<SysPost> list(SysPost post) {
         List<SysPost> list = postService.selectPostList(post);
-        return PageResult.ok(list);
+        return PageResult.of(list, list.size());
     }
 
     /**
@@ -33,7 +33,7 @@ public class SysPostController {
      */
     @GetMapping("/all")
     public ApiResult<List<SysPost>> all() {
-        return ApiResult.success(postService.selectPostAll());
+        return ApiResult.ok(postService.selectPostAll());
     }
 
     /**
@@ -41,7 +41,7 @@ public class SysPostController {
      */
     @GetMapping(value = "/{postId}")
     public ApiResult<SysPost> getInfo(@PathVariable("postId") Long postId) {
-        return ApiResult.success(postService.selectPostById(postId));
+        return ApiResult.ok(postService.selectPostById(postId));
     }
 
     /**
@@ -49,7 +49,8 @@ public class SysPostController {
      */
     @PostMapping
     public ApiResult<Void> add(@RequestBody SysPost post) {
-        return ApiResult.success(postService.insertPost(post) > 0);
+        postService.insertPost(post);
+        return ApiResult.ok();
     }
 
     /**
@@ -57,7 +58,8 @@ public class SysPostController {
      */
     @PutMapping
     public ApiResult<Void> edit(@RequestBody SysPost post) {
-        return ApiResult.success(postService.updatePost(post) > 0);
+        postService.updatePost(post);
+        return ApiResult.ok();
     }
 
     /**
@@ -65,6 +67,7 @@ public class SysPostController {
      */
     @DeleteMapping("/{postIds}")
     public ApiResult<Void> remove(@PathVariable Long[] postIds) {
-        return ApiResult.success(postService.deletePostByIds(postIds) > 0);
+        postService.deletePostByIds(postIds);
+        return ApiResult.ok();
     }
 }

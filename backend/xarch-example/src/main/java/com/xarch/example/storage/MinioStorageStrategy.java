@@ -64,11 +64,16 @@ public class MinioStorageStrategy implements StorageStrategy {
                     .credentials(config.getAccessKey(), config.getSecretKey())
                     .build();
 
-            client.getObject(GetObjectArgs.builder()
+            try (var stream = client.getObject(GetObjectArgs.builder()
                     .bucket(config.getBucketName())
                     .object(objectKey)
-                    .stream(outputStream)
-                    .build());
+                    .build())) {
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = stream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, read);
+                }
+            }
             return true;
         } catch (Exception e) {
             throw new RuntimeException("Failed to download from MinIO", e);

@@ -66,10 +66,10 @@ public class WebSocketSessionManager {
     /**
      * Execute command in session
      */
-    public SshSession.CommandResult executeCommand(String sessionId, String command) {
+    public SshService.CommandResult executeCommand(String sessionId, String command) {
         SshSession session = sessions.get(sessionId);
         if (session == null) {
-            return new SshSession.CommandResult(-1, "Session not found", 0);
+            return new SshService.CommandResult(-1, "Session not found", 0);
         }
         return session.executeCommand(command);
     }
@@ -106,12 +106,12 @@ public class WebSocketSessionManager {
             this.sshSession = SshService.createSession(server);
         }
 
-        public CommandResult executeCommand(String command) {
+        public SshService.CommandResult executeCommand(String command) {
             try {
                 return SshService.executeCommandOnSession(server, command);
             } catch (Exception e) {
                 connected = false;
-                return new CommandResult(-1, "SSH Error: " + e.getMessage(), 0);
+                return new SshService.CommandResult(-1, "SSH Error: " + e.getMessage(), 0);
             }
         }
 

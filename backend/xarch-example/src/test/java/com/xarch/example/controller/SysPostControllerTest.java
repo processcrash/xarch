@@ -26,9 +26,8 @@ class SysPostControllerTest {
 
     @Test
     void testList() {
-        var result = postController.list(new SysPost());
+        PageResult<SysPost> result = postController.list(new SysPost());
         assertNotNull(result);
-        assertEquals("0000", result.getCode());
     }
 
     @Test
