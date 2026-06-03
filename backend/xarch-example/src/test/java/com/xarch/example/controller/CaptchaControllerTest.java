@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * CaptchaController unit tests
  */
 @SpringBootTest
-class CaptchaControllerTest {
+public class CaptchaControllerTest {
 
     @Autowired
     private CaptchaController captchaController;

@@ -1,6 +1,7 @@
 package com.xarch.example.controller;
 
 import com.xarch.starter.core.result.ApiResult;
+import com.xarch.starter.core.result.PageResult;
 import com.xarch.example.entity.SysNotice;
 import com.xarch.example.service.ISysNoticeService;
 import org.junit.jupiter.api.Test;

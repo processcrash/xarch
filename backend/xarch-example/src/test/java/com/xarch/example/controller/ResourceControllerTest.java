@@ -21,7 +21,7 @@ class ResourceControllerTest {
 
     @Test
     void testPage() {
-        var result = resourceController.page(null, 1, 10);
+        var result = resourceController.page(null, null, null, 1, 10);
         assertNotNull(result);
         assertEquals("0000", result.getCode());
     }

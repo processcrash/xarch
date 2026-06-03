@@ -23,10 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@Testcontainers(disabledTests = {
-    "testServerConnection",  // Requires actual SSH server
-    "testCommandExecution"      // Requires actual SSH server
-})
+@Testcontainers
 class ServerManageIntegrationTest {
 
     @Container

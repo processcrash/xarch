@@ -22,13 +22,13 @@ class SysUserOnlineControllerTest {
 
     @Test
     void testList() {
-        PageResult<List<SysUserOnline>> result = onlineController.list(null, null);
+        PageResult<SysUserOnline> result = onlineController.list(null, null);
         assertNotNull(result);
     }
 
     @Test
     void testListWithParams() {
-        PageResult<List<SysUserOnline>> result = onlineController.list("127.0.0.1", "admin");
+        PageResult<SysUserOnline> result = onlineController.list("127.0.0.1", "admin");
         assertNotNull(result);
     }
 

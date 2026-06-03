@@ -71,7 +71,7 @@ class HealthCheckSystemTest {
     @DisplayName("Online: List online users")
     void testOnlineList() {
         try {
-            PageResult<List<SysUserOnline>> result = sysUserOnlineController.list(null, null);
+            PageResult<SysUserOnline> result = sysUserOnlineController.list(null, null);
             assertNotNull(result);
         } catch (Exception e) {
             // Online users may require auth
