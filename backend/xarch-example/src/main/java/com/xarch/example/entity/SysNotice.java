@@ -1,8 +1,8 @@
 package com.xarch.example.entity;
 
-import com.mybatis.flex.core.annotation.Column;
-import com.mybatis.flex.core.annotation.Id;
-import com.mybatis.flex.core.annotation.Table;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 /**
@@ -13,7 +13,7 @@ import lombok.Data;
 public class SysNotice {
 
     /** 公告ID */
-    @Id(auto = true)
+    @Id(keyType = com.mybatisflex.annotation.KeyType.Auto)
     private Long noticeId;
 
     /** 公告标题 */

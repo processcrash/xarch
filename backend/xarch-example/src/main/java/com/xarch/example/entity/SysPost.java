@@ -1,7 +1,7 @@
 package com.xarch.example.entity;
 
-import com.mybatis.flex.core.annotation.Id;
-import com.mybatis.flex.core.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 /**
@@ -12,7 +12,7 @@ import lombok.Data;
 public class SysPost {
 
     /** 岗位序号 */
-    @Id(auto = true)
+    @Id(keyType = com.mybatisflex.annotation.KeyType.Auto)
     private Long postId;
 
     /** 岗位编码 */

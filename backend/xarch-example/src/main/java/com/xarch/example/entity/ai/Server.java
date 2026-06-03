@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Table("ai_server")
 public class Server implements Serializable {
 
-    @Id(auto = true)
+    @Id(keyType = com.mybatisflex.annotation.KeyType.Auto)
     private Long id;
 
     /** Server name */

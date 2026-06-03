@@ -30,4 +30,8 @@ public class PageResult<T> implements Serializable {
     public static <T> PageResult<T> of(List<T> list, long total) {
         return new PageResult<>(list, total);
     }
+
+    public static <T> PageResult<T> ok(List<T> list) {
+        return new PageResult<>(list, list == null ? 0 : list.size());
+    }
 }

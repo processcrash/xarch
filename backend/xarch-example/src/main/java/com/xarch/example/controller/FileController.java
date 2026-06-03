@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource as SpringResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -86,7 +85,7 @@ public class FileController {
 
     @GetMapping("/download/{id}")
     @Operation(summary = "Download file")
-    public ResponseEntity<SpringResource> download(@PathVariable Long id) {
+    public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable Long id) {
         Resource resource = resourceService.getById(id);
         if (resource == null) {
             return ResponseEntity.notFound().build();

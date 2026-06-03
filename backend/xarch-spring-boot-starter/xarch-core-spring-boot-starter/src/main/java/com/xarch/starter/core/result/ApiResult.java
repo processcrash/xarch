@@ -48,11 +48,23 @@ public class ApiResult<T> implements Serializable {
         return new ApiResult<>("0000", "SUCCESS", data);
     }
 
+    public static <T> ApiResult<T> success() {
+        return ok();
+    }
+
+    public static <T> ApiResult<T> success(T data) {
+        return ok(data);
+    }
+
     public static <T> ApiResult<T> fail(String code, String message) {
         return new ApiResult<>(code, message);
     }
 
     public static <T> ApiResult<T> fail(String code, String message, T data) {
         return new ApiResult<>(code, message, data);
+    }
+
+    public static <T> ApiResult<T> fail(String message) {
+        return new ApiResult<>("9999", message);
     }
 }

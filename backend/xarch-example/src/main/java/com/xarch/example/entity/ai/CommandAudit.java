@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Table("ai_command_audit")
 public class CommandAudit {
 
-    @Id(auto = true)
+    @Id(keyType = com.mybatisflex.annotation.KeyType.Auto)
     private Long id;
 
     private Long serverId;

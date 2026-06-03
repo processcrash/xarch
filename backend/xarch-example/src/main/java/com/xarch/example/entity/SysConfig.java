@@ -1,7 +1,7 @@
 package com.xarch.example.entity;
 
-import com.mybatis.flex.core.annotation.Id;
-import com.mybatis.flex.core.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 /**
@@ -12,7 +12,7 @@ import lombok.Data;
 public class SysConfig {
 
     /** 参数主键 */
-    @Id(auto = true)
+    @Id(keyType = com.mybatisflex.annotation.KeyType.Auto)
     private Long configId;
 
     /** 参数名称 */

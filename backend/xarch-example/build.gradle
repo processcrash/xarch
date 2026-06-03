@@ -8,6 +8,10 @@ dependencies {
     implementation project(':xarch-spring-boot-starter:xarch-web-spring-boot-starter')
     implementation project(':xarch-spring-boot-starter:xarch-cache-spring-boot-starter')
 
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.40'
+    annotationProcessor 'org.projectlombok:lombok:1.18.40'
+
     // Excel import/export
     implementation 'com.alibaba:easyexcel:3.3.3'
 
@@ -21,6 +25,16 @@ dependencies {
     // Actuator + Prometheus monitoring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // Storage dependencies
+    implementation 'io.minio:minio:8.5.10'
+    implementation 'com.aliyun.oss:aliyun-sdk-oss:3.17.4'
+
+    // Hutool for captcha
+    implementation 'cn.hutool:hutool-captcha:5.8.22'
+
+    // JSch for SSH
+    implementation 'com.jcraft:jsch:0.1.55'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'

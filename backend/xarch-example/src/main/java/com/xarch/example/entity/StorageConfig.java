@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Table("sys_storage_config")
 public class StorageConfig implements Serializable {
 
-    @Id(auto = true)
+    @Id(keyType = com.mybatisflex.annotation.KeyType.Auto)
     private Long id;
 
     /** Storage type: local, minio, aliyun_oss, qiniu, tencent_cos */

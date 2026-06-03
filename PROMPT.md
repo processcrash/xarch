@@ -39,3 +39,5 @@
 - 所有命令都记录成历史
 - 实现完后使用 brainstorming skill 调研市面上的 linux 服务器管理 AI Agent 平台，借鉴并实现完整的平台功能
 ---
+所有使用 Node 实现的 MCP 服务都要支持使用 Bun 启动
+---

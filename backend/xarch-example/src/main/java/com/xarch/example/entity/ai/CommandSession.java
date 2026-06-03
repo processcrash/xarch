@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Table("ai_command_session")
 public class CommandSession implements Serializable {
 
-    @Id(auto = true)
+    @Id(keyType = com.mybatisflex.annotation.KeyType.Auto)
     private Long id;
 
     /** Session unique identifier */

@@ -30,11 +30,11 @@ public class AliyunOssStorageStrategy implements StorageStrategy {
         }
 
         try {
-            OSS ossClient = OSSClientBuilder.create()
-                    .endpoint(config.getEndpoint())
-                    .credentials(config.getAccessKey(), config.getSecretKey())
-                    .region(config.getRegion())
-                    .build();
+            OSS ossClient = new OSSClientBuilder().build(
+                    config.getEndpoint(),
+                    config.getAccessKey(),
+                    config.getSecretKey()
+            );
 
             PutObjectRequest request = new PutObjectRequest(
                     config.getBucketName(),
@@ -60,11 +60,11 @@ public class AliyunOssStorageStrategy implements StorageStrategy {
         }
 
         try {
-            OSS ossClient = OSSClientBuilder.create()
-                    .endpoint(config.getEndpoint())
-                    .credentials(config.getAccessKey(), config.getSecretKey())
-                    .region(config.getRegion())
-                    .build();
+            OSS ossClient = new OSSClientBuilder().build(
+                    config.getEndpoint(),
+                    config.getAccessKey(),
+                    config.getSecretKey()
+            );
 
             OSSObject object = ossClient.getObject(config.getBucketName(), objectKey);
             if (object == null) {
@@ -92,11 +92,11 @@ public class AliyunOssStorageStrategy implements StorageStrategy {
         }
 
         try {
-            OSS ossClient = OSSClientBuilder.create()
-                    .endpoint(config.getEndpoint())
-                    .credentials(config.getAccessKey(), config.getSecretKey())
-                    .region(config.getRegion())
-                    .build();
+            OSS ossClient = new OSSClientBuilder().build(
+                    config.getEndpoint(),
+                    config.getAccessKey(),
+                    config.getSecretKey()
+            );
 
             ossClient.deleteObject(config.getBucketName(), objectKey);
             return true;
@@ -113,11 +113,11 @@ public class AliyunOssStorageStrategy implements StorageStrategy {
         }
 
         try {
-            OSS ossClient = OSSClientBuilder.create()
-                    .endpoint(config.getEndpoint())
-                    .credentials(config.getAccessKey(), config.getSecretKey())
-                    .region(config.getRegion())
-                    .build();
+            OSS ossClient = new OSSClientBuilder().build(
+                    config.getEndpoint(),
+                    config.getAccessKey(),
+                    config.getSecretKey()
+            );
 
             return ossClient.doesObjectExist(config.getBucketName(), objectKey);
         } catch (Exception e) {
@@ -187,11 +187,11 @@ public class AliyunOssStorageStrategy implements StorageStrategy {
         }
 
         try {
-            OSS ossClient = OSSClientBuilder.create()
-                    .endpoint(config.getEndpoint())
-                    .credentials(config.getAccessKey(), config.getSecretKey())
-                    .region(config.getRegion())
-                    .build();
+            OSS ossClient = new OSSClientBuilder().build(
+                    config.getEndpoint(),
+                    config.getAccessKey(),
+                    config.getSecretKey()
+            );
 
             Date expiration = new Date(System.currentTimeMillis() + expiryMinutes * 60 * 1000L);
             URL url = ossClient.generatePresignedUrl(config.getBucketName(), objectKey, expiration);

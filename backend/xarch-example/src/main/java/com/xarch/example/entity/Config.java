@@ -1,8 +1,8 @@
 package com.xarch.example.entity;
 
-import com.mybatis.flex.core.annotation.Column;
-import com.mybatis.flex.core.annotation.Id;
-import com.mybatis.flex.core.annotation.Table;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Table("sys_config")
 public class Config implements Serializable {
 
-    @Id(auto = true)
+    @Id(keyType = com.mybatisflex.annotation.KeyType.Auto)
     private Long id;
 
     private String configKey;

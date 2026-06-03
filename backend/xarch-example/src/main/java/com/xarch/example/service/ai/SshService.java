@@ -179,6 +179,13 @@ public class SshService {
     }
 
     /**
+     * Execute command on an existing SSH session (for WebSocket)
+     */
+    public static CommandResult executeCommandOnSession(Server server, String command) throws JSchException {
+        return new SshService().executeCommand(server, command);
+    }
+
+    /**
      * Create SSH session for WebSocket terminal
      */
     public static Session createSession(Server server) throws JSchException {

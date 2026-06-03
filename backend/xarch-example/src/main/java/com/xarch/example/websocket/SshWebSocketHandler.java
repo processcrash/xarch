@@ -1,6 +1,7 @@
 package com.xarch.example.websocket;
 
 import cn.dev33.satoken.stp.StpUtil;
+import com.jcraft.jsch.Session;
 import com.xarch.example.mapper.ai.ServerMapper;
 import com.xarch.example.service.ai.SshService;
 import lombok.extern.slf4j.Slf4j;
@@ -233,10 +234,10 @@ public class SshWebSocketHandler extends TextWebSocketHandler {
      */
     private static class SshSessionHandler {
         private final WebSocketSession session;
-        private final SshService.Session sshSession;
+        private final Session sshSession;
         private boolean executing = false;
 
-        public SshSessionHandler(WebSocketSession session, SshService.Session sshSession) {
+        public SshSessionHandler(WebSocketSession session, Session sshSession) {
             this.session = session;
             this.sshSession = sshSession;
         }

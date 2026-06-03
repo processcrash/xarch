@@ -2,6 +2,7 @@ package com.xarch.example.websocket;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.xarch.example.entity.ai.Server;
 import com.xarch.example.service.ai.SshService;
 import lombok.Data;
@@ -95,7 +96,7 @@ public class WebSocketSessionManager {
         private final String sessionId;
         private final Long serverId;
         private final Server server;
-        private final SshService.Session sshSession;
+        private final Session sshSession;
         private volatile boolean connected = true;
 
         public SshSession(String sessionId, Long serverId, Server server) throws JSchException, IOException {
@@ -107,8 +108,8 @@ public class WebSocketSessionManager {
 
         public CommandResult executeCommand(String command) {
             try {
-                return sshSession.executeCommand(command);
-            } catch (JSchException e) {
+                return SshService.executeCommandOnSession(server, command);
+            } catch (Exception e) {
                 connected = false;
                 return new CommandResult(-1, "SSH Error: " + e.getMessage(), 0);
             }

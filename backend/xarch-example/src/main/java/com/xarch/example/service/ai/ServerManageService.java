@@ -5,6 +5,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.xarch.example.entity.ai.CommandHistory;
 import com.xarch.example.entity.ai.Server;
+import com.xarch.example.mapper.ai.CommandHistoryMapper;
 import com.xarch.example.mapper.ai.ServerMapper;
 import com.xarch.starter.core.result.PageResult;
 import lombok.Data;
