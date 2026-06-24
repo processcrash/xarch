@@ -41,6 +41,39 @@
               <el-icon><List /></el-icon>
               <span>Logs</span>
             </el-menu-item>
+            <el-menu-item index="8" @click="router.push('/clients')">
+              <el-icon><UserFilled /></el-icon>
+              <span>Client Management</span>
+            </el-menu-item>
+            <el-menu-item index="9" @click="router.push('/messages')">
+              <el-icon><ChatDotRound /></el-icon>
+              <span>Message Center</span>
+              <el-badge v-if="unreadCount > 0" :value="unreadCount" class="menu-badge" />
+            </el-menu-item>
+            <el-menu-item index="10" @click="router.push('/monitor/server')">
+              <el-icon><Monitor /></el-icon>
+              <span>Server Monitor</span>
+            </el-menu-item>
+            <el-menu-item index="11" @click="router.push('/monitor/cache')">
+              <el-icon><Coin /></el-icon>
+              <span>Cache Monitor</span>
+            </el-menu-item>
+            <el-menu-item index="12" @click="router.push('/resources')">
+              <el-icon><Folder /></el-icon>
+              <span>Resource Management</span>
+            </el-menu-item>
+            <el-menu-item index="13" @click="router.push('/tempfiles')">
+              <el-icon><Document /></el-icon>
+              <span>Temp File</span>
+            </el-menu-item>
+            <el-menu-item index="14" @click="router.push('/audit')">
+              <el-icon><List /></el-icon>
+              <span>Command Audit</span>
+            </el-menu-item>
+            <el-menu-item index="15" @click="router.push('/excel/users')">
+              <el-icon><Download /></el-icon>
+              <span>Excel Import/Export</span>
+            </el-menu-item>
           </el-menu>
         </el-aside>
         <el-main>
@@ -85,13 +118,29 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { User, Role, Menu, Office, Document, Setting, List } from '@element-plus/icons-vue'
+import {
+  User,
+  Role,
+  Menu,
+  Office,
+  Document,
+  Setting,
+  List,
+  Monitor,
+  Coin,
+  Folder,
+  Download,
+  UserFilled,
+  ChatDotRound
+} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
+import { messageApi } from '@/api/message'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const activeMenu = ref('1')
+const unreadCount = ref(0)
 
 const username = computed(() => localStorage.getItem('username') || '')
 
@@ -102,6 +151,15 @@ const stats = ref([
   { title: 'Depts', value: '8', icon: Office },
 ])
 
+const loadUnreadCount = async () => {
+  try {
+    const result = await messageApi.count()
+    unreadCount.value = result?.unreadCount || 0
+  } catch {
+    // ignore
+  }
+}
+
 const handleLogout = async () => {
   await authStore.logout()
   ElMessage.success('Logged out successfully')
@@ -111,6 +169,10 @@ const handleLogout = async () => {
 const handleMenuSelect = (index: string) => {
   activeMenu.value = index
 }
+
+onMounted(() => {
+  loadUnreadCount()
+})
 </script>
 
 <style scoped>
@@ -200,5 +262,9 @@ const handleMenuSelect = (index: string) => {
 .card-content ul li {
   padding: 8px 0;
   color: #666;
+}
+
+.menu-badge {
+  margin-left: 8px;
 }
 </style>

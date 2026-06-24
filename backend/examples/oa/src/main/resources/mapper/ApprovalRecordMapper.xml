@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xarch.oa.mapper.ApprovalRecordMapper">
+
+    <resultMap id="RecordResult" type="com.xarch.oa.entity.ApprovalRecord">
+        <id property="id" column="id"/>
+        <result property="businessType" column="business_type"/>
+        <result property="businessId" column="business_id"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="approverName" column="approver_name"/>
+        <result property="action" column="action"/>
+        <result property="comment" column="comment"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectByBusiness" resultMap="RecordResult">
+        SELECT * FROM oa_approval_record
+        WHERE business_type = #{businessType}
+          AND business_id = #{businessId}
+        ORDER BY create_time ASC
+    </select>
+
+</mapper>

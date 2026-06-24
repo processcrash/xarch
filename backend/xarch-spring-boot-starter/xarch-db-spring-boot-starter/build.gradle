@@ -11,4 +11,16 @@ dependencies {
     api 'org.postgresql:postgresql'
     api 'com.alibaba:druid-spring-boot-3-starter:1.2.23'
     api 'org.apache.commons:commons-lang3'
+
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testRuntimeOnly 'org.h2database:h2'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }

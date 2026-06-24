@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xarch.oa.mapper.ExpenseReportMapper">
+
+    <resultMap id="ExpenseResult" type="com.xarch.oa.entity.ExpenseReport">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="category" column="category"/>
+        <result property="amount" column="amount"/>
+        <result property="currency" column="currency"/>
+        <result property="description" column="description"/>
+        <result property="items" column="items"/>
+        <result property="status" column="status"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="reimbursementDate" column="reimbursement_date"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectPendingForApprover" resultMap="ExpenseResult">
+        SELECT * FROM oa_expense_report
+        WHERE is_deleted = 0
+          AND status = 'APPROVING'
+          AND approver_id = #{approverId}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="sumApprovedAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0) FROM oa_expense_report
+        WHERE is_deleted = 0
+          AND user_id = #{userId}
+          AND status = 'APPROVED'
+    </select>
+
+</mapper>

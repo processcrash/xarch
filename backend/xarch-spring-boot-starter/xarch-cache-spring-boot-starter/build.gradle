@@ -3,4 +3,15 @@ dependencies {
 
     compileOnly 'org.springframework.boot:spring-boot-starter-data-redis'
     api 'org.redisson:redisson-spring-boot-starter:3.37.0'
+
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }

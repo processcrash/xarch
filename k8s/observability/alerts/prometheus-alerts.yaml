@@ -1,0 +1,284 @@
+# =============================================================================
+# Prometheus alert rules for the xarch platform
+# Mounted by Prometheus at /etc/prometheus/alerts/
+# Naming convention: <Component><Concern>  e.g. JvmMemoryUsageHigh
+# =============================================================================
+
+groups:
+
+  # ---------------------------------------------------------------------------
+  # Application health - service up / pod readiness / restart loops
+  # ---------------------------------------------------------------------------
+  - name: ApplicationHealth
+    interval: 30s
+    rules:
+
+      - alert: XarchServiceDown
+        expr: up{job="xarch-services"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          component: application
+        annotations:
+          summary: "xarch service {{ $labels.instance }} is down"
+          description: "The xarch service {{ $labels.application }} on instance {{ $labels.instance }} has been unreachable for more than 2 minutes."
+          runbook_url: "https://wiki.xarch.internal/runbooks/xarch-service-down"
+
+      - alert: XarchServiceCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 5 > 0
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          component: application
+        annotations:
+          summary: "Pod {{ $labels.pod }} is crash looping"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been restarting ({{ $value | humanize }} restarts in last 15m) for at least 10 minutes."
+          runbook_url: "https://wiki.xarch.internal/runbooks/xarch-crashloop"
+
+      - alert: XarchPodNotReady
+        expr: kube_pod_status_ready{condition="true", namespace="xarch"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: application
+        annotations:
+          summary: "Pod {{ $labels.pod }} not ready"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been unready for more than 5 minutes."
+          runbook_url: "https://wiki.xarch.internal/runbooks/xarch-pod-not-ready"
+
+  # ---------------------------------------------------------------------------
+  # JVM - heap / non-heap memory, CPU, threads, GC pauses
+  # ---------------------------------------------------------------------------
+  - name: Jvm
+    interval: 30s
+    rules:
+
+      - alert: JvmMemoryUsageHigh
+        expr: (jvm_memory_used_bytes / jvm_memory_max_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: jvm
+        annotations:
+          summary: "JVM memory usage > 85% on {{ $labels.instance }}"
+          description: "JVM memory area {{ $labels.area }} on {{ $labels.instance }} ({{ $labels.application }}) is at {{ $value | printf \"%.1f\" }}% of the configured maximum."
+          runbook_url: "https://wiki.xarch.internal/runbooks/jvm-memory-high"
+
+      - alert: JvmMemoryUsageCritical
+        expr: (jvm_memory_used_bytes / jvm_memory_max_bytes) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          component: jvm
+        annotations:
+          summary: "JVM memory usage > 95% on {{ $labels.instance }}"
+          description: "JVM memory area {{ $labels.area }} on {{ $labels.instance }} ({{ $labels.application }}) is at {{ $value | printf \"%.1f\" }}% of the configured maximum - OutOfMemoryError imminent."
+          runbook_url: "https://wiki.xarch.internal/runbooks/jvm-memory-critical"
+
+      - alert: JvmCpuUsageHigh
+        expr: rate(jvm_cpu_recent_utilization[5m]) > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          component: jvm
+        annotations:
+          summary: "JVM CPU usage > 80% on {{ $labels.instance }}"
+          description: "Recent JVM CPU utilization on {{ $labels.instance }} ({{ $labels.application }}) is {{ $value | printf \"%.1f\" }}% sustained for 10m."
+          runbook_url: "https://wiki.xarch.internal/runbooks/jvm-cpu-high"
+
+      - alert: JvmThreadDeadlock
+        expr: jvm_threads_deadlocked > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          component: jvm
+        annotations:
+          summary: "JVM thread deadlock detected on {{ $labels.instance }}"
+          description: "Detected {{ $value }} deadlocked thread(s) on {{ $labels.instance }} ({{ $labels.application }}). Thread dump recommended."
+          runbook_url: "https://wiki.xarch.internal/runbooks/jvm-thread-deadlock"
+
+      - alert: JvmGcPauseLong
+        expr: rate(jvm_gc_pause_seconds_max[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: jvm
+        annotations:
+          summary: "Long GC pauses on {{ $labels.instance }}"
+          description: "Max GC pause duration on {{ $labels.instance }} ({{ $labels.application }}, cause={{ $labels.cause }}) is {{ $value | printf \"%.2f\" }}s - sustained for 5m."
+          runbook_url: "https://wiki.xarch.internal/runbooks/jvm-gc-pause"
+
+  # ---------------------------------------------------------------------------
+  # HTTP request metrics (Spring Boot WebFlux / Servlet actuator)
+  # ---------------------------------------------------------------------------
+  - name: HttpRequests
+    interval: 30s
+    rules:
+
+      - alert: Http5xxErrorRate
+        expr: sum by (application, instance) (rate(http_server_requests_seconds_count{status=~"5..", uri!~".*/actuator.*"}[5m])) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          component: http
+        annotations:
+          summary: "High 5xx error rate on {{ $labels.application }}"
+          description: "Service {{ $labels.application }} on {{ $labels.instance }} is returning 5xx responses at {{ $value | printf \"%.2f\" }} req/s over 5m."
+          runbook_url: "https://wiki.xarch.internal/runbooks/http-5xx"
+
+      - alert: Http4xxErrorRate
+        expr: sum by (application, instance) (rate(http_server_requests_seconds_count{status=~"4.."}[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: http
+        annotations:
+          summary: "High 4xx error rate on {{ $labels.application }}"
+          description: "Service {{ $labels.application }} on {{ $labels.instance }} is returning 4xx responses at {{ $value | printf \"%.2f\" }} req/s over 5m."
+          runbook_url: "https://wiki.xarch.internal/runbooks/http-4xx"
+
+      - alert: HttpRequestLatencyP99
+        expr: histogram_quantile(0.99, sum by (le, application, instance) (rate(http_server_requests_seconds_bucket{uri!~".*/actuator.*"}[5m]))) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: http
+        annotations:
+          summary: "P99 latency > 2s on {{ $labels.application }}"
+          description: "P99 request latency on {{ $labels.application }} ({{ $labels.instance }}) is {{ $value | printf \"%.2f\" }}s over the last 5m."
+          runbook_url: "https://wiki.xarch.internal/runbooks/http-latency"
+
+  # ---------------------------------------------------------------------------
+  # Database - HikariCP connection pool
+  # ---------------------------------------------------------------------------
+  - name: Database
+    interval: 30s
+    rules:
+
+      - alert: HikariConnectionPoolExhausted
+        expr: hikaricp_connections_active / hikaricp_connections_max > 0.9
+        for: 2m
+        labels:
+          severity: warning
+          team: platform
+          component: database
+        annotations:
+          summary: "HikariCP pool {{ $labels.pool }} > 90% saturated"
+          description: "HikariCP pool '{{ $labels.pool }}' on {{ $labels.instance }} ({{ $labels.application }}) is at {{ $value | printf \"%.1f\" }}% of maximum connections."
+          runbook_url: "https://wiki.xarch.internal/runbooks/hikari-pool-exhausted"
+
+      - alert: HikariConnectionAcquisitionSlow
+        expr: hikaricp_connections_acquisition_seconds_max > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: database
+        annotations:
+          summary: "Slow connection acquisition on pool {{ $labels.pool }}"
+          description: "HikariCP pool '{{ $labels.pool }}' on {{ $labels.instance }} ({{ $labels.application }}) took {{ $value | printf \"%.2f\" }}s to acquire a connection."
+          runbook_url: "https://wiki.xarch.internal/runbooks/hikari-slow-acquire"
+
+  # ---------------------------------------------------------------------------
+  # MCP servers (database / knowledge / filesystem / vector)
+  # ---------------------------------------------------------------------------
+  - name: McpServers
+    interval: 30s
+    rules:
+
+      - alert: McpServerUnhealthy
+        expr: up{job=~"xarch-mcp-.*"} == 0
+        for: 3m
+        labels:
+          severity: critical
+          team: mcp
+          component: mcp
+        annotations:
+          summary: "MCP server {{ $labels.job }} unhealthy"
+          description: "MCP server job '{{ $labels.job }}' on instance {{ $labels.instance }} has been down for more than 3 minutes."
+          runbook_url: "https://wiki.xarch.internal/runbooks/mcp-down"
+
+      - alert: McpServerHighLatency
+        expr: mcp_request_duration_seconds_p99 > 5
+        for: 5m
+        labels:
+          severity: warning
+          team: mcp
+          component: mcp
+        annotations:
+          summary: "MCP request latency > 5s on {{ $labels.job }}"
+          description: "P99 MCP request duration on {{ $labels.job }} ({{ $labels.instance }}) is {{ $value | printf \"%.2f\" }}s over the last 5m."
+          runbook_url: "https://wiki.xarch.internal/runbooks/mcp-latency"
+
+  # ---------------------------------------------------------------------------
+  # Nacos - service discovery / config server
+  # ---------------------------------------------------------------------------
+  - name: Nacos
+    interval: 30s
+    rules:
+
+      - alert: NacosDown
+        expr: up{job="nacos"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          component: nacos
+        annotations:
+          summary: "Nacos is down"
+          description: "Nacos instance {{ $labels.instance }} has been unreachable for more than 2 minutes. Service discovery and config are impacted."
+          runbook_url: "https://wiki.xarch.internal/runbooks/nacos-down"
+
+  # ---------------------------------------------------------------------------
+  # Disk & node resources
+  # ---------------------------------------------------------------------------
+  - name: DiskAndResources
+    interval: 30s
+    rules:
+
+      - alert: NodeDiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+        for: 10m
+        labels:
+          severity: warning
+          team: sre
+          component: node
+        annotations:
+          summary: "Less than 10% disk free on {{ $labels.instance }}"
+          description: "Filesystem {{ $labels.mountpoint }} ({{ $labels.device }}) on {{ $labels.instance }} has {{ $value | printf \"%.1f\" }}% space available."
+          runbook_url: "https://wiki.xarch.internal/runbooks/node-disk-low"
+
+      - alert: NodeCpuUsageHigh
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+          team: sre
+          component: node
+        annotations:
+          summary: "Node CPU > 85% on {{ $labels.instance }}"
+          description: "CPU usage on node {{ $labels.instance }} is {{ $value | printf \"%.1f\" }}% sustained for 10m."
+          runbook_url: "https://wiki.xarch.internal/runbooks/node-cpu-high"
+
+      - alert: NodeMemoryUsageHigh
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: sre
+          component: node
+        annotations:
+          summary: "Node memory > 85% on {{ $labels.instance }}"
+          description: "Memory usage on node {{ $labels.instance }} is {{ $value | printf \"%.1f\" }}% sustained for 5m."
+          runbook_url: "https://wiki.xarch.internal/runbooks/node-memory-high"

@@ -1,0 +1,132 @@
+# ===============================================
+# Vector Database MCP Server 部署配置
+# ===============================================
+# 嵌入式向量数据库 MCP Server
+# 提供工具：vector_create_collection、vector_insert、vector_search 等
+# 端口：9094
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xarch-mcp-vector
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: xarch-mcp-vector
+    app.kubernetes.io/component: mcp-server
+    app.kubernetes.io/version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: xarch-mcp-vector
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: xarch-mcp-vector
+        app.kubernetes.io/component: mcp-server
+        app.kubernetes.io/version: "1.0.0"
+    spec:
+      serviceAccountName: xarch-sa
+      initContainers:
+        - name: wait-for-nacos
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Nacos to be ready..."
+              until curl -sf http://nacos.xarch:8848/nacos/v1/console/health/readiness; do
+                echo "Nacos is not ready, waiting..."
+                sleep 5
+              done
+              echo "Nacos is ready!"
+      containers:
+        - name: xarch-mcp-vector
+          image: xarch/xarch-mcp-vector:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 9094
+              protocol: TCP
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: "xarch-mcp-vector"
+            - name: SERVER_PORT
+              value: "9094"
+            # Nacos MCP 服务注册
+            - name: SPRING_CLOUD_NACOS_SERVER_ADDR
+              value: "nacos.xarch:8848"
+            - name: SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE
+              value: "xarch-cloud"
+            - name: SPRING_CLOUD_NACOS_DISCOVERY_GROUP
+              value: "MCP"
+            # MCP Server 类型标识
+            - name: XARCH_MCP_TYPE
+              value: "vector-database"
+            # 默认向量维度（OpenAI text-embedding-3-small = 1536）
+            - name: XARCH_VECTOR_DEFAULT_DIM
+              value: "1536"
+            # 默认距离度量
+            - name: XARCH_VECTOR_DEFAULT_DISTANCE
+              value: "cosine"
+            # 最大单集合向量数
+            - name: XARCH_VECTOR_MAX_PER_COLLECTION
+              value: "1000000"
+            # JVM 参数
+            - name: JAVA_OPTS
+              value: "-Xms512m -Xmx1536m -XX:+UseG1GC"
+          readinessProbe:
+            httpGet:
+              path: /mcp/vector/health
+              port: 9094
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /mcp/vector/health
+              port: 9094
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 3Gi
+          # 向量数据持久化（生产环境建议使用 PVC + SSD）
+          volumeMounts:
+            - name: vector-data
+              mountPath: /data/vector
+      volumes:
+        - name: vector-data
+          emptyDir: {}  # 生产环境使用 PVC（推荐 SSD）
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xarch-mcp-vector
+  namespace: xarch
+  labels:
+    app.kubernetes.io/name: xarch-mcp-vector
+    app.kubernetes.io/component: mcp-server
+  annotations:
+    description: "Vector Database MCP Server - In-Memory Vector Store"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 9094
+      targetPort: 9094
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: xarch-mcp-vector

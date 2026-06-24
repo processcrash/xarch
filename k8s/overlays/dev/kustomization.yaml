@@ -49,6 +49,8 @@ images:
     newTag: latest
   - name: xarch/xarch-mcp-filesystem
     newTag: latest
+  - name: xarch/xarch-mcp-vector
+    newTag: latest
   - name: xarch/xarch-cloud-gateway
     newTag: latest
 

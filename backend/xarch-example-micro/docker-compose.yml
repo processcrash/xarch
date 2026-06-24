@@ -1,0 +1,264 @@
+version: '3.8'
+
+# xarch-example-micro docker-compose
+# Brings up Nacos + MySQL + Redis + all 6 micro-services on bridge network "xarch-net".
+#
+# Usage:
+#   docker-compose up -d nacos mysql redis       # infra only
+#   docker-compose up -d                         # everything
+#
+# Notes:
+#   * The services depend on infra healthchecks (curl /actuator/health).
+#   * The MySQL schema is created on first run from docs/db/init.sql (mounted).
+
+networks:
+  xarch-net:
+    driver: bridge
+
+volumes:
+  nacos-data:
+  mysql-data:
+  redis-data:
+
+services:
+  # ------------------------------------------------------------------
+  # Infrastructure
+  # ------------------------------------------------------------------
+  nacos:
+    image: nacos/nacos-server:v2.4.0
+    container_name: xarch-nacos
+    networks: [xarch-net]
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    environment:
+      MODE: standalone
+      JVM_XMS: 512m
+      JVM_XMX: 512m
+      JVM_XMN: 256m
+    volumes:
+      - nacos-data:/home/nacos/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  mysql:
+    image: mysql:8.4.0
+    container_name: xarch-mysql
+    networks: [xarch-net]
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: xarch
+      MYSQL_USER: xarch
+      MYSQL_PASSWORD: xarch
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../docs/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: xarch-redis
+    networks: [xarch-net]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  # ------------------------------------------------------------------
+  # Micro-services
+  # ------------------------------------------------------------------
+  service-auth:
+    build:
+      context: ../
+      dockerfile: xarch-example-micro/docker/Dockerfile
+      args:
+        MODULE: service-auth
+    image: xarch/service-auth:1.0.0
+    container_name: xarch-service-auth
+    networks: [xarch-net]
+    ports:
+      - "9001:9001"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER: nacos:8848
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9001/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  service-system:
+    build:
+      context: ../
+      dockerfile: xarch-example-micro/docker/Dockerfile
+      args:
+        MODULE: service-system
+    image: xarch/service-system:1.0.0
+    container_name: xarch-service-system
+    networks: [xarch-net]
+    ports:
+      - "9002:9002"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER: nacos:8848
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      service-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9002/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  service-file:
+    build:
+      context: ../
+      dockerfile: xarch-example-micro/docker/Dockerfile
+      args:
+        MODULE: service-file
+    image: xarch/service-file:1.0.0
+    container_name: xarch-service-file
+    networks: [xarch-net]
+    ports:
+      - "9003:9003"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER: nacos:8848
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      service-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9003/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  service-monitor:
+    build:
+      context: ../
+      dockerfile: xarch-example-micro/docker/Dockerfile
+      args:
+        MODULE: service-monitor
+    image: xarch/service-monitor:1.0.0
+    container_name: xarch-service-monitor
+    networks: [xarch-net]
+    ports:
+      - "9004:9004"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER: nacos:8848
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9004/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  service-ai:
+    build:
+      context: ../
+      dockerfile: xarch-example-micro/docker/Dockerfile
+      args:
+        MODULE: service-ai
+    image: xarch/service-ai:1.0.0
+    container_name: xarch-service-ai
+    networks: [xarch-net]
+    ports:
+      - "9005:9005"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER: nacos:8848
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      service-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9005/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  service-message:
+    build:
+      context: ../
+      dockerfile: xarch-example-micro/docker/Dockerfile
+      args:
+        MODULE: service-message
+    image: xarch/service-message:1.0.0
+    container_name: xarch-service-message
+    networks: [xarch-net]
+    ports:
+      - "9006:9006"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER: nacos:8848
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      service-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9006/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10

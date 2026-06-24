@@ -1,0 +1,24 @@
+// xarch-mcp-vector
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.4.0'
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:3.2.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    // Optional native vector ops (graceful fallback to pure Java when absent)
+    compileOnly 'org.bytedeco:javacpp:1.5.10'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.4.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

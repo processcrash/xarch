@@ -1,0 +1,149 @@
+name: Docker Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/docker-publish.yml"
+  workflow_dispatch:
+    inputs:
+      image_name:
+        description: "Specific image to build (leave empty for all)"
+        required: false
+        type: string
+
+concurrency:
+  group: docker-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_OWNER: ${{ github.repository_owner }}
+
+jobs:
+  build-and-push:
+    name: Build & Push (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: xarch-example
+            context: backend
+            dockerfile: backend/Dockerfile
+          - image: xarch-cloud-gateway
+            context: backend
+            dockerfile: backend/xarch-spring-cloud/xarch-cloud/xarch-cloud-starter-gateway/Dockerfile
+          - image: xarch-mcp-database
+            context: backend
+            dockerfile: backend/xarch-spring-boot-starter/xarch-mcp/xarch-mcp-database/Dockerfile
+          - image: xarch-mcp-knowledge
+            context: backend
+            dockerfile: backend/xarch-spring-boot-starter/xarch-mcp/xarch-mcp-knowledge/Dockerfile
+          - image: xarch-mcp-filesystem
+            context: backend
+            dockerfile: backend/xarch-spring-boot-starter/xarch-mcp/xarch-mcp-filesystem/Dockerfile
+          - image: xarch-mcp-vector
+            context: backend
+            dockerfile: backend/xarch-spring-boot-starter/xarch-mcp/xarch-mcp-vector/Dockerfile
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.image }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=xarch
+            org.opencontainers.image.description=${{ matrix.image }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+          provenance: false
+
+      - name: Generate SBOM
+        if: github.event_name != 'pull_request'
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.image }}@${{ steps.meta.outputs.digest }}
+          format: cyclonedx-json
+          artifact-name: sbom-${{ matrix.image }}.cyclonedx.json
+
+  build-only:
+    name: Build (PR)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - xarch-example
+          - xarch-cloud-gateway
+          - xarch-mcp-database
+          - xarch-mcp-knowledge
+          - xarch-mcp-filesystem
+          - xarch-mcp-vector
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          platforms: linux/amd64
+          push: false
+          tags: xarch/${{ matrix.image }}:pr-${{ github.event.number }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          provenance: false

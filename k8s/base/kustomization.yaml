@@ -20,6 +20,7 @@ resources:
   - xarch-mcp-database.yaml
   - xarch-mcp-knowledge.yaml
   - xarch-mcp-filesystem.yaml
+  - xarch-mcp-vector.yaml
   # API 网关
   - xarch-cloud-gateway.yaml
   # 监控与日志 (在 overlays/dev 或 overlays/prod 中按需引入)

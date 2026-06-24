@@ -1,44 +1,293 @@
-# Prometheus Configuration for xarch
+# =============================================================================
+# Prometheus configuration for the xarch platform
+# Spring Boot 4.0 / JDK 25 / Nacos / MySQL|PostgreSQL / Redis
+# Deployed to Kubernetes namespace "xarch"
+# =============================================================================
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  external_labels:
+    cluster: xarch
+    environment: production
 
+# -----------------------------------------------------------------------------
+# Rule files - alert rules
+# -----------------------------------------------------------------------------
+rule_files:
+  - /etc/prometheus/alerts/*.yaml
+
+# -----------------------------------------------------------------------------
+# Alertmanager - leave for now, can be added when Alertmanager is deployed
+# -----------------------------------------------------------------------------
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# -----------------------------------------------------------------------------
+# Scrape configs
+# -----------------------------------------------------------------------------
 scrape_configs:
-  # xarch-example backend service
+  # ---------------------------------------------------------------------------
+  # Prometheus self-monitoring
+  # ---------------------------------------------------------------------------
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          application: prometheus
+          environment: production
+
+  # ---------------------------------------------------------------------------
+  # Kubernetes API server (control plane metrics)
+  # ---------------------------------------------------------------------------
+  - job_name: 'kubernetes-apiservers'
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: [default]
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      insecure_skip_verify: true
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+      - target_label: job
+        replacement: kubernetes-apiservers
+      - target_label: application
+        replacement: kubernetes-apiserver
+
+  # ---------------------------------------------------------------------------
+  # Kubernetes nodes (kubelet metrics via /metrics endpoint)
+  # ---------------------------------------------------------------------------
+  - job_name: 'kubernetes-nodes'
+    kubernetes_sd_configs:
+      - role: nodes
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      insecure_skip_verify: true
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: job
+        replacement: kubernetes-nodes
+      - target_label: application
+        replacement: kubelet
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics
+
+  # ---------------------------------------------------------------------------
+  # Kubernetes pods (with Prometheus annotations)
+  #   pod annotations:
+  #     prometheus.io/scrape: "true"
+  #     prometheus.io/port: "8080"
+  #     prometheus.io/path: "/actuator/prometheus"
+  # ---------------------------------------------------------------------------
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: [xarch]
+    relabel_configs:
+      # Only scrape pods that opt-in via annotation
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      # Resolve scrape address and port
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+        action: replace
+        regex: (https?)
+        target_label: __scheme__
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      # Meta labels for filtering
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        target_label: application
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        target_label: application
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - target_label: job
+        replacement: xarch-services
+    metric_relabel_configs:
+      # Drop noisy / expensive metric families we do not need
+      - source_labels: [__name__]
+        regex: 'go_gc_.*|go_memstats_.*|go_goroutines|process_.*'
+        action: drop
+
+  # ---------------------------------------------------------------------------
+  # Kubernetes service endpoints (used to discover cluster-internal services
+  # that should be scraped as a logical group, e.g. all xarch services)
+  # ---------------------------------------------------------------------------
+  - job_name: 'kubernetes-service-endpoints'
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: [xarch]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+        action: replace
+        regex: (https?)
+        target_label: __scheme__
+      - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: service
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - target_label: job
+        replacement: xarch-services
+
+  # ---------------------------------------------------------------------------
+  # Explicit scrape targets for xarch Spring Boot services (defensive layer
+  # so that the platform still works if pod annotations are not set on every
+  # service). Each service exposes /actuator/prometheus on port 8080.
+  # ---------------------------------------------------------------------------
   - job_name: 'xarch-example'
     metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
     static_configs:
       - targets: ['xarch-example:8080']
         labels:
-          application: 'xarch-example'
-          environment: 'production'
+          application: xarch-example
+          environment: production
 
-  # Spring Boot Admin
-  - job_name: 'spring-boot-admin'
+  - job_name: 'xarch-cloud-gateway'
     metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
     static_configs:
-      - targets: ['xarch-admin:8080']
+      - targets: ['xarch-cloud-gateway:8080']
         labels:
-          application: 'xarch-admin'
-          environment: 'production'
+          application: xarch-cloud-gateway
+          environment: production
 
-  # Nacos (if exposed)
+  # ---------------------------------------------------------------------------
+  # MCP servers - Model Context Protocol tooling
+  # ---------------------------------------------------------------------------
+  - job_name: 'xarch-mcp-database'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['xarch-mcp-database:8080']
+        labels:
+          application: xarch-mcp-database
+          environment: production
+          component: mcp
+
+  - job_name: 'xarch-mcp-knowledge'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['xarch-mcp-knowledge:8080']
+        labels:
+          application: xarch-mcp-knowledge
+          environment: production
+          component: mcp
+
+  - job_name: 'xarch-mcp-filesystem'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['xarch-mcp-filesystem:8080']
+        labels:
+          application: xarch-mcp-filesystem
+          environment: production
+          component: mcp
+
+  - job_name: 'xarch-mcp-vector'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['xarch-mcp-vector:8080']
+        labels:
+          application: xarch-mcp-vector
+          environment: production
+          component: mcp
+
+  # ---------------------------------------------------------------------------
+  # Nacos (service discovery / config server)
+  # ---------------------------------------------------------------------------
   - job_name: 'nacos'
+    metrics_path: '/nacos/actuator/prometheus'
+    scrape_interval: 15s
     static_configs:
       - targets: ['nacos:8848']
         labels:
-          application: 'nacos'
+          application: nacos
+          environment: production
 
+  # ---------------------------------------------------------------------------
   # Redis
+  # ---------------------------------------------------------------------------
   - job_name: 'redis'
     static_configs:
-      - targets: ['redis:6379']
+      - targets: ['redis-exporter:9121']
         labels:
-          application: 'redis'
+          application: redis
+          environment: production
 
-  # PostgreSQL (via postgres_exporter if available)
+  # ---------------------------------------------------------------------------
+  # PostgreSQL (postgres_exporter)
+  # ---------------------------------------------------------------------------
   - job_name: 'postgresql'
     static_configs:
       - targets: ['postgres-exporter:9187']
         labels:
-          application: 'postgresql'
+          application: postgresql
+          environment: production
+
+  # ---------------------------------------------------------------------------
+  # MySQL (mysqld_exporter) - used in some environments
+  # ---------------------------------------------------------------------------
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['mysql-exporter:9104']
+        labels:
+          application: mysql
+          environment: production
+
+  # ---------------------------------------------------------------------------
+  # Spring Boot Admin (ops UI, exposes actuator)
+  # ---------------------------------------------------------------------------
+  - job_name: 'spring-boot-admin'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['xarch-admin:8080']
+        labels:
+          application: xarch-admin
+          environment: production

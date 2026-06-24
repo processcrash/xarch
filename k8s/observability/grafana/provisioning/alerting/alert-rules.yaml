@@ -1,0 +1,226 @@
+# =============================================================================
+# Grafana managed alerting rules (Unified Alerting)
+# Mirrors the critical subset of /etc/prometheus/alerts/prometheus-alerts.yaml
+# so Grafana can route even if Prometheus -> Alertmanager is not yet wired.
+# =============================================================================
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: application
+    folder: xarch
+    interval: 30s
+    rules:
+
+      - uid: xarch-service-down
+        title: XarchServiceDown
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: up{job="xarch-services"} == 0
+              refId: A
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+        noDataState: OK
+        execErrState: Alerting
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          component: application
+        annotations:
+          summary: "xarch service {{ $labels.application }} is down"
+          description: "Instance {{ $labels.instance }} has been down for more than 2 minutes."
+          runbook_url: "https://wiki.xarch.internal/runbooks/xarch-service-down"
+
+      - uid: jvm-memory-critical
+        title: JvmMemoryUsageCritical
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: jvm_memory_used_bytes / jvm_memory_max_bytes
+              refId: A
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              refId: B
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.95]
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                    params: []
+        noDataState: OK
+        execErrState: Alerting
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          component: jvm
+        annotations:
+          summary: "JVM memory > 95% on {{ $labels.instance }}"
+          description: "JVM memory area {{ $labels.area }} on {{ $labels.instance }} is critically high."
+          runbook_url: "https://wiki.xarch.internal/runbooks/jvm-memory-critical"
+
+      - uid: mcp-server-unhealthy
+        title: McpServerUnhealthy
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: up{job=~"xarch-mcp-.*"} == 0
+              refId: A
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+        noDataState: OK
+        execErrState: Alerting
+        for: 3m
+        labels:
+          severity: critical
+          team: mcp
+          component: mcp
+        annotations:
+          summary: "MCP server {{ $labels.job }} unhealthy"
+          description: "MCP server '{{ $labels.job }}' on instance {{ $labels.instance }} has been unreachable for 3 minutes."
+          runbook_url: "https://wiki.xarch.internal/runbooks/mcp-down"
+
+      - uid: http-5xx-error-rate
+        title: Http5xxErrorRate
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum by (application, instance) (rate(http_server_requests_seconds_count{status=~"5..", uri!~".*/actuator.*"}[5m]))
+              refId: A
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              refId: B
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.1]
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                    params: []
+        noDataState: OK
+        execErrState: Alerting
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          component: http
+        annotations:
+          summary: "High 5xx rate on {{ $labels.application }}"
+          description: "Service {{ $labels.application }} on {{ $labels.instance }} is returning 5xx responses > 0.1 req/s."
+          runbook_url: "https://wiki.xarch.internal/runbooks/http-5xx"
+
+      - uid: nacos-down
+        title: NacosDown
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: up{job="nacos"} == 0
+              refId: A
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+        noDataState: OK
+        execErrState: Alerting
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          component: nacos
+        annotations:
+          summary: "Nacos is down"
+          description: "Nacos instance {{ $labels.instance }} has been unreachable for 2 minutes. Service discovery is impacted."
+          runbook_url: "https://wiki.xarch.internal/runbooks/nacos-down"
+
+      - uid: jvm-thread-deadlock
+        title: JvmThreadDeadlock
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: jvm_threads_deadlocked
+              refId: A
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              refId: B
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0]
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                    params: []
+        noDataState: OK
+        execErrState: Alerting
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          component: jvm
+        annotations:
+          summary: "JVM deadlock detected on {{ $labels.instance }}"
+          description: "{{ $value }} deadlocked thread(s) detected. Take a thread dump immediately."
+          runbook_url: "https://wiki.xarch.internal/runbooks/jvm-thread-deadlock"

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xarch.cms.mapper.ArticleTagMapper">
+
+    <select id="selectTagIdsByArticleId" resultType="long">
+        SELECT tag_id FROM cms_article_tag WHERE article_id = #{articleId}
+    </select>
+
+    <select id="selectArticleIdsByTagId" resultType="long">
+        SELECT article_id FROM cms_article_tag WHERE tag_id = #{tagId}
+    </select>
+
+</mapper>

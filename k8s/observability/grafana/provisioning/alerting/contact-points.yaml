@@ -1,0 +1,18 @@
+# =============================================================================
+# Grafana contact points (where alerts are sent)
+# Replace the placeholder webhook URL with the real Alertmanager / PagerDuty /
+# Slack endpoint for your environment.
+# =============================================================================
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: xarch-team
+    receivers:
+      - uid: xarch-team-webhook
+        type: webhook
+        settings:
+          url: http://alertmanager:9093/api/v1/alerts
+        disableResolveMessage: false
+    labels:
+      team: platform

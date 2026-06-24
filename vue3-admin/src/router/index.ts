@@ -117,6 +117,54 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/clients',
+    name: 'ClientManagement',
+    component: () => import('@/views/system/client/ClientList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/messages',
+    name: 'MessageCenter',
+    component: () => import('@/views/message/MessageList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/monitor/server',
+    name: 'ServerMonitor',
+    component: () => import('@/views/monitor/server/ServerList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/monitor/cache',
+    name: 'CacheMonitor',
+    component: () => import('@/views/monitor/cache/CacheList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/resources',
+    name: 'ResourceManagement',
+    component: () => import('@/views/resource/ResourceList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/tempfiles',
+    name: 'TempFileManagement',
+    component: () => import('@/views/tempfile/TempFileList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/audit',
+    name: 'CommandAudit',
+    component: () => import('@/views/audit/CommandAuditList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/excel/users',
+    name: 'UserExcel',
+    component: () => import('@/views/excel/UserExcel.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/NotFound.vue')

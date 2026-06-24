@@ -1,0 +1,44 @@
+name: "CodeQL Config"
+
+paths:
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.gradle/**"
+  - "**/target/**"
+  - "**/venv/**"
+  - "**/__pycache__/**"
+  - "**/*.min.js"
+  - "**/*.min.css"
+  - "**/coverage/**"
+  - "**/.next/**"
+  - "**/.nuxt/**"
+  - "**/out/**"
+  - "**/tmp/**"
+  - "**/.git/**"
+
+paths-ignore:
+  - "docs/**"
+  - "**/*.md"
+  - "**/*.lock"
+  - "**/package-lock.json"
+  - "**/yarn.lock"
+  - "**/pnpm-lock.yaml"
+  - "**/*.test.js"
+  - "**/*.test.ts"
+  - "**/*.spec.js"
+  - "**/*.spec.ts"
+  - "**/__tests__/**"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/mvnw"
+  - "**/gradlew"
+  - "**/gradlew.bat"
+  - "**/*.jar"
+  - "**/*.class"
+
+query-filters:
+  - exclude:
+      id: js/redundant-assignment
+  - exclude:
+      id: js/useless-assignment-to-local

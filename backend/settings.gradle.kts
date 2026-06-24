@@ -23,5 +23,10 @@ include(
     // MCP Servers
     "xarch-spring-boot-starter:xarch-mcp:xarch-mcp-database",
     "xarch-spring-boot-starter:xarch-mcp:xarch-mcp-knowledge",
-    "xarch-spring-boot-starter:xarch-mcp:xarch-mcp-filesystem"
+    "xarch-spring-boot-starter:xarch-mcp:xarch-mcp-filesystem",
+    "xarch-spring-boot-starter:xarch-mcp:xarch-mcp-vector",
+    // Business example modules
+    "examples:cms",
+    "examples:oa",
+    "examples:crm"
 )

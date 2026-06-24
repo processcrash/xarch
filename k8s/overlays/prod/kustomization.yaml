@@ -48,6 +48,8 @@ images:
     newTag: "1.0.0"
   - name: xarch/xarch-mcp-filesystem
     newTag: "1.0.0"
+  - name: xarch/xarch-mcp-vector
+    newTag: "1.0.0"
   - name: xarch/xarch-cloud-gateway
     newTag: "1.0.0"
 
@@ -95,6 +97,16 @@ patches:
     target:
       kind: Deployment
       name: xarch-mcp-filesystem
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: xarch-mcp-vector
+      spec:
+        replicas: 3
+    target:
+      kind: Deployment
+      name: xarch-mcp-vector
 
 # 标签覆盖
 commonLabels:

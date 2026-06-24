@@ -1,0 +1,183 @@
+version: 2
+
+# Common settings applied to all ecosystems
+enable-beta-ecosystems: false
+
+# Limit the number of open PRs across all ecosystems
+open-pull-requests-limit: 10
+
+# Common labels applied to all Dependabot PRs
+labels:
+  - "dependencies"
+  - "automated"
+
+# Commit message preferences
+commit-message:
+  prefix: "chore"
+  prefix-development: "chore(dev)"
+  include: "scope"
+
+# Rebase strategy
+rebase-strategy: "auto"
+
+# Group all dev dependencies together for npm
+updates:
+  # ----- npm (frontend + node MCP) -----
+  - package-ecosystem: "npm"
+    directory: "/vue3-admin"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "npm"
+      - "frontend"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+      security:
+        applies-to: security-updates
+    ignore:
+      - dependency-name: "vue"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "npm"
+    directory: "/node-mcp-servers"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "npm"
+      - "node-mcp"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+
+  # ----- Gradle (Java backend) -----
+  - package-ecosystem: "gradle"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "gradle"
+      - "backend"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+
+  # ----- pip (Python MCP servers) -----
+  - package-ecosystem: "pip"
+    directories:
+      - "/py-mcp-servers"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "pip"
+      - "python-mcp"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "pip"
+    directories:
+      - "/python"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "pip"
+      - "python"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+
+  # ----- Docker (Dockerfiles) -----
+  - package-ecosystem: "docker"
+    directories:
+      - "/backend"
+      - "/backend/xarch-example"
+      - "/backend/xarch-spring-boot-starter"
+      - "/backend/xarch-spring-cloud"
+      - "/py-mcp-servers"
+      - "/python"
+      - "/node-mcp-servers"
+      - "/vue3-admin"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+
+  # ----- GitHub Actions -----
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    # Don't auto-update pinned Docker tags used inside workflows to avoid breakage
+    ignore:
+      - dependency-name: "docker/build-push-action"
+      - dependency-name: "docker/setup-buildx-action"
+      - dependency-name: "docker/login-action"
+      - dependency-name: "docker/setup-qemu-action"
+      - dependency-name: "docker/metadata-action"

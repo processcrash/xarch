@@ -1,0 +1,132 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "vue3-admin/**"
+      - ".github/workflows/ci-frontend.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "vue3-admin/**"
+      - ".github/workflows/ci-frontend.yml"
+
+concurrency:
+  group: ci-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect package manager
+        id: detect-pm
+        working-directory: vue3-admin
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> "$GITHUB_OUTPUT"
+          elif [ -f "yarn.lock" ]; then
+            echo "manager=yarn" >> "$GITHUB_OUTPUT"
+          elif [ -f "package-lock.json" ]; then
+            echo "manager=npm" >> "$GITHUB_OUTPUT"
+          else
+            echo "manager=npm" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "${{ steps.detect-pm.outputs.manager }}"
+          cache-dependency-path: vue3-admin/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vue3-admin
+        shell: bash
+        run: |
+          case "${{ steps.detect-pm.outputs.manager }}" in
+            pnpm)
+              npm install -g pnpm
+              pnpm install --frozen-lockfile
+              ;;
+            yarn)
+              npm install -g yarn
+              yarn install --frozen-lockfile
+              ;;
+            npm)
+              npm ci
+              ;;
+          esac
+
+      - name: Run lint
+        working-directory: vue3-admin
+        run: npm run lint
+
+  build:
+    name: Build
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect package manager
+        id: detect-pm
+        working-directory: vue3-admin
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> "$GITHUB_OUTPUT"
+          elif [ -f "yarn.lock" ]; then
+            echo "manager=yarn" >> "$GITHUB_OUTPUT"
+          elif [ -f "package-lock.json" ]; then
+            echo "manager=npm" >> "$GITHUB_OUTPUT"
+          else
+            echo "manager=npm" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "${{ steps.detect-pm.outputs.manager }}"
+          cache-dependency-path: vue3-admin/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vue3-admin
+        shell: bash
+        run: |
+          case "${{ steps.detect-pm.outputs.manager }}" in
+            pnpm)
+              npm install -g pnpm
+              pnpm install --frozen-lockfile
+              ;;
+            yarn)
+              npm install -g yarn
+              yarn install --frozen-lockfile
+              ;;
+            npm)
+              npm ci
+              ;;
+          esac
+
+      - name: Build
+        working-directory: vue3-admin
+        run: npm run build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: vue3-admin/dist
+          retention-days: 7
+          if-no-files-found: error

@@ -1,0 +1,63 @@
+# =============================================================================
+# Kustomize entrypoint for the xarch observability stack.
+# This file references only configuration / provisioning files - the
+# actual Deployment / Service / ConfigMap manifests for Prometheus and
+# Grafana live next to it and are expected to be included by name.
+# Apply with: kubectl apply -k k8s/observability/
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: xarch
+
+commonLabels:
+  app.kubernetes.io/part-of: xarch
+  app.kubernetes.io/component: observability
+  app.kubernetes.io/managed-by: kustomize
+
+# ConfigMaps are referenced explicitly so that downstream overlays
+# (e.g. overlays/dev, overlays/prod) can patch them without modifying
+# this base.
+configMapGenerator:
+  - name: prometheus-config
+    files:
+      - prometheus.yml
+      - alerts/prometheus-alerts.yaml
+    options:
+      labels:
+        app.kubernetes.io/name: prometheus
+        app.kubernetes.io/component: config
+
+  - name: grafana-datasources
+    files:
+      - grafana/provisioning/datasources/prometheus.yaml
+    options:
+      labels:
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/component: datasources
+
+  - name: grafana-dashboards-provider
+    files:
+      - grafana/provisioning/dashboards/dashboards.yaml
+    options:
+      labels:
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/component: dashboards
+
+  - name: grafana-dashboards-xarch
+    files:
+      - grafana/provisioning/dashboards/xarch-overview.json
+    options:
+      labels:
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/component: dashboards
+
+  - name: grafana-alerting
+    files:
+      - grafana/provisioning/alerting/alert-rules.yaml
+      - grafana/provisioning/alerting/contact-points.yaml
+      - grafana/provisioning/alerting/policies.yaml
+    options:
+      labels:
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/component: alerting

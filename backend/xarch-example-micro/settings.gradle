@@ -1,0 +1,9 @@
+rootProject.name = 'xarch-example-micro'
+
+include 'common'
+include 'service-auth'
+include 'service-system'
+include 'service-file'
+include 'service-monitor'
+include 'service-ai'
+include 'service-message'

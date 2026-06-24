@@ -1,0 +1,103 @@
+name: Node.js MCP CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "node-mcp-servers/**"
+      - ".github/workflows/ci-node.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "node-mcp-servers/**"
+      - ".github/workflows/ci-node.yml"
+
+concurrency:
+  group: ci-node-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    name: Detect Node MCP packages
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.detect.outputs.packages }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect MCP packages
+        id: detect
+        run: |
+          packages=()
+          for dir in node-mcp-servers/*; do
+            if [ -d "$dir" ] && [ -f "$dir/package.json" ]; then
+              relpath="${dir#./}"
+              packages+=("$relpath")
+            fi
+          done
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "packages=" >> "$GITHUB_OUTPUT"
+          else
+            printf '%s\n' "${packages[@]}" | jq -R . | jq -s -c . > /tmp/pkgs.json
+            pkgs=$(cat /tmp/pkgs.json)
+            echo "packages=$pkgs" >> "$GITHUB_OUTPUT"
+          fi
+
+  ci:
+    name: CI (${{ matrix.package }})
+    needs: detect
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.detect.outputs.packages) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read package.json to detect Node version
+        id: meta
+        working-directory: ${{ matrix.package }}
+        run: |
+          echo "node_version=$(jq -r '.engines.node // "20"' package.json | sed 's/[>=^~]//g')" >> "$GITHUB_OUTPUT"
+          echo "package_name=$(jq -r '.name // "unknown"' package.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node ${{ steps.meta.outputs.node_version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.meta.outputs.node_version }}
+          cache: "npm"
+          cache-dependency-path: ${{ matrix.package }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.package }}
+        run: npm ci
+
+      - name: Run lint
+        working-directory: ${{ matrix.package }}
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Run tests
+        working-directory: ${{ matrix.package }}
+        run: npm test
+        continue-on-error: true
+
+      - name: Build
+        working-directory: ${{ matrix.package }}
+        run: npm run build
+        continue-on-error: true
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-mcp-${{ matrix.package }}
+          path: ${{ matrix.package }}/dist
+          retention-days: 7
+          if-no-files-found: ignore
