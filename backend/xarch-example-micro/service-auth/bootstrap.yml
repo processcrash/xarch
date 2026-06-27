@@ -1,0 +1,17 @@
+# service-auth/bootstrap.yml
+# Bootstrap configuration — Nacos discovery + config are wired here.
+# application.yml overrides app-specific settings.
+
+spring:
+  application:
+    name: xarch-service-auth
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER:nacos.xarch:8848}
+        namespace: xarch-cloud
+      config:
+        server-addr: ${NACOS_SERVER:nacos.xarch:8848}
+        namespace: xarch-cloud
+        file-extension: yaml
+        refresh-enabled: true

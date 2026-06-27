@@ -1,0 +1,40 @@
+// service-file/build.gradle
+// File management micro-service (port 9003).
+// Owns: Resource, TempFile, StorageConfig.
+
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation project(':common')
+
+    implementation project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-db-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-web-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-cache-spring-boot-starter')
+
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    // Excel
+    implementation 'com.alibaba:easyexcel:3.3.3'
+
+    // Storage backends
+    implementation 'io.minio:minio:8.5.10'
+    implementation 'com.aliyun.oss:aliyun-sdk-oss:3.17.4'
+
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+springBoot {
+    mainClass = 'com.xarch.example.file.FileMicroApplication'
+}

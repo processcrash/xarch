@@ -1,0 +1,19 @@
+// common/build.gradle
+// Shared library module — no Spring Boot, no Spring Cloud runtime.
+// Only ships DTOs, constants, utility classes and Feign fallback stubs.
+
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // Compile-only Spring/Feign types so Feign fallback signatures compile
+    // when other modules wire this jar onto their classpath.
+    api 'org.springframework:spring-web:6.2.1'
+    api 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.0'
+    api 'com.xarch.starter:xarch-cloud-starter-core:1.0.0'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+}

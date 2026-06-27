@@ -1,0 +1,38 @@
+// service-monitor/build.gradle
+// Monitor micro-service (port 9004).
+// Owns: SysJob, SysJobLog. Also exposes server + cache monitor.
+
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation project(':common')
+
+    implementation project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-db-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-web-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-cache-spring-boot-starter')
+
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // Quartz for scheduled jobs
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+springBoot {
+    mainClass = 'com.xarch.example.monitor.MonitorMicroApplication'
+}

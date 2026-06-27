@@ -1,0 +1,15 @@
+# service-monitor/bootstrap.yml
+
+spring:
+  application:
+    name: xarch-service-monitor
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER:nacos.xarch:8848}
+        namespace: xarch-cloud
+      config:
+        server-addr: ${NACOS_SERVER:nacos.xarch:8848}
+        namespace: xarch-cloud
+        file-extension: yaml
+        refresh-enabled: true

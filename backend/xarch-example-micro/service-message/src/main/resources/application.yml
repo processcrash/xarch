@@ -1,0 +1,54 @@
+# service-message/application.yml
+
+server:
+  port: 9006
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: xarch-service-message
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/xarch?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USER:xarch}
+    password: ${MYSQL_PASSWORD:xarch}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      timeout: 5s
+
+mybatis-flex:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+sa-token:
+  token-name: xarch-token
+  timeout: 2592000
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+
+logging:
+  level:
+    root: INFO
+    com.xarch.example: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always

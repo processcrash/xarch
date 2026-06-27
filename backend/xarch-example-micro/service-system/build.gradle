@@ -1,0 +1,41 @@
+// service-system/build.gradle
+// System management micro-service (port 9002).
+// Owns: Role, Menu, Dept, Dict, DictData, Config, OpLog, LoginLog,
+//       SysNotice, SysPost, SysUserOnline.
+
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation project(':common')
+
+    // xarch starters
+    implementation project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-db-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-web-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-cache-spring-boot-starter')
+
+    // Spring Cloud / Nacos
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    // MySQL driver
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // Actuator for health-check
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+springBoot {
+    mainClass = 'com.xarch.example.system.SystemMicroApplication'
+}

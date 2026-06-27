@@ -1,0 +1,45 @@
+// service-ai/build.gradle
+// AI micro-service (port 9005).
+// Owns: AI server, command audit, command history, command session.
+
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation project(':common')
+
+    implementation project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-db-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-web-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-cache-spring-boot-starter')
+
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    // Spring AI
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M6'
+    implementation 'org.springframework.ai:spring-ai-anthropic-spring-boot-starter:1.0.0-M6'
+
+    // WebSocket for chat streaming
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // JSch for SSH command execution
+    implementation 'com.jcraft:jsch:0.1.55'
+
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+springBoot {
+    mainClass = 'com.xarch.example.ai.AiMicroApplication'
+}
