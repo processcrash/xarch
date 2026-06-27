@@ -1,5 +1,6 @@
 package com.xarch.crm.service;
 
+import com.xarch.crm.dto.ContactDTO;
 import com.xarch.crm.entity.Contact;
 
 import java.util.List;
@@ -14,9 +15,12 @@ public interface ContactService {
     Contact getById(Long id);
 
     /** Create a new contact. The {@code isPrimary} flag is honoured. */
-    void create(Contact contact);
+    void create(ContactDTO dto);
 
-    void update(Contact contact);
+    void update(ContactDTO dto);
 
     void delete(Long id);
+
+    /** Promote a contact to the primary contact for its customer. */
+    void setPrimary(Long id);
 }

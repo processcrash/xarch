@@ -14,5 +14,14 @@ public interface FollowUpService {
 
     void delete(Long id);
 
+    void update(Long id, FollowUpDTO dto);
+
+    FollowUp getById(Long id);
+
     List<FollowUp> listByCustomer(Long customerId);
+
+    List<FollowUp> listByOpportunity(Long opportunityId);
+
+    /** Find follow-ups whose {@code nextFollowUpDate} is on or before the cutoff. */
+    List<FollowUp> scheduleNext(Long date);
 }

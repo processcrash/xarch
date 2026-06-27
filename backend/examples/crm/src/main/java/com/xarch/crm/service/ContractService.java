@@ -17,6 +17,9 @@ public interface ContractService {
 
     void update(Long id, ContractDTO dto);
 
+    /** Soft delete. */
+    void delete(Long id);
+
     /** Mark a draft contract as signed and active. */
     void sign(Long id, Long signedDate);
 

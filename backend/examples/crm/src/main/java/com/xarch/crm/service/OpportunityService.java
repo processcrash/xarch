@@ -20,6 +20,9 @@ public interface OpportunityService {
 
     void update(Long id, OpportunityDTO dto);
 
+    /** Soft delete. */
+    void delete(Long id);
+
     /** Move an opportunity to a new stage. */
     void changeStage(Long id, String stage);
 
