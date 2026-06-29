@@ -1,0 +1,42 @@
+dependencies {
+    api project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+
+    compileOnly 'org.springframework.boot:spring-boot-starter'
+    compileOnly 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.springframework.boot:spring-boot-starter-webflux'
+    compileOnly 'org.springframework.boot:spring-boot-starter-jdbc'
+    compileOnly 'org.springframework.boot:spring-boot-starter-data-redis'
+    compileOnly 'org.springframework.kafka:spring-kafka'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // OpenTelemetry SDK + Auto-Instrumentation Starter
+    api 'io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:2.10.0'
+
+    // Exporter back-ends
+    api 'io.opentelemetry:opentelemetry-exporter-otlp:1.42.0'
+    api 'io.opentelemetry:opentelemetry-exporter-logging:1.42.0'
+    api 'io.opentelemetry:opentelemetry-exporter-zipkin:1.42.0'
+
+    // Auto-instrumentation libraries for common frameworks
+    api 'io.opentelemetry.instrumentation:opentelemetry-spring-webmvc-6.0:2.10.0'
+    api 'io.opentelemetry.instrumentation:opentelemetry-jdbc:2.10.0'
+    api 'io.opentelemetry.instrumentation:opentelemetry-redis:2.10.0'
+    api 'io.opentelemetry.instrumentation:opentelemetry-kafka:2.10.0'
+
+    // Logback bridge used by the MDC TurboFilter
+    api 'ch.qos.logback:logback-classic:1.5.6'
+
+    api 'org.slf4j:slf4j-api'
+
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

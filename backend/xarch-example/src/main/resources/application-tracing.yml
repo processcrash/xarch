@@ -1,0 +1,26 @@
+# Tracing configuration for the xarch-example monolith.
+#
+# Activate by passing --spring.profiles.active=tracing on the command line
+# or by including this file's keys in application.yml directly.
+
+xarch:
+  tracing:
+    enabled: true
+    service-name: xarch-example
+    exporter: otlp
+    endpoint: http://jaeger:4317
+    sample-rate: 1.0
+    resource-attributes:
+      deployment.environment: dev
+      service.version: 1.0.0
+
+# When running locally without a collector, switch to:
+#   exporter: logging
+# Spans will then be printed to System.err.
+
+# For Zipkin:
+#   exporter: zipkin
+#   endpoint: http://localhost:9411/api/v2/spans
+
+# Disable entirely:
+#   xarch.tracing.enabled: false

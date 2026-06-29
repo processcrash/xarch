@@ -15,6 +15,7 @@ include(
     "xarch-spring-boot-starter:xarch-db-spring-boot-starter",
     "xarch-spring-boot-starter:xarch-web-spring-boot-starter",
     "xarch-spring-boot-starter:xarch-cache-spring-boot-starter",
+    "xarch-spring-boot-starter:xarch-tracing-spring-boot-starter",
     "xarch-example",
     // Spring Cloud modules
     "xarch-spring-cloud:xarch-cloud:xarch-cloud-starter-nacos",
