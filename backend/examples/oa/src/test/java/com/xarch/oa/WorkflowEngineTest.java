@@ -5,6 +5,8 @@ import com.xarch.oa.entity.ApprovalRecord;
 import com.xarch.oa.entity.Workflow;
 import com.xarch.oa.workflow.WorkflowDefinition;
 import com.xarch.oa.workflow.WorkflowEngine;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -67,6 +69,79 @@ class WorkflowEngineTest {
                 new ApprovalDTO("REJECT", 101L, "Alice", "no", null), this::noopSink);
         assertNull(terminal);
         assertEquals(WorkflowDefinition.Edge.TERMINAL_REJECT, workflow.getCurrentNode());
+    }
+
+    @Nested
+    @DisplayName("Extended workflow engine tests")
+    class Extended {
+
+        @Test
+        @DisplayName("submit creates workflow instance from definition")
+        void shouldCreateInstanceFromDefinition() {
+            WorkflowEngine engine = newEngine();
+            Workflow workflow = new Workflow();
+            workflow.setId(10L);
+            workflow.setBusinessType("LEAVE");
+            workflow.setDefinition(sampleDefinition());
+
+            WorkflowDefinition.Node first = engine.start(workflow);
+
+            assertNotNull(first);
+            assertEquals(0, first.id());
+            assertEquals(0, workflow.getCurrentNode());
+        }
+
+        @Test
+        @DisplayName("approve advances to next node")
+        void shouldAdvanceOnApprove() {
+            WorkflowEngine engine = newEngine();
+            Workflow workflow = new Workflow();
+            workflow.setId(20L);
+            workflow.setBusinessType("LEAVE");
+            workflow.setDefinition(sampleDefinition());
+            workflow.setCurrentNode(0);
+
+            WorkflowDefinition.Node next = engine.act(workflow,
+                    new ApprovalDTO("APPROVE", 101L, "Alice", "ok", null), record -> {});
+
+            assertNotNull(next);
+            assertEquals(1, next.id());
+            assertEquals(1, workflow.getCurrentNode());
+        }
+
+        @Test
+        @DisplayName("reject terminates workflow")
+        void shouldTerminateOnReject() {
+            WorkflowEngine engine = newEngine();
+            Workflow workflow = new Workflow();
+            workflow.setId(30L);
+            workflow.setBusinessType("LEAVE");
+            workflow.setDefinition(sampleDefinition());
+            workflow.setCurrentNode(0);
+
+            WorkflowDefinition.Node terminal = engine.act(workflow,
+                    new ApprovalDTO("REJECT", 101L, "Alice", "no", null), record -> {});
+
+            assertNull(terminal);
+            assertEquals(WorkflowDefinition.Edge.TERMINAL_REJECT, workflow.getCurrentNode());
+        }
+
+        @Test
+        @DisplayName("second approve reaches terminal APPROVE")
+        void shouldReachTerminalApprove() {
+            WorkflowEngine engine = newEngine();
+            Workflow workflow = new Workflow();
+            workflow.setId(40L);
+            workflow.setBusinessType("LEAVE");
+            workflow.setDefinition(sampleDefinition());
+            workflow.setCurrentNode(1);
+
+            WorkflowDefinition.Node terminal = engine.act(workflow,
+                    new ApprovalDTO("APPROVE", 201L, "Bob", "approved", null), record -> {});
+
+            assertNull(terminal);
+            assertEquals(WorkflowDefinition.Edge.TERMINAL_APPROVE, workflow.getCurrentNode());
+        }
     }
 
     private void noopSink(ApprovalRecord record) {
