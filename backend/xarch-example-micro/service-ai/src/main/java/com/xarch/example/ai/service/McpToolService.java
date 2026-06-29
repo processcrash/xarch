@@ -1,5 +1,8 @@
 package com.xarch.example.ai.service;
 
+import com.xarch.example.ai.entity.CommandAudit;
+import com.xarch.starter.core.result.PageResult;
+
 import java.util.List;
 import java.util.Map;
 
@@ -31,8 +34,7 @@ public interface McpToolService {
     /**
      * Page through tool execution history.
      */
-    com.xarch.starter.core.result.PageResult<com.xarch.example.ai.entity.CommandAudit>
-            pageHistory(Long serverId, Long userId, int pageNum, int pageSize);
+    PageResult<CommandAudit> pageHistory(Long serverId, Long userId, int pageNum, int pageSize);
 
     /** Tool invocation request bundle. */
     final class ToolInvokeRequest {

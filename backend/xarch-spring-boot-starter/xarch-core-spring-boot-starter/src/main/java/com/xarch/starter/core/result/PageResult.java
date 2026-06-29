@@ -34,4 +34,11 @@ public class PageResult<T> implements Serializable {
     public static <T> PageResult<T> ok(List<T> list) {
         return new PageResult<>(list, list == null ? 0 : list.size());
     }
+
+    /**
+     * Build an empty page result (zero total, empty list).
+     */
+    public static <T> PageResult<T> empty() {
+        return new PageResult<>(List.of(), 0L);
+    }
 }
