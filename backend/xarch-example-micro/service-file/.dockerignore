@@ -1,0 +1,10 @@
+**/build/
+**/.gradle/
+**/out/
+**/target/
+**/*.iml
+**/.idea/
+**/.vscode/
+**/logs/
+**/*.log
+**/.git/

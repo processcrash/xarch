@@ -4,11 +4,14 @@ version: '3.8'
 # Brings up Nacos + MySQL + Redis + all 6 micro-services on bridge network "xarch-net".
 #
 # Usage:
-#   docker-compose up -d nacos mysql redis       # infra only
-#   docker-compose up -d                         # everything
+#   ./build-images.sh                         # build all 6 service images
+#   docker compose up -d nacos mysql redis    # infra only
+#   docker compose up -d                      # everything
 #
 # Notes:
-#   * The services depend on infra healthchecks (curl /actuator/health).
+#   * Each service has its own Dockerfile under service-<name>/.
+#   * Build context is the xarch-example-micro/ root (so :common resolves).
+#   * Services depend on infra healthchecks (curl /actuator/health).
 #   * The MySQL schema is created on first run from docs/db/init.sql (mounted).
 
 networks:
@@ -43,6 +46,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+    restart: unless-stopped
 
   mysql:
     image: mysql:8.4.0
@@ -63,6 +67,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+    restart: unless-stopped
 
   redis:
     image: redis:7.2-alpine
@@ -77,17 +82,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 6
+    restart: unless-stopped
 
   # ------------------------------------------------------------------
   # Micro-services
+  #
+  # Image naming: xarch-example-micro/service-<name>:1.0.0
+  # Build context: .   (the xarch-example-micro/ root — same level as
+  #                   service-auth/, common/, settings.gradle, etc.)
   # ------------------------------------------------------------------
   service-auth:
     build:
-      context: ../
-      dockerfile: xarch-example-micro/docker/Dockerfile
-      args:
-        MODULE: service-auth
-    image: xarch/service-auth:1.0.0
+      context: .
+      dockerfile: service-auth/Dockerfile
+    image: xarch-example-micro/service-auth:1.0.0
     container_name: xarch-service-auth
     networks: [xarch-net]
     ports:
@@ -105,18 +113,18 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9001/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9001/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
 
   service-system:
     build:
-      context: ../
-      dockerfile: xarch-example-micro/docker/Dockerfile
-      args:
-        MODULE: service-system
-    image: xarch/service-system:1.0.0
+      context: .
+      dockerfile: service-system/Dockerfile
+    image: xarch-example-micro/service-system:1.0.0
     container_name: xarch-service-system
     networks: [xarch-net]
     ports:
@@ -136,18 +144,18 @@ services:
       service-auth:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9002/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9002/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
 
   service-file:
     build:
-      context: ../
-      dockerfile: xarch-example-micro/docker/Dockerfile
-      args:
-        MODULE: service-file
-    image: xarch/service-file:1.0.0
+      context: .
+      dockerfile: service-file/Dockerfile
+    image: xarch-example-micro/service-file:1.0.0
     container_name: xarch-service-file
     networks: [xarch-net]
     ports:
@@ -167,18 +175,18 @@ services:
       service-auth:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9003/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9003/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
 
   service-monitor:
     build:
-      context: ../
-      dockerfile: xarch-example-micro/docker/Dockerfile
-      args:
-        MODULE: service-monitor
-    image: xarch/service-monitor:1.0.0
+      context: .
+      dockerfile: service-monitor/Dockerfile
+    image: xarch-example-micro/service-monitor:1.0.0
     container_name: xarch-service-monitor
     networks: [xarch-net]
     ports:
@@ -196,18 +204,18 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9004/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9004/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
 
   service-ai:
     build:
-      context: ../
-      dockerfile: xarch-example-micro/docker/Dockerfile
-      args:
-        MODULE: service-ai
-    image: xarch/service-ai:1.0.0
+      context: .
+      dockerfile: service-ai/Dockerfile
+    image: xarch-example-micro/service-ai:1.0.0
     container_name: xarch-service-ai
     networks: [xarch-net]
     ports:
@@ -227,18 +235,18 @@ services:
       service-auth:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9005/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9005/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
 
   service-message:
     build:
-      context: ../
-      dockerfile: xarch-example-micro/docker/Dockerfile
-      args:
-        MODULE: service-message
-    image: xarch/service-message:1.0.0
+      context: .
+      dockerfile: service-message/Dockerfile
+    image: xarch-example-micro/service-message:1.0.0
     container_name: xarch-service-message
     networks: [xarch-net]
     ports:
@@ -258,7 +266,9 @@ services:
       service-auth:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9006/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9006/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
