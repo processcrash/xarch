@@ -1,10 +1,10 @@
 <template>
   <div class="command-audit">
     <div class="toolbar">
-      <span class="page-title">Command Audit</span>
+      <span class="page-title">{{ t('audit.title') }}</span>
       <el-button type="primary" @click="loadData" :loading="loading">
         <el-icon><Refresh /></el-icon>
-        Refresh
+        {{ t('common.refresh') }}
       </el-button>
     </div>
 
@@ -13,7 +13,7 @@
         <el-card shadow="hover" class="stat-card">
           <div class="stat-header">
             <el-icon class="stat-icon" color="#409eff"><Document /></el-icon>
-            <span class="stat-label">Total</span>
+            <span class="stat-label">{{ t('audit.total') }}</span>
           </div>
           <div class="stat-value">{{ stats.total || 0 }}</div>
         </el-card>
@@ -22,7 +22,7 @@
         <el-card shadow="hover" class="stat-card">
           <div class="stat-header">
             <el-icon class="stat-icon" color="#67c23a"><CircleCheck /></el-icon>
-            <span class="stat-label">Approved</span>
+            <span class="stat-label">{{ t('audit.approved') }}</span>
           </div>
           <div class="stat-value">{{ stats.approved || 0 }}</div>
         </el-card>
@@ -31,7 +31,7 @@
         <el-card shadow="hover" class="stat-card">
           <div class="stat-header">
             <el-icon class="stat-icon" color="#f56c6c"><CircleClose /></el-icon>
-            <span class="stat-label">Rejected</span>
+            <span class="stat-label">{{ t('audit.rejected') }}</span>
           </div>
           <div class="stat-value">{{ stats.rejected || 0 }}</div>
         </el-card>
@@ -40,7 +40,7 @@
         <el-card shadow="hover" class="stat-card">
           <div class="stat-header">
             <el-icon class="stat-icon" color="#e6a23c"><Clock /></el-icon>
-            <span class="stat-label">Pending</span>
+            <span class="stat-label">{{ t('audit.pending') }}</span>
           </div>
           <div class="stat-value">{{ stats.pending || 0 }}</div>
         </el-card>
@@ -49,95 +49,95 @@
 
     <el-card shadow="hover" style="margin-top: 20px">
       <el-form :model="queryParams" inline class="filter-form">
-        <el-form-item label="Server ID">
-          <el-input-number v-model="queryParams.serverId" :min="0" controls-position="right" placeholder="Server ID" />
+        <el-form-item :label="t('audit.serverId')">
+          <el-input-number v-model="queryParams.serverId" :min="0" controls-position="right" :placeholder="t('audit.serverId')" />
         </el-form-item>
-        <el-form-item label="User ID">
-          <el-input-number v-model="queryParams.userId" :min="0" controls-position="right" placeholder="User ID" />
+        <el-form-item :label="t('audit.userId')">
+          <el-input-number v-model="queryParams.userId" :min="0" controls-position="right" :placeholder="t('audit.userId')" />
         </el-form-item>
-        <el-form-item label="Risk Level">
-          <el-select v-model="queryParams.riskLevel" placeholder="All" clearable style="width: 140px">
-            <el-option label="All" value="" />
-            <el-option label="Low" value="LOW" />
-            <el-option label="Medium" value="MEDIUM" />
-            <el-option label="High" value="HIGH" />
+        <el-form-item :label="t('audit.riskLevel')">
+          <el-select v-model="queryParams.riskLevel" :placeholder="t('common.all')" clearable style="width: 140px">
+            <el-option :label="t('common.all')" value="" />
+            <el-option :label="t('audit.riskLow')" value="LOW" />
+            <el-option :label="t('audit.riskMedium')" value="MEDIUM" />
+            <el-option :label="t('audit.riskHigh')" value="HIGH" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Approval">
-          <el-select v-model="queryParams.approvalStatus" placeholder="All" clearable style="width: 140px">
-            <el-option label="All" value="" />
-            <el-option label="Pending" value="PENDING" />
-            <el-option label="Approved" value="APPROVED" />
-            <el-option label="Rejected" value="REJECTED" />
-            <el-option label="Executed" value="EXECUTED" />
+        <el-form-item :label="t('audit.approval')">
+          <el-select v-model="queryParams.approvalStatus" :placeholder="t('common.all')" clearable style="width: 140px">
+            <el-option :label="t('common.all')" value="" />
+            <el-option :label="t('common.status.pending')" value="PENDING" />
+            <el-option :label="t('common.status.approved')" value="APPROVED" />
+            <el-option :label="t('common.status.rejected')" value="REJECTED" />
+            <el-option :label="t('common.status.executed')" value="EXECUTED" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Date Range">
+        <el-form-item :label="t('audit.dateRange')">
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
-            range-separator="to"
-            start-placeholder="Start"
-            end-placeholder="End"
+            :range-separator="t('common.to')"
+            :start-placeholder="t('audit.start')"
+            :end-placeholder="t('audit.end')"
             value-format="YYYY-MM-DD HH:mm:ss"
             style="width: 360px"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">Search</el-button>
-          <el-button @click="handleReset">Reset</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
       <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-        <el-tab-pane label="All Logs" name="all" />
-        <el-tab-pane label="Pending Approvals" name="pending" />
-        <el-tab-pane label="My History" name="history" />
+        <el-tab-pane :label="t('audit.tabAllLogs')" name="all" />
+        <el-tab-pane :label="t('audit.tabPendingApprovals')" name="pending" />
+        <el-tab-pane :label="t('audit.tabMyHistory')" name="history" />
       </el-tabs>
 
       <el-table :data="tableData" v-loading="loading" stripe>
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="serverName" label="Server" width="140" show-overflow-tooltip />
-        <el-table-column prop="userName" label="User" width="120" show-overflow-tooltip />
-        <el-table-column prop="command" label="Command" min-width="220">
+        <el-table-column prop="serverName" :label="t('audit.server')" width="140" show-overflow-tooltip />
+        <el-table-column prop="userName" :label="t('audit.user')" width="120" show-overflow-tooltip />
+        <el-table-column prop="command" :label="t('audit.command')" min-width="220">
           <template #default="{ row }">
             <el-tooltip :content="row.command" placement="top">
               <span class="truncate">{{ row.command }}</span>
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column prop="riskLevel" label="Risk" width="100">
+        <el-table-column prop="riskLevel" :label="t('audit.risk')" width="100">
           <template #default="{ row }">
             <el-tag :type="getRiskLevelType(row.riskLevel)" size="small">
               {{ row.riskLevel || '-' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="approvalStatus" label="Status" width="110">
+        <el-table-column prop="approvalStatus" :label="t('audit.approvalStatus')" width="110">
           <template #default="{ row }">
             <el-tag :type="getApprovalStatusType(row.approvalStatus)" size="small">
               {{ row.approvalStatus || '-' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="result" label="Result" min-width="200">
+        <el-table-column prop="result" :label="t('audit.result')" min-width="200">
           <template #default="{ row }">
             <el-tooltip :content="row.result || '-'" placement="top">
               <span class="truncate">{{ row.result || '-' }}</span>
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="Create Time" width="170" />
-        <el-table-column label="Actions" width="240" fixed="right">
+        <el-table-column prop="createTime" :label="t('audit.createTime')" width="170" />
+        <el-table-column :label="t('audit.actions')" width="240" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleView(row)">View</el-button>
+            <el-button size="small" @click="handleView(row)">{{ t('audit.view') }}</el-button>
             <el-button
               v-if="row.approvalStatus === 'PENDING'"
               size="small"
               type="success"
               @click="handleApprove(row)"
             >
-              Approve
+              {{ t('audit.approve') }}
             </el-button>
             <el-button
               v-if="row.approvalStatus === 'PENDING'"
@@ -145,7 +145,7 @@
               type="danger"
               @click="handleReject(row)"
             >
-              Reject
+              {{ t('audit.reject') }}
             </el-button>
           </template>
         </el-table-column>
@@ -175,58 +175,58 @@
       />
     </el-card>
 
-    <el-drawer v-model="detailDrawerVisible" title="Command Audit Detail" size="500px">
+    <el-drawer v-model="detailDrawerVisible" :title="t('audit.detailTitle')" size="500px">
       <el-descriptions :column="1" border>
         <el-descriptions-item label="ID">{{ currentRecord?.id }}</el-descriptions-item>
-        <el-descriptions-item label="Server">{{ currentRecord?.serverName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="User">{{ currentRecord?.userName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="Risk Level">
+        <el-descriptions-item :label="t('audit.server')">{{ currentRecord?.serverName || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('audit.user')">{{ currentRecord?.userName || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('audit.riskLevel')">
           <el-tag :type="getRiskLevelType(currentRecord?.riskLevel)" size="small">
             {{ currentRecord?.riskLevel || '-' }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="Approval Status">
+        <el-descriptions-item :label="t('audit.approvalStatus')">
           <el-tag :type="getApprovalStatusType(currentRecord?.approvalStatus)" size="small">
             {{ currentRecord?.approvalStatus || '-' }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="Create Time">{{ currentRecord?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="Command">
+        <el-descriptions-item :label="t('audit.createTime')">{{ currentRecord?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="t('audit.command')">
           <pre class="code-block">{{ currentRecord?.command }}</pre>
         </el-descriptions-item>
-        <el-descriptions-item label="Result">
+        <el-descriptions-item :label="t('audit.result')">
           <pre class="code-block">{{ currentRecord?.result || '-' }}</pre>
         </el-descriptions-item>
       </el-descriptions>
     </el-drawer>
 
-    <el-dialog v-model="approveDialogVisible" title="Approve Command" width="500px">
+    <el-dialog v-model="approveDialogVisible" :title="t('audit.approveTitle')" width="500px">
       <el-form :model="approveForm" label-width="100px">
-        <el-form-item label="Command">
+        <el-form-item :label="t('audit.command')">
           <pre class="code-block">{{ currentRecord?.command }}</pre>
         </el-form-item>
-        <el-form-item label="Comment">
-          <el-input v-model="approveForm.comment" type="textarea" :rows="4" placeholder="Approval comment (optional)" />
+        <el-form-item :label="t('audit.comment')">
+          <el-input v-model="approveForm.comment" type="textarea" :rows="4" :placeholder="t('audit.commentPlaceholder')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="approveDialogVisible = false">Cancel</el-button>
-        <el-button type="success" @click="submitApprove" :loading="actionLoading">Approve</el-button>
+        <el-button @click="approveDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="success" @click="submitApprove" :loading="actionLoading">{{ t('audit.approve') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="rejectDialogVisible" title="Reject Command" width="500px">
+    <el-dialog v-model="rejectDialogVisible" :title="t('audit.rejectTitle')" width="500px">
       <el-form :model="rejectForm" label-width="100px" :rules="rejectRules" ref="rejectFormRef">
-        <el-form-item label="Command">
+        <el-form-item :label="t('audit.command')">
           <pre class="code-block">{{ currentRecord?.command }}</pre>
         </el-form-item>
-        <el-form-item label="Reason" prop="reason">
-          <el-input v-model="rejectForm.reason" type="textarea" :rows="4" placeholder="Reason for rejection" />
+        <el-form-item :label="t('audit.reason')" prop="reason">
+          <el-input v-model="rejectForm.reason" type="textarea" :rows="4" :placeholder="t('audit.reasonPlaceholder')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="rejectDialogVisible = false">Cancel</el-button>
-        <el-button type="danger" @click="submitReject" :loading="actionLoading">Reject</el-button>
+        <el-button @click="rejectDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="danger" @click="submitReject" :loading="actionLoading">{{ t('audit.reject') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -244,7 +244,9 @@ import {
 } from '@element-plus/icons-vue'
 import { auditApi } from '@/api/audit'
 import type { CommandAudit, ComplianceStats, RiskLevel, ApprovalStatus } from '@/api/audit'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const loading = ref(false)
 const statsLoading = ref(false)
 const actionLoading = ref(false)
@@ -290,8 +292,8 @@ const rejectFormRef = ref()
 const rejectForm = reactive({ reason: '' })
 const rejectRules = {
   reason: [
-    { required: true, message: 'Reason is required', trigger: 'blur' },
-    { min: 2, max: 500, message: 'Length 2-500 characters', trigger: 'blur' }
+    { required: true, message: t('audit.validation.reasonRequired'), trigger: 'blur' },
+    { min: 2, max: 500, message: t('audit.validation.reasonLength'), trigger: 'blur' }
   ]
 }
 
@@ -315,7 +317,7 @@ const loadData = async () => {
       total.value = result.total || 0
     }
   } catch {
-    ElMessage.error('Failed to load audit records')
+    ElMessage.error(t('audit.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -381,12 +383,12 @@ const submitApprove = async () => {
   actionLoading.value = true
   try {
     await auditApi.approve(currentRecord.value.id, { comment: approveForm.comment })
-    ElMessage.success('Approved successfully')
+    ElMessage.success(t('audit.approvedSuccess'))
     approveDialogVisible.value = false
     loadData()
     loadStats()
   } catch {
-    ElMessage.error('Approve failed')
+    ElMessage.error(t('audit.approveFailed'))
   } finally {
     actionLoading.value = false
   }
@@ -409,12 +411,12 @@ const submitReject = async () => {
   actionLoading.value = true
   try {
     await auditApi.reject(currentRecord.value.id, { reason: rejectForm.reason })
-    ElMessage.success('Rejected successfully')
+    ElMessage.success(t('audit.rejectedSuccess'))
     rejectDialogVisible.value = false
     loadData()
     loadStats()
   } catch {
-    ElMessage.error('Reject failed')
+    ElMessage.error(t('audit.rejectFailed'))
   } finally {
     actionLoading.value = false
   }

@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('menu.*') keys -->
 <template>
   <div class="menu-list">
     <div class="toolbar">

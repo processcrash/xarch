@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('config.*') keys -->
 <template>
   <div class="config-list">
     <div class="toolbar">

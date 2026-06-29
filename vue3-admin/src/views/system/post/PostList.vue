@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('post.*') keys (namespace not yet added to locale files) -->
 <template>
   <div class="post-list">
     <div class="toolbar">

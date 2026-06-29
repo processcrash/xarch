@@ -1,10 +1,10 @@
 <template>
   <div class="server-monitor">
     <div class="toolbar">
-      <span class="page-title">Server Monitor</span>
+      <span class="page-title">{{ t('monitor.server.title') }}</span>
       <el-button type="primary" @click="loadData" :loading="loading">
         <el-icon><Refresh /></el-icon>
-        Refresh
+        {{ t('common.refresh') }}
       </el-button>
     </div>
 
@@ -13,7 +13,7 @@
         <el-card shadow="hover" class="stat-card">
           <div class="stat-header">
             <el-icon class="stat-icon" color="#409eff"><Cpu /></el-icon>
-            <span class="stat-label">CPU Usage</span>
+            <span class="stat-label">{{ t('monitor.server.cpuUsage') }}</span>
           </div>
           <el-progress
             :percentage="Number(((serverInfo?.cpu?.usage || 0)).toFixed(2))"
@@ -21,7 +21,7 @@
             :stroke-width="14"
           />
           <div class="stat-meta">
-            Cores: {{ serverInfo?.cpu?.cpuNum ?? '-' }}
+            {{ t('monitor.server.cores') }}: {{ serverInfo?.cpu?.cpuNum ?? '-' }}
           </div>
         </el-card>
       </el-col>
@@ -29,7 +29,7 @@
         <el-card shadow="hover" class="stat-card">
           <div class="stat-header">
             <el-icon class="stat-icon" color="#67c23a"><Histogram /></el-icon>
-            <span class="stat-label">Memory Usage</span>
+            <span class="stat-label">{{ t('monitor.server.memoryUsage') }}</span>
           </div>
           <el-progress
             :percentage="Number(((serverInfo?.mem?.usage || 0)).toFixed(2))"
@@ -37,7 +37,7 @@
             :stroke-width="14"
           />
           <div class="stat-meta">
-            Used: {{ formatBytes(serverInfo?.mem?.used) }} / {{ formatBytes(serverInfo?.mem?.total) }}
+            {{ t('monitor.server.used') }}: {{ formatBytes(serverInfo?.mem?.used) }} / {{ formatBytes(serverInfo?.mem?.total) }}
           </div>
         </el-card>
       </el-col>
@@ -45,7 +45,7 @@
         <el-card shadow="hover" class="stat-card">
           <div class="stat-header">
             <el-icon class="stat-icon" color="#e6a23c"><Coin /></el-icon>
-            <span class="stat-label">JVM Memory</span>
+            <span class="stat-label">{{ t('monitor.server.jvmMemory') }}</span>
           </div>
           <el-progress
             :percentage="Number(((serverInfo?.jvm?.usage || 0)).toFixed(2))"
@@ -53,7 +53,7 @@
             :stroke-width="14"
           />
           <div class="stat-meta">
-            Used: {{ formatBytes(serverInfo?.jvm?.used) }} / Max: {{ formatBytes(serverInfo?.jvm?.max) }}
+            {{ t('monitor.server.used') }}: {{ formatBytes(serverInfo?.jvm?.used) }} / Max: {{ formatBytes(serverInfo?.jvm?.max) }}
           </div>
         </el-card>
       </el-col>
@@ -61,7 +61,7 @@
         <el-card shadow="hover" class="stat-card">
           <div class="stat-header">
             <el-icon class="stat-icon" color="#f56c6c"><Files /></el-icon>
-            <span class="stat-label">Disk Usage</span>
+            <span class="stat-label">{{ t('monitor.server.diskUsage') }}</span>
           </div>
           <el-progress
             :percentage="Number(((diskUsage || 0)).toFixed(2))"
@@ -69,7 +69,7 @@
             :stroke-width="14"
           />
           <div class="stat-meta">
-            Used: {{ formatBytes(diskUsed) }} / {{ formatBytes(diskTotal) }}
+            {{ t('monitor.server.used') }}: {{ formatBytes(diskUsed) }} / {{ formatBytes(diskTotal) }}
           </div>
         </el-card>
       </el-col>
@@ -79,52 +79,52 @@
       <el-col :span="8">
         <el-card shadow="hover">
           <template #header>
-            <span>CPU Info</span>
+            <span>{{ t('monitor.server.cpuInfo') }}</span>
           </template>
           <el-descriptions :column="1" border size="small">
-            <el-descriptions-item label="CPU Cores">{{ serverInfo?.cpu?.cpuNum ?? '-' }}</el-descriptions-item>
-            <el-descriptions-item label="Total">{{ formatBytes(serverInfo?.cpu?.total) }}</el-descriptions-item>
-            <el-descriptions-item label="System">{{ formatBytes(serverInfo?.cpu?.sys) }}</el-descriptions-item>
-            <el-descriptions-item label="Used">{{ formatBytes(serverInfo?.cpu?.used) }}</el-descriptions-item>
-            <el-descriptions-item label="Wait">{{ formatBytes(serverInfo?.cpu?.wait) }}</el-descriptions-item>
-            <el-descriptions-item label="Free">{{ formatBytes(serverInfo?.cpu?.free) }}</el-descriptions-item>
-            <el-descriptions-item label="Usage">{{ (serverInfo?.cpu?.usage ?? 0).toFixed(2) }}%</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.cpuCores')">{{ serverInfo?.cpu?.cpuNum ?? '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.total')">{{ formatBytes(serverInfo?.cpu?.total) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.system')">{{ formatBytes(serverInfo?.cpu?.sys) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.used')">{{ formatBytes(serverInfo?.cpu?.used) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.wait')">{{ formatBytes(serverInfo?.cpu?.wait) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.free')">{{ formatBytes(serverInfo?.cpu?.free) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.usage')">{{ (serverInfo?.cpu?.usage ?? 0).toFixed(2) }}%</el-descriptions-item>
           </el-descriptions>
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card shadow="hover">
           <template #header>
-            <span>Memory Info</span>
+            <span>{{ t('monitor.server.memoryInfo') }}</span>
           </template>
           <el-descriptions :column="1" border size="small">
-            <el-descriptions-item label="Total">{{ formatBytes(serverInfo?.mem?.total) }}</el-descriptions-item>
-            <el-descriptions-item label="Used">{{ formatBytes(serverInfo?.mem?.used) }}</el-descriptions-item>
-            <el-descriptions-item label="Free">{{ formatBytes(serverInfo?.mem?.free) }}</el-descriptions-item>
-            <el-descriptions-item label="Usage">{{ (serverInfo?.mem?.usage ?? 0).toFixed(2) }}%</el-descriptions-item>
-            <el-descriptions-item label="JVM Total">{{ formatBytes(serverInfo?.jvm?.total) }}</el-descriptions-item>
-            <el-descriptions-item label="JVM Max">{{ formatBytes(serverInfo?.jvm?.max) }}</el-descriptions-item>
-            <el-descriptions-item label="JVM Free">{{ formatBytes(serverInfo?.jvm?.free) }}</el-descriptions-item>
-            <el-descriptions-item label="JVM Version">{{ serverInfo?.jvm?.version || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="JVM Home">{{ serverInfo?.jvm?.home || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="JVM Name">{{ serverInfo?.jvm?.name || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="Start Time">{{ serverInfo?.jvm?.startTime || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="Run Time">{{ serverInfo?.jvm?.runTime || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.total')">{{ formatBytes(serverInfo?.mem?.total) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.used')">{{ formatBytes(serverInfo?.mem?.used) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.free')">{{ formatBytes(serverInfo?.mem?.free) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.usage')">{{ (serverInfo?.mem?.usage ?? 0).toFixed(2) }}%</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.jvmTotal')">{{ formatBytes(serverInfo?.jvm?.total) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.jvmMax')">{{ formatBytes(serverInfo?.jvm?.max) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.jvmFree')">{{ formatBytes(serverInfo?.jvm?.free) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.jvmVersion')">{{ serverInfo?.jvm?.version || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.jvmHome')">{{ serverInfo?.jvm?.home || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.jvmName')">{{ serverInfo?.jvm?.name || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.startTime')">{{ serverInfo?.jvm?.startTime || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.runTime')">{{ serverInfo?.jvm?.runTime || '-' }}</el-descriptions-item>
           </el-descriptions>
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card shadow="hover">
           <template #header>
-            <span>System Info</span>
+            <span>{{ t('monitor.server.systemInfo') }}</span>
           </template>
           <el-descriptions :column="1" border size="small">
-            <el-descriptions-item label="Computer Name">{{ serverInfo?.sys?.computerName || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="Computer IP">{{ serverInfo?.sys?.computerIp || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="OS Name">{{ serverInfo?.sys?.osName || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="OS Arch">{{ serverInfo?.sys?.osArch || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="User Dir">{{ serverInfo?.sys?.userDir || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="User Name">{{ serverInfo?.sys?.userName || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.computerName')">{{ serverInfo?.sys?.computerName || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.computerIp')">{{ serverInfo?.sys?.computerIp || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.osName')">{{ serverInfo?.sys?.osName || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.osArch')">{{ serverInfo?.sys?.osArch || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.userDir')">{{ serverInfo?.sys?.userDir || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('monitor.server.userName')">{{ serverInfo?.sys?.userName || '-' }}</el-descriptions-item>
           </el-descriptions>
         </el-card>
       </el-col>
@@ -132,16 +132,16 @@
 
     <el-card shadow="hover" style="margin-top: 20px">
       <template #header>
-        <span>Disk Filesystems</span>
+        <span>{{ t('monitor.server.diskFilesystems') }}</span>
       </template>
       <el-table :data="serverInfo?.sysFile || []" stripe size="small">
-        <el-table-column prop="dirName" label="Directory" min-width="200" />
-        <el-table-column prop="sysTypeName" label="System Type" width="140" />
-        <el-table-column prop="typeName" label="Type" width="120" />
-        <el-table-column prop="total" label="Total" width="140" />
-        <el-table-column prop="free" label="Free" width="140" />
-        <el-table-column prop="used" label="Used" width="140" />
-        <el-table-column prop="usage" label="Usage" width="240">
+        <el-table-column prop="dirName" :label="t('monitor.server.directory')" min-width="200" />
+        <el-table-column prop="sysTypeName" :label="t('monitor.server.systemType')" width="140" />
+        <el-table-column prop="typeName" :label="t('monitor.server.type')" width="120" />
+        <el-table-column prop="total" :label="t('monitor.server.total')" width="140" />
+        <el-table-column prop="free" :label="t('monitor.server.free')" width="140" />
+        <el-table-column prop="used" :label="t('monitor.server.used')" width="140" />
+        <el-table-column prop="usage" :label="t('monitor.server.usage')" width="240">
           <template #default="{ row }">
             <el-progress :percentage="Number((row.usage ?? 0).toFixed(2))" :color="getProgressColor(row.usage || 0)" />
           </template>
@@ -157,7 +157,9 @@ import { ElMessage } from 'element-plus'
 import { Refresh, Cpu, Histogram, Coin, Files } from '@element-plus/icons-vue'
 import { serverApi } from '@/api/server'
 import type { Server, SysFileInfo } from '@/api/server'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const loading = ref(false)
 const serverInfo = ref<Server | null>(null)
 
@@ -185,7 +187,7 @@ const loadData = async () => {
   try {
     serverInfo.value = await serverApi.getInfo()
   } catch {
-    ElMessage.error('Failed to load server info')
+    ElMessage.error(t('monitor.server.loadFailed'))
   } finally {
     loading.value = false
   }

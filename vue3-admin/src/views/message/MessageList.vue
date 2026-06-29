@@ -2,39 +2,39 @@
   <div class="message-list">
     <div class="toolbar">
       <el-form :model="queryParams" inline>
-        <el-form-item label="Message Type">
-          <el-select v-model="queryParams.msgType" placeholder="Please select" clearable style="width: 180px">
-            <el-option label="System" value="SYSTEM" />
-            <el-option label="Notice" value="NOTICE" />
-            <el-option label="Private" value="PRIVATE" />
-            <el-option label="Todo" value="TODO" />
+        <el-form-item :label="t('message.messageType')">
+          <el-select v-model="queryParams.msgType" :placeholder="t('common.pleaseSelect')" clearable style="width: 180px">
+            <el-option :label="t('message.typeSystem')" value="SYSTEM" />
+            <el-option :label="t('message.typeNotice')" value="NOTICE" />
+            <el-option :label="t('message.typePrivate')" value="PRIVATE" />
+            <el-option :label="t('message.typeTodo')" value="TODO" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">Search</el-button>
-          <el-button @click="handleReset">Reset</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
       <div class="actions">
-        <el-button type="primary" @click="handleAdd">Send Message</el-button>
+        <el-button type="primary" @click="handleAdd">{{ t('message.sendMessage') }}</el-button>
       </div>
     </div>
 
     <el-tabs v-model="activeTab" @tab-change="handleTabChange">
       <el-tab-pane :name="'all'">
         <template #label>
-          <span>All</span>
+          <span>{{ t('message.tabAll') }}</span>
         </template>
       </el-tab-pane>
       <el-tab-pane :name="'todo'">
         <template #label>
-          <span>Todo</span>
+          <span>{{ t('message.tabTodo') }}</span>
         </template>
       </el-tab-pane>
       <el-tab-pane :name="'unread'">
         <template #label>
           <span>
-            Unread
+            {{ t('message.tabUnread') }}
             <el-badge v-if="unreadCount > 0" :value="unreadCount" class="unread-badge" />
           </span>
         </template>
@@ -43,29 +43,29 @@
 
     <el-table :data="tableData" v-loading="loading" stripe>
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="title" label="Title" min-width="200" />
-      <el-table-column prop="msgType" label="Type" width="120">
+      <el-table-column prop="title" :label="t('message.titleField')" min-width="200" />
+      <el-table-column prop="msgType" :label="t('message.type')" width="120">
         <template #default="{ row }">
           <el-tag :type="getMsgTypeColor(row.msgType)" size="small">
             {{ row.msgType }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="sender" label="Sender" width="120" />
-      <el-table-column prop="receiver" label="Receiver" width="120" />
-      <el-table-column prop="status" label="Status" width="100">
+      <el-table-column prop="sender" :label="t('message.sender')" width="120" />
+      <el-table-column prop="receiver" :label="t('message.receiver')" width="120" />
+      <el-table-column :label="t('common.status.active')" width="100">
         <template #default="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
-            {{ row.status === 1 ? 'Read' : 'Unread' }}
+            {{ row.status === 1 ? t('common.status.read') : t('common.status.unread') }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createTime" label="Create Time" width="180" />
-      <el-table-column label="Actions" width="220" fixed="right">
+      <el-table-column prop="createTime" :label="t('message.createTime')" width="180" />
+      <el-table-column :label="t('message.actions')" width="220" fixed="right">
         <template #default="{ row }">
-          <el-button size="small" @click="handleView(row)">View</el-button>
-          <el-button size="small" @click="handleEdit(row)">Edit</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(row)">Delete</el-button>
+          <el-button size="small" @click="handleView(row)">{{ t('common.view') }}</el-button>
+          <el-button size="small" @click="handleEdit(row)">{{ t('common.edit') }}</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -84,41 +84,41 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="560px">
       <el-form :model="formData" label-width="100px" :rules="formRules" ref="formRef">
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="formData.title" placeholder="Please enter title" />
+        <el-form-item :label="t('message.titleField')" prop="title">
+          <el-input v-model="formData.title" :placeholder="t('message.titlePlaceholder')" />
         </el-form-item>
-        <el-form-item label="Type" prop="msgType">
-          <el-select v-model="formData.msgType" placeholder="Please select" style="width: 100%">
-            <el-option label="System" value="SYSTEM" />
-            <el-option label="Notice" value="NOTICE" />
-            <el-option label="Private" value="PRIVATE" />
-            <el-option label="Todo" value="TODO" />
+        <el-form-item :label="t('message.type')" prop="msgType">
+          <el-select v-model="formData.msgType" :placeholder="t('common.pleaseSelect')" style="width: 100%">
+            <el-option :label="t('message.typeSystem')" value="SYSTEM" />
+            <el-option :label="t('message.typeNotice')" value="NOTICE" />
+            <el-option :label="t('message.typePrivate')" value="PRIVATE" />
+            <el-option :label="t('message.typeTodo')" value="TODO" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Sender">
-          <el-input v-model="formData.sender" placeholder="Sender (optional)" />
+        <el-form-item :label="t('message.sender')">
+          <el-input v-model="formData.sender" :placeholder="t('message.senderPlaceholder')" />
         </el-form-item>
-        <el-form-item label="Receiver">
-          <el-input v-model="formData.receiver" placeholder="Receiver (optional)" />
+        <el-form-item :label="t('message.receiver')">
+          <el-input v-model="formData.receiver" :placeholder="t('message.receiverPlaceholder')" />
         </el-form-item>
-        <el-form-item label="Content" prop="content">
-          <el-input v-model="formData.content" type="textarea" :rows="5" placeholder="Please enter content" />
+        <el-form-item :label="t('message.content')" prop="content">
+          <el-input v-model="formData.content" type="textarea" :rows="5" :placeholder="t('message.contentPlaceholder')" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="handleSubmit">Submit</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleSubmit">{{ t('common.submit') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="viewDialogVisible" title="Message Detail" width="600px">
+    <el-dialog v-model="viewDialogVisible" :title="t('message.detailTitle')" width="600px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="Title">{{ currentMessage?.title }}</el-descriptions-item>
-        <el-descriptions-item label="Type">{{ currentMessage?.msgType }}</el-descriptions-item>
-        <el-descriptions-item label="Sender">{{ currentMessage?.sender || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="Receiver">{{ currentMessage?.receiver || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="Create Time">{{ currentMessage?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="Content">
+        <el-descriptions-item :label="t('message.titleField')">{{ currentMessage?.title }}</el-descriptions-item>
+        <el-descriptions-item :label="t('message.type')">{{ currentMessage?.msgType }}</el-descriptions-item>
+        <el-descriptions-item :label="t('message.sender')">{{ currentMessage?.sender || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('message.receiver')">{{ currentMessage?.receiver || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('message.createTime')">{{ currentMessage?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="t('message.content')">
           <div style="white-space: pre-wrap">{{ currentMessage?.content }}</div>
         </el-descriptions-item>
       </el-descriptions>
@@ -131,8 +131,10 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { messageApi } from '@/api/message'
 import type { Message } from '@/api/message'
+import { useI18n } from '@/composables/useI18n'
 
 const formRef = ref()
+const { t } = useI18n()
 
 const loading = ref(false)
 const tableData = ref<Message[]>([])
@@ -160,14 +162,14 @@ const formData = reactive<Message>({
 
 const formRules = {
   title: [
-    { required: true, message: 'Title is required', trigger: 'blur' },
-    { min: 2, max: 100, message: 'Length 2-100 characters', trigger: 'blur' }
+    { required: true, message: t('message.validation.titleRequired'), trigger: 'blur' },
+    { min: 2, max: 100, message: t('message.validation.lengthRange'), trigger: 'blur' }
   ],
   msgType: [
-    { required: true, message: 'Message type is required', trigger: 'change' }
+    { required: true, message: t('message.validation.typeRequired'), trigger: 'change' }
   ],
   content: [
-    { required: true, message: 'Content is required', trigger: 'blur' }
+    { required: true, message: t('message.validation.contentRequired'), trigger: 'blur' }
   ]
 }
 
@@ -188,7 +190,7 @@ const loadData = async () => {
       total.value = tableData.value.length
     }
   } catch {
-    ElMessage.error('Failed to load messages')
+    ElMessage.error(t('common.messages.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -231,13 +233,13 @@ const resetForm = () => {
 
 const handleAdd = () => {
   resetForm()
-  dialogTitle.value = 'Send Message'
+  dialogTitle.value = t('message.sendMessage')
   dialogVisible.value = true
 }
 
 const handleEdit = (row: Message) => {
   Object.assign(formData, row)
-  dialogTitle.value = 'Edit Message'
+  dialogTitle.value = t('message.editMessage')
   dialogVisible.value = true
 }
 
@@ -252,26 +254,26 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     if (formData.id) {
       await messageApi.update(formData.id, formData)
-      ElMessage.success('Updated successfully')
+      ElMessage.success(t('common.messages.updatedSuccess'))
     } else {
       await messageApi.create(formData)
-      ElMessage.success('Sent successfully')
+      ElMessage.success(t('message.sentSuccess'))
     }
     dialogVisible.value = false
     loadData()
     loadUnreadCount()
   } catch (e: any) {
     if (e?.message) {
-      ElMessage.error('Operation failed: ' + e.message)
+      ElMessage.error(t('common.operationFailed') + ': ' + e.message)
     }
   }
 }
 
 const handleDelete = async (row: Message) => {
   try {
-    await ElMessageBox.confirm(`Delete message "${row.title}"?`, 'Confirm', { type: 'warning' })
+    await ElMessageBox.confirm(t('message.confirmDelete', { title: row.title }), t('common.confirm'), { type: 'warning' })
     await messageApi.delete(row.id!)
-    ElMessage.success('Deleted successfully')
+    ElMessage.success(t('common.messages.deletedSuccess'))
     loadData()
     loadUnreadCount()
   } catch {

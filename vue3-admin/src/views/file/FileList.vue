@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('file.*') keys -->
 <template>
   <div class="file-management">
     <!-- Storage Stats -->

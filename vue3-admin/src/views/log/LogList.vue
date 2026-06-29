@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('log.*') keys -->
 <template>
   <div class="log-list">
     <el-tabs v-model="activeTab">

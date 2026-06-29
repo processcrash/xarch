@@ -1,7 +1,7 @@
 <template>
   <div class="user-excel">
     <div class="toolbar">
-      <span class="page-title">User Excel Import/Export</span>
+      <span class="page-title">{{ t('excel.title') }}</span>
     </div>
 
     <el-row :gutter="20">
@@ -10,10 +10,9 @@
           <div class="card-content">
             <el-icon class="card-icon" color="#409eff"><Download /></el-icon>
             <div class="card-info">
-              <div class="card-title">Export Users</div>
+              <div class="card-title">{{ t('excel.exportUsers') }}</div>
               <div class="card-desc">
-                Download all users as an Excel file (.xlsx). Use this to back up user data or perform
-                offline analysis.
+                {{ t('excel.exportDesc') }}
               </div>
               <el-button
                 type="primary"
@@ -23,7 +22,7 @@
                 style="margin-top: 16px"
               >
                 <el-icon><Download /></el-icon>
-                Export Users
+                {{ t('excel.exportUsers') }}
               </el-button>
             </div>
           </div>
@@ -34,10 +33,9 @@
           <div class="card-content">
             <el-icon class="card-icon" color="#67c23a"><Upload /></el-icon>
             <div class="card-info">
-              <div class="card-title">Import Users</div>
+              <div class="card-title">{{ t('excel.importUsers') }}</div>
               <div class="card-desc">
-                Upload an Excel file (.xlsx) containing user data. Make sure the columns match the
-                template format.
+                {{ t('excel.importDesc') }}
               </div>
               <el-upload
                 class="upload-area"
@@ -49,7 +47,7 @@
               >
                 <el-button type="success" size="large" :loading="importing">
                   <el-icon><Upload /></el-icon>
-                  Import Users
+                  {{ t('excel.importUsers') }}
                 </el-button>
               </el-upload>
             </div>
@@ -60,34 +58,33 @@
 
     <el-card shadow="hover" style="margin-top: 20px">
       <template #header>
-        <span>Import Instructions</span>
+        <span>{{ t('excel.importInstructions') }}</span>
       </template>
       <el-alert type="info" :closable="false" show-icon style="margin-bottom: 16px">
-        <p>1. The Excel template must contain the following columns: <b>username</b>, <b>nickname</b>,
-          <b>email</b>, <b>mobile</b>, <b>status</b>.</p>
-        <p>2. Status values: <b>1</b> = Active, <b>0</b> = Disabled.</p>
-        <p>3. Duplicate usernames will be skipped automatically.</p>
-        <p>4. Maximum file size: 10MB.</p>
+        <p v-html="renderedInstruction1"></p>
+        <p>{{ t('excel.instruction2') }}</p>
+        <p>{{ t('excel.instruction3') }}</p>
+        <p>{{ t('excel.instruction4') }}</p>
       </el-alert>
 
       <div class="history-section">
-        <h4>Recent Import History</h4>
+        <h4>{{ t('excel.recentHistory') }}</h4>
         <el-table :data="historyList" stripe size="small">
-          <el-table-column prop="fileName" label="File Name" min-width="240" />
-          <el-table-column prop="total" label="Total Rows" width="120" />
-          <el-table-column prop="imported" label="Imported" width="120">
+          <el-table-column prop="fileName" :label="t('excel.fileName')" min-width="240" />
+          <el-table-column prop="total" :label="t('excel.totalRows')" width="120" />
+          <el-table-column prop="imported" :label="t('excel.imported')" width="120">
             <template #default="{ row }">
               <el-tag type="success" size="small">{{ row.imported }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="skipped" label="Skipped" width="120">
+          <el-table-column prop="skipped" :label="t('excel.skipped')" width="120">
             <template #default="{ row }">
               <el-tag type="info" size="small">{{ row.skipped }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="user" label="Operator" width="140" />
-          <el-table-column prop="time" label="Time" width="180" />
-          <el-table-column prop="status" label="Status" width="100">
+          <el-table-column prop="user" :label="t('excel.operator')" width="140" />
+          <el-table-column prop="time" :label="t('excel.time')" width="180" />
+          <el-table-column :label="t('excel.status')" width="100">
             <template #default="{ row }">
               <el-tag :type="row.status === 'SUCCESS' ? 'success' : 'danger'" size="small">
                 {{ row.status }}
@@ -101,11 +98,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Download, Upload } from '@element-plus/icons-vue'
 import { excelApi } from '@/api/excel'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const exporting = ref(false)
 const importing = ref(false)
 
@@ -120,6 +119,8 @@ interface ImportHistory {
 }
 
 const historyList = ref<ImportHistory[]>([])
+
+const renderedInstruction1 = computed(() => t('excel.instruction1'))
 
 const loadHistory = () => {
   // Placeholder: actual import history endpoint can be wired in later.
@@ -157,9 +158,9 @@ const handleExport = async () => {
     link.click()
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
-    ElMessage.success('Export started')
+    ElMessage.success(t('excel.exportStarted'))
   } catch {
-    ElMessage.error('Export failed')
+    ElMessage.error(t('excel.exportFailed'))
   } finally {
     exporting.value = false
   }
@@ -168,12 +169,12 @@ const handleExport = async () => {
 const beforeImport = (file: File) => {
   const maxSize = 10 * 1024 * 1024
   if (file.size > maxSize) {
-    ElMessage.error('File size cannot exceed 10MB')
+    ElMessage.error(t('excel.fileSizeLimit'))
     return false
   }
   const isExcel = /\.(xlsx|xls)$/i.test(file.name)
   if (!isExcel) {
-    ElMessage.error('Only Excel files are supported')
+    ElMessage.error(t('excel.excelOnly'))
     return false
   }
   return true
@@ -195,12 +196,12 @@ const customImport = async (options: any) => {
 }
 
 const handleImportSuccess = (response: any) => {
-  ElMessage.success(`Imported ${response?.data ?? 0} users successfully`)
+  ElMessage.success(t('excel.importedSuccess', { count: response?.data ?? 0 }))
   loadHistory()
 }
 
 const handleImportError = () => {
-  ElMessage.error('Import failed')
+  ElMessage.error(t('excel.importFailed'))
 }
 
 onMounted(() => {

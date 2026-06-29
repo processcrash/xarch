@@ -2,12 +2,12 @@
   <div class="temp-file-list">
     <div class="toolbar">
       <el-form :model="queryParams" inline>
-        <el-form-item label="File Name">
-          <el-input v-model="queryParams.fileName" placeholder="Please enter file name" clearable />
+        <el-form-item :label="t('tempFile.fileName')">
+          <el-input v-model="queryParams.fileName" :placeholder="t('tempFile.fileName')" clearable />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">Search</el-button>
-          <el-button @click="handleReset">Reset</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
       <div class="actions">
@@ -20,11 +20,11 @@
         >
           <el-button type="primary" :loading="uploading">
             <el-icon><Upload /></el-icon>
-            Upload
+            {{ t('tempFile.upload') }}
           </el-button>
         </el-upload>
         <el-button type="danger" :disabled="selectedRows.length === 0" @click="handleBatchDelete">
-          Batch Delete
+          {{ t('common.batchDelete') }}
         </el-button>
       </div>
     </div>
@@ -32,19 +32,19 @@
     <el-table :data="tableData" v-loading="loading" stripe @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="50" />
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="fileName" label="File Name" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="filePath" label="File Path" min-width="240" show-overflow-tooltip />
-      <el-table-column prop="fileSize" label="Size" width="120">
+      <el-table-column prop="fileName" :label="t('tempFile.fileName')" min-width="200" show-overflow-tooltip />
+      <el-table-column prop="filePath" :label="t('tempFile.filePath')" min-width="240" show-overflow-tooltip />
+      <el-table-column prop="fileSize" :label="t('tempFile.size')" width="120">
         <template #default="{ row }">
           {{ formatSize(row.fileSize) }}
         </template>
       </el-table-column>
-      <el-table-column prop="fileType" label="Type" width="160" show-overflow-tooltip />
-      <el-table-column prop="createTime" label="Create Time" width="180" />
-      <el-table-column label="Actions" width="180" fixed="right">
+      <el-table-column prop="fileType" :label="t('tempFile.type')" width="160" show-overflow-tooltip />
+      <el-table-column prop="createTime" :label="t('tempFile.createTime')" width="180" />
+      <el-table-column :label="t('common.actions')" width="180" fixed="right">
         <template #default="{ row }">
-          <el-button size="small" @click="handleDownload(row)">Download</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(row)">Delete</el-button>
+          <el-button size="small" @click="handleDownload(row)">{{ t('common.download') }}</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -68,7 +68,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload } from '@element-plus/icons-vue'
 import { tempFileApi } from '@/api/tempFile'
 import type { TempFile } from '@/api/tempFile'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const loading = ref(false)
 const uploading = ref(false)
 const tableData = ref<TempFile[]>([])
@@ -88,7 +90,7 @@ const loadData = async () => {
     tableData.value = result.list || []
     total.value = result.total || 0
   } catch {
-    ElMessage.error('Failed to load temp files')
+    ElMessage.error(t('tempFile.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -112,7 +114,7 @@ const handleSelectionChange = (rows: TempFile[]) => {
 const beforeUpload = (file: File) => {
   const maxSize = 100 * 1024 * 1024
   if (file.size > maxSize) {
-    ElMessage.error('File size cannot exceed 100MB')
+    ElMessage.error(t('tempFile.fileSizeLimit'))
     return false
   }
   return true
@@ -134,19 +136,19 @@ const customUpload = async (options: any) => {
 }
 
 const handleUploadSuccess = () => {
-  ElMessage.success('Uploaded successfully')
+  ElMessage.success(t('resource.uploadedSuccess'))
   loadData()
 }
 
 const handleUploadError = () => {
-  ElMessage.error('Upload failed')
+  ElMessage.error(t('resource.uploadFailed'))
 }
 
 const handleDelete = async (row: TempFile) => {
   try {
-    await ElMessageBox.confirm(`Delete temp file "${row.fileName}"?`, 'Confirm', { type: 'warning' })
+    await ElMessageBox.confirm(t('tempFile.confirmDelete', { name: row.fileName }), t('common.confirm'), { type: 'warning' })
     await tempFileApi.delete({ ids: [row.id!] })
-    ElMessage.success('Deleted successfully')
+    ElMessage.success(t('common.messages.deletedSuccess'))
     loadData()
   } catch {
     // cancelled
@@ -155,18 +157,18 @@ const handleDelete = async (row: TempFile) => {
 
 const handleBatchDelete = async () => {
   if (selectedRows.value.length === 0) {
-    ElMessage.warning('Please select files to delete')
+    ElMessage.warning(t('common.messages.pleaseSelectToDelete'))
     return
   }
   try {
     await ElMessageBox.confirm(
-      `Delete ${selectedRows.value.length} temp files?`,
-      'Confirm',
+      t('tempFile.confirmDelete', { name: `${selectedRows.value.length}` }),
+      t('common.confirm'),
       { type: 'warning' }
     )
     const ids = selectedRows.value.map(r => r.id!)
     await tempFileApi.delete({ ids })
-    ElMessage.success(`Deleted ${ids.length} temp files`)
+    ElMessage.success(t('common.messages.deletedSuccess'))
     selectedRows.value = []
     loadData()
   } catch {
@@ -186,7 +188,7 @@ const handleDownload = async (row: TempFile) => {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
   } catch {
-    ElMessage.error('Download failed')
+    ElMessage.error(t('resource.downloadFailed'))
   }
 }
 

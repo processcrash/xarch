@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('dept.*') keys -->
 <template>
   <div class="dept-list">
     <div class="toolbar">

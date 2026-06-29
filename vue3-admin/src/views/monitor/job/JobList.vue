@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('monitor.job.*') keys -->
 <template>
   <div class="job-list">
     <div class="toolbar">

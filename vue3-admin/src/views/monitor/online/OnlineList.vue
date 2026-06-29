@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('monitor.online.*') keys -->
 <template>
   <div class="online-list">
     <div class="toolbar">

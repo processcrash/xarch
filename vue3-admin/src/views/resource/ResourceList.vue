@@ -2,32 +2,32 @@
   <div class="resource-list">
     <div class="toolbar">
       <el-form :model="queryParams" inline>
-        <el-form-item label="Scene Code">
-          <el-input v-model="queryParams.sceneCode" placeholder="Scene code" clearable style="width: 150px" />
+        <el-form-item :label="t('resource.sceneCode')">
+          <el-input v-model="queryParams.sceneCode" :placeholder="t('resource.sceneCode')" clearable style="width: 150px" />
         </el-form-item>
-        <el-form-item label="Storage Type">
-          <el-select v-model="queryParams.storageType" placeholder="All" clearable style="width: 150px">
-            <el-option label="All" value="" />
-            <el-option label="Local" value="local" />
-            <el-option label="MinIO" value="minio" />
-            <el-option label="OSS" value="oss" />
+        <el-form-item :label="t('resource.storageType')">
+          <el-select v-model="queryParams.storageType" :placeholder="t('common.all')" clearable style="width: 150px">
+            <el-option :label="t('common.all')" value="" />
+            <el-option :label="t('resource.storageLocal')" value="local" />
+            <el-option :label="t('resource.storageMinio')" value="minio" />
+            <el-option :label="t('resource.storageOss')" value="oss" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Keyword">
-          <el-input v-model="queryParams.keyword" placeholder="File name" clearable />
+        <el-form-item :label="t('resource.keyword')">
+          <el-input v-model="queryParams.keyword" :placeholder="t('resource.fileName')" clearable />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">Search</el-button>
-          <el-button @click="handleReset">Reset</el-button>
+          <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+          <el-button @click="handleReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
       <div class="actions">
         <el-button type="primary" @click="showUploadDialog">
           <el-icon><Upload /></el-icon>
-          Upload File
+          {{ t('resource.uploadFile') }}
         </el-button>
         <el-button type="danger" :disabled="selectedRows.length === 0" @click="handleBatchDelete">
-          Batch Delete
+          {{ t('common.batchDelete') }}
         </el-button>
       </div>
     </div>
@@ -35,27 +35,27 @@
     <el-table :data="tableData" v-loading="loading" stripe @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="50" />
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="resourceName" label="File Name" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="sceneCode" label="Scene" width="140" />
-      <el-table-column prop="fileType" label="Type" width="160" show-overflow-tooltip />
-      <el-table-column prop="fileSize" label="Size" width="120">
+      <el-table-column prop="resourceName" :label="t('resource.fileName')" min-width="200" show-overflow-tooltip />
+      <el-table-column prop="sceneCode" :label="t('resource.sceneCode')" width="140" />
+      <el-table-column prop="fileType" :label="t('resource.type')" width="160" show-overflow-tooltip />
+      <el-table-column prop="fileSize" :label="t('resource.size')" width="120">
         <template #default="{ row }">
           {{ formatSize(row.fileSize) }}
         </template>
       </el-table-column>
-      <el-table-column prop="storageType" label="Storage" width="120">
+      <el-table-column prop="storageType" :label="t('resource.storage')" width="120">
         <template #default="{ row }">
           <el-tag :type="getStorageTypeColor(row.storageType)" size="small">
             {{ getStorageTypeLabel(row.storageType) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createUserName" label="Upload By" width="120" />
-      <el-table-column prop="createTime" label="Upload Time" width="180" />
-      <el-table-column label="Actions" width="180" fixed="right">
+      <el-table-column prop="createUserName" :label="t('resource.uploadBy')" width="120" />
+      <el-table-column prop="createTime" :label="t('resource.uploadTime')" width="180" />
+      <el-table-column :label="t('common.actions')" width="180" fixed="right">
         <template #default="{ row }">
-          <el-button size="small" @click="handleDownload(row)">Download</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(row)">Delete</el-button>
+          <el-button size="small" @click="handleDownload(row)">{{ t('common.download') }}</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(row)">{{ t('common.delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -71,19 +71,19 @@
       style="margin-top: 20px"
     />
 
-    <el-dialog v-model="uploadDialogVisible" title="Upload Resource" width="500px">
+    <el-dialog v-model="uploadDialogVisible" :title="t('resource.uploadResource')" width="500px">
       <el-form :model="uploadForm" label-width="100px">
-        <el-form-item label="Scene Code" required>
-          <el-input v-model="uploadForm.sceneCode" placeholder="e.g., avatar, document" />
+        <el-form-item :label="t('resource.sceneCode')" required>
+          <el-input v-model="uploadForm.sceneCode" :placeholder="t('resource.sceneCodePlaceholder')" />
         </el-form-item>
-        <el-form-item label="Storage Type">
+        <el-form-item :label="t('resource.storageType')">
           <el-select v-model="uploadForm.storageType" style="width: 100%">
-            <el-option label="Local" value="local" />
-            <el-option label="MinIO" value="minio" />
-            <el-option label="OSS" value="oss" />
+            <el-option :label="t('resource.storageLocal')" value="local" />
+            <el-option :label="t('resource.storageMinio')" value="minio" />
+            <el-option :label="t('resource.storageOss')" value="oss" />
           </el-select>
         </el-form-item>
-        <el-form-item label="File">
+        <el-form-item :label="t('resource.fileName')">
           <el-upload
             ref="uploadRef"
             :auto-upload="false"
@@ -94,13 +94,13 @@
             drag
           >
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            <div>Drop file here or <em>click to upload</em></div>
+            <div>{{ t('resource.dropOrClick') }} <em>{{ t('resource.clickToUpload') }}</em></div>
           </el-upload>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="uploadDialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="handleUpload" :loading="uploading">Upload</el-button>
+        <el-button @click="uploadDialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleUpload" :loading="uploading">{{ t('common.upload') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -112,7 +112,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload, UploadFilled } from '@element-plus/icons-vue'
 import { resourceApi } from '@/api/resource'
 import type { Resource } from '@/api/resource'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const loading = ref(false)
 const tableData = ref<Resource[]>([])
 const total = ref(0)
@@ -142,7 +144,7 @@ const loadData = async () => {
     tableData.value = result.list || []
     total.value = result.total || 0
   } catch {
-    ElMessage.error('Failed to load resources')
+    ElMessage.error(t('resource.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -167,9 +169,9 @@ const handleSelectionChange = (rows: Resource[]) => {
 
 const handleDelete = async (row: Resource) => {
   try {
-    await ElMessageBox.confirm(`Delete resource "${row.resourceName}"?`, 'Confirm', { type: 'warning' })
+    await ElMessageBox.confirm(t('resource.confirmDelete', { name: row.resourceName }), t('common.confirm'), { type: 'warning' })
     await resourceApi.delete(row.id!)
-    ElMessage.success('Deleted successfully')
+    ElMessage.success(t('common.messages.deletedSuccess'))
     loadData()
   } catch {
     // cancelled
@@ -178,18 +180,18 @@ const handleDelete = async (row: Resource) => {
 
 const handleBatchDelete = async () => {
   if (selectedRows.value.length === 0) {
-    ElMessage.warning('Please select resources to delete')
+    ElMessage.warning(t('common.messages.pleaseSelectToDelete'))
     return
   }
   try {
     await ElMessageBox.confirm(
-      `Delete ${selectedRows.value.length} resources?`,
-      'Confirm',
+      t('resource.confirmDelete', { name: `${selectedRows.value.length}` }),
+      t('common.confirm'),
       { type: 'warning' }
     )
     const ids = selectedRows.value.map(r => r.id!)
     await Promise.all(ids.map(id => resourceApi.delete(id)))
-    ElMessage.success(`Deleted ${ids.length} resources`)
+    ElMessage.success(t('common.messages.deletedSuccess'))
     selectedRows.value = []
     loadData()
   } catch {
@@ -215,11 +217,11 @@ const customUpload = async (options: any) => {
 
 const handleUpload = async () => {
   if (fileList.value.length === 0) {
-    ElMessage.warning('Please select a file')
+    ElMessage.warning(t('resource.selectFile'))
     return
   }
   if (!uploadForm.sceneCode.trim()) {
-    ElMessage.warning('Please enter a scene code')
+    ElMessage.warning(t('resource.enterSceneCode'))
     return
   }
 
@@ -231,11 +233,11 @@ const handleUpload = async () => {
   uploading.value = true
   try {
     await resourceApi.upload(formData)
-    ElMessage.success('Uploaded successfully')
+    ElMessage.success(t('resource.uploadedSuccess'))
     uploadDialogVisible.value = false
     loadData()
   } catch {
-    ElMessage.error('Upload failed')
+    ElMessage.error(t('resource.uploadFailed'))
   } finally {
     uploading.value = false
   }
@@ -253,7 +255,7 @@ const handleDownload = async (row: Resource) => {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
   } catch {
-    ElMessage.error('Download failed')
+    ElMessage.error(t('resource.downloadFailed'))
   }
 }
 
@@ -280,9 +282,9 @@ const getStorageTypeColor = (type: string) => {
 
 const getStorageTypeLabel = (type: string) => {
   const map: Record<string, string> = {
-    local: 'Local',
-    minio: 'MinIO',
-    oss: 'OSS'
+    local: t('resource.storageLocal'),
+    minio: t('resource.storageMinio'),
+    oss: t('resource.storageOss')
   }
   return map[type] || type
 }

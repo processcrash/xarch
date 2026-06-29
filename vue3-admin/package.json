@@ -19,6 +19,7 @@
     "@element-plus/icons-vue": "^2.3.1",
     "@vueuse/core": "^12.5.0",
     "dayjs": "^1.11.13",
+    "vue-i18n": "^9.14.0",
     "lodash-es": "^4.17.21",
     "nprogress": "^0.2.0",
     "xterm": "^5.3.0",

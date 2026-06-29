@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('ai.*') keys (namespace not yet added to locale files) -->
 <template>
   <div class="server-management">
     <el-row :gutter="20">

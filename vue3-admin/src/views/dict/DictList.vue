@@ -1,3 +1,4 @@
+<!-- TODO: i18n - migrate all hardcoded labels/buttons to t('dict.*') keys -->
 <template>
   <div class="dict-list">
     <div class="toolbar">
