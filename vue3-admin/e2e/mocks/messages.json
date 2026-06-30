@@ -1,0 +1,33 @@
+{
+  "rows": [
+    {
+      "id": 1,
+      "title": "System upgrade scheduled",
+      "content": "We will upgrade the system on 2024-12-01 02:00 UTC.",
+      "type": "notice",
+      "priority": "high",
+      "read": false,
+      "createTime": "2024-11-20 10:00:00"
+    },
+    {
+      "id": 2,
+      "title": "Please review the new policy",
+      "content": "A new internal policy is pending your review.",
+      "type": "todo",
+      "priority": "medium",
+      "read": false,
+      "createTime": "2024-11-21 14:00:00"
+    },
+    {
+      "id": 3,
+      "title": "Welcome aboard",
+      "content": "Welcome to the xarch platform!",
+      "type": "notice",
+      "priority": "low",
+      "read": true,
+      "createTime": "2024-11-15 09:00:00"
+    }
+  ],
+  "total": 3,
+  "unreadCount": 2
+}

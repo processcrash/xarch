@@ -1,0 +1,32 @@
+{
+  "rows": [
+    {
+      "id": 1,
+      "username": "admin",
+      "nickname": "Administrator",
+      "email": "admin@example.com",
+      "mobile": "13800000001",
+      "enabled": true,
+      "createTime": "2024-01-01 10:00:00"
+    },
+    {
+      "id": 2,
+      "username": "alice",
+      "nickname": "Alice",
+      "email": "alice@example.com",
+      "mobile": "13800000002",
+      "enabled": true,
+      "createTime": "2024-02-15 11:30:00"
+    },
+    {
+      "id": 3,
+      "username": "bob",
+      "nickname": "Bob",
+      "email": "bob@example.com",
+      "mobile": "13800000003",
+      "enabled": false,
+      "createTime": "2024-03-10 09:15:00"
+    }
+  ],
+  "total": 3
+}

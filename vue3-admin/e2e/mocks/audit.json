@@ -1,0 +1,39 @@
+{
+  "rows": [
+    {
+      "id": 1,
+      "command": "rm -rf /var/log/old.log",
+      "riskLevel": "high",
+      "status": "approved",
+      "user": "alice",
+      "reason": "Cleaning old logs",
+      "createTime": "2024-11-22 10:00:00"
+    },
+    {
+      "id": 2,
+      "command": "systemctl restart nginx",
+      "riskLevel": "medium",
+      "status": "pending",
+      "user": "bob",
+      "reason": "Apply new config",
+      "createTime": "2024-11-23 11:30:00"
+    },
+    {
+      "id": 3,
+      "command": "ls -la /tmp",
+      "riskLevel": "low",
+      "status": "rejected",
+      "user": "carol",
+      "reason": "Investigate disk usage",
+      "createTime": "2024-11-24 09:15:00"
+    }
+  ],
+  "total": 3,
+  "stats": {
+    "total": 120,
+    "pending": 14,
+    "approved": 95,
+    "rejected": 11,
+    "highRisk": 8
+  }
+}

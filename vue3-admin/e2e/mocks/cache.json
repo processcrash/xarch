@@ -1,0 +1,23 @@
+{
+  "cacheNames": ["userCache", "dictCache", "configCache", "shiroSessionCache"],
+  "cacheStats": [
+    {
+      "cacheName": "userCache",
+      "cacheSize": 42,
+      "cacheHits": 1234,
+      "cacheMisses": 56
+    },
+    {
+      "cacheName": "dictCache",
+      "cacheSize": 18,
+      "cacheHits": 567,
+      "cacheMisses": 12
+    },
+    {
+      "cacheName": "configCache",
+      "cacheSize": 7,
+      "cacheHits": 89,
+      "cacheMisses": 3
+    }
+  ]
+}

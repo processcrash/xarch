@@ -1,0 +1,41 @@
+{
+  "cpu": {
+    "physicalProcessorCount": 8,
+    "logicalProcessorCount": 16,
+    "systemCpuLoad": 0.32,
+    "processCpuLoad": 0.18,
+    "systemCpuLoadPercent": "32%",
+    "processCpuLoadPercent": "18%"
+  },
+  "memory": {
+    "total": 16384,
+    "available": 8192,
+    "used": 8192,
+    "usagePercent": "50%"
+  },
+  "jvm": {
+    "totalMemory": 2048,
+    "freeMemory": 512,
+    "usedMemory": 1536,
+    "maxMemory": 4096,
+    "usagePercent": "37.5%",
+    "jdkVersion": "17.0.9",
+    "jdkHome": "/usr/lib/jvm/java-17",
+    "javaVersion": "17.0.9",
+    "javaHome": "/usr/lib/jvm/java-17",
+    "startTime": 1700000000000,
+    "runTime": 3600000
+  },
+  "disk": {
+    "total": 512000,
+    "free": 256000,
+    "used": 256000,
+    "usagePercent": "50%"
+  },
+  "system": {
+    "osName": "Linux",
+    "osVersion": "5.15.0",
+    "hostname": "xarch-host",
+    "ip": "10.0.0.1"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "rows": [
+    {
+      "id": 1,
+      "clientId": "web-client",
+      "clientSecret": "secret-123",
+      "name": "Web Portal",
+      "redirectUris": ["https://app.example.com/callback"],
+      "authorizedGrantTypes": ["authorization_code", "refresh_token"],
+      "accessTokenValiditySeconds": 3600,
+      "refreshTokenValiditySeconds": 86400,
+      "autoApprove": false,
+      "enabled": true
+    },
+    {
+      "id": 2,
+      "clientId": "mobile-client",
+      "clientSecret": "secret-456",
+      "name": "Mobile App",
+      "redirectUris": ["myapp://oauth2redirect"],
+      "authorizedGrantTypes": ["authorization_code", "refresh_token", "password"],
+      "accessTokenValiditySeconds": 7200,
+      "refreshTokenValiditySeconds": 604800,
+      "autoApprove": true,
+      "enabled": true
+    }
+  ],
+  "total": 2
+}
