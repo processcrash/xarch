@@ -1,0 +1,151 @@
+{
+  "groups": [
+    {
+      "name": "xarch.storage",
+      "type": "com.xarch.starter.storage.StorageProperties",
+      "description": "Configuration for the xarch storage starter."
+    },
+    {
+      "name": "xarch.storage.configs.local",
+      "type": "com.xarch.starter.storage.local.LocalStorageProperties",
+      "description": "Local filesystem storage settings."
+    },
+    {
+      "name": "xarch.storage.configs.minio",
+      "type": "com.xarch.starter.storage.minio.MinioProperties",
+      "description": "MinIO object storage settings."
+    },
+    {
+      "name": "xarch.storage.configs.aliyun-oss",
+      "type": "com.xarch.starter.storage.aliyun.AliyunOssProperties",
+      "description": "Aliyun OSS storage settings."
+    },
+    {
+      "name": "xarch.storage.configs.s3",
+      "type": "com.xarch.starter.storage.s3.S3Properties",
+      "description": "AWS S3 storage settings."
+    }
+  ],
+  "properties": [
+    {
+      "name": "xarch.storage.default-type",
+      "type": "java.lang.String",
+      "description": "Default storage backend code. One of: local, minio, aliyun_oss, s3.",
+      "defaultValue": "local"
+    },
+    {
+      "name": "xarch.storage.configs.local.base-path",
+      "type": "java.lang.String",
+      "description": "Base directory for local file storage.",
+      "defaultValue": "./xarch-files"
+    },
+    {
+      "name": "xarch.storage.configs.local.public-base-url",
+      "type": "java.lang.String",
+      "description": "Public URL prefix for accessing locally stored files.",
+      "defaultValue": "/files"
+    },
+    {
+      "name": "xarch.storage.configs.local.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable the local storage provider.",
+      "defaultValue": true
+    },
+    {
+      "name": "xarch.storage.configs.minio.endpoint",
+      "type": "java.lang.String",
+      "description": "MinIO server endpoint URL."
+    },
+    {
+      "name": "xarch.storage.configs.minio.access-key",
+      "type": "java.lang.String",
+      "description": "MinIO access key."
+    },
+    {
+      "name": "xarch.storage.configs.minio.secret-key",
+      "type": "java.lang.String",
+      "description": "MinIO secret key."
+    },
+    {
+      "name": "xarch.storage.configs.minio.region",
+      "type": "java.lang.String",
+      "description": "MinIO region.",
+      "defaultValue": "us-east-1"
+    },
+    {
+      "name": "xarch.storage.configs.minio.default-bucket",
+      "type": "java.lang.String",
+      "description": "Default MinIO bucket.",
+      "defaultValue": "xarch"
+    },
+    {
+      "name": "xarch.storage.configs.minio.cname",
+      "type": "java.lang.String",
+      "description": "CDN/custom domain for MinIO access URLs."
+    },
+    {
+      "name": "xarch.storage.configs.aliyun-oss.endpoint",
+      "type": "java.lang.String",
+      "description": "Aliyun OSS endpoint URL."
+    },
+    {
+      "name": "xarch.storage.configs.aliyun-oss.access-key-id",
+      "type": "java.lang.String",
+      "description": "Aliyun OSS access key id."
+    },
+    {
+      "name": "xarch.storage.configs.aliyun-oss.access-key-secret",
+      "type": "java.lang.String",
+      "description": "Aliyun OSS access key secret."
+    },
+    {
+      "name": "xarch.storage.configs.aliyun-oss.bucket-name",
+      "type": "java.lang.String",
+      "description": "Default Aliyun OSS bucket.",
+      "defaultValue": "xarch"
+    },
+    {
+      "name": "xarch.storage.configs.aliyun-oss.cname",
+      "type": "java.lang.String",
+      "description": "CDN/custom domain for Aliyun OSS access URLs."
+    },
+    {
+      "name": "xarch.storage.configs.s3.region",
+      "type": "java.lang.String",
+      "description": "AWS region for the S3 client.",
+      "defaultValue": "us-east-1"
+    },
+    {
+      "name": "xarch.storage.configs.s3.access-key-id",
+      "type": "java.lang.String",
+      "description": "AWS access key id."
+    },
+    {
+      "name": "xarch.storage.configs.s3.secret-access-key",
+      "type": "java.lang.String",
+      "description": "AWS secret access key."
+    },
+    {
+      "name": "xarch.storage.configs.s3.endpoint",
+      "type": "java.lang.String",
+      "description": "Optional custom endpoint for S3-compatible services."
+    },
+    {
+      "name": "xarch.storage.configs.s3.default-bucket",
+      "type": "java.lang.String",
+      "description": "Default S3 bucket.",
+      "defaultValue": "xarch"
+    },
+    {
+      "name": "xarch.storage.configs.s3.path-style-access",
+      "type": "java.lang.Boolean",
+      "description": "Use path-style URLs (required for most non-AWS services).",
+      "defaultValue": true
+    },
+    {
+      "name": "xarch.storage.configs.s3.cname",
+      "type": "java.lang.String",
+      "description": "CDN/custom domain for S3 access URLs."
+    }
+  ]
+}

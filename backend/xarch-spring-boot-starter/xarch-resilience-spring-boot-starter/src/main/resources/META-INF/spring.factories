@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.xarch.starter.resilience.XarchResilienceAutoConfiguration

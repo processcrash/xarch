@@ -1,0 +1,86 @@
+# xarch API gateway — sample resilience configuration
+server:
+  port: 9000
+
+spring:
+  application:
+    name: xarch-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        # System routes — protected by per-IP rate limit
+        - id: system-user
+          uri: lb://xarch-example
+          predicates:
+            - Path=/api/system/user/**
+          filters:
+            - name: RateLimit
+              args:
+                permitsPerSecond: 50
+                burstCapacity: 50
+                scope: IP
+            - name: CircuitBreakerGW
+              args:
+                name: xarch-example-user
+                failureRateThreshold: 50
+                slidingWindowSize: 20
+                minimumNumberOfCalls: 10
+                waitDurationInOpenStateMillis: 10000
+
+        - id: system-role
+          uri: lb://xarch-example
+          predicates:
+            - Path=/api/system/role/**
+          filters:
+            - name: RateLimit
+              args:
+                permitsPerSecond: 30
+                burstCapacity: 30
+            - name: CircuitBreakerGW
+              args:
+                name: xarch-example-role
+
+        - id: auth-login
+          uri: lb://xarch-example
+          predicates:
+            - Path=/api/auth/login/**
+          filters:
+            # Login is the canonical brute-force target — tight per-IP cap.
+            - name: RateLimit
+              args:
+                permitsPerSecond: 5
+                burstCapacity: 5
+                scope: IP
+
+        - id: mcp-database
+          uri: lb://xarch-mcp-database
+          predicates:
+            - Path=/mcp/database/**
+          filters:
+            - name: CircuitBreakerGW
+              args:
+                name: xarch-mcp-database
+                failureRateThreshold: 30
+                slidingWindowSize: 30
+                waitDurationInOpenStateMillis: 30000
+
+xarch:
+  resilience:
+    enabled: true
+    rate-limit:
+      # Global default for routes that don't override
+      permits-per-second: 100
+      burst-capacity: 100
+      default-scope: IP
+      redis-key-prefix: "xarch:gw:rl:"
+    circuit-breaker:
+      failure-rate-threshold: 50
+      sliding-window-size: 50
+      minimum-number-of-calls: 20
+      wait-duration-in-open-state-millis: 10000

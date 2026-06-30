@@ -1,0 +1,47 @@
+xarch:
+  storage:
+    # Default storage backend: local | minio | aliyun_oss | s3
+    default-type: ${XARCH_STORAGE_TYPE:local}
+
+    configs:
+
+      # ---- Local filesystem ----
+      local:
+        enabled: true
+        base-path: ${XARCH_LOCAL_PATH:./xarch-files}
+        public-base-url: ${XARCH_LOCAL_BASE_URL:/files}
+        default-bucket: xarch
+
+      # ---- MinIO ----
+      minio:
+        enabled: ${XARCH_MINIO_ENABLED:false}
+        endpoint: ${XARCH_MINIO_ENDPOINT:http://localhost:9000}
+        access-key: ${XARCH_MINIO_ACCESS_KEY:minioadmin}
+        secret-key: ${XARCH_MINIO_SECRET_KEY:minioadmin}
+        region: ${XARCH_MINIO_REGION:us-east-1}
+        default-bucket: ${XARCH_MINIO_BUCKET:xarch}
+        cname: ${XARCH_MINIO_CNAME:}
+        auto-create-bucket: true
+
+      # ---- Aliyun OSS ----
+      aliyun-oss:
+        enabled: ${XARCH_OSS_ENABLED:false}
+        endpoint: ${XARCH_OSS_ENDPOINT:https://oss-cn-hangzhou.aliyuncs.com}
+        access-key-id: ${XARCH_OSS_ACCESS_KEY_ID:}
+        access-key-secret: ${XARCH_OSS_ACCESS_KEY_SECRET:}
+        security-token: ${XARCH_OSS_SECURITY_TOKEN:}
+        bucket-name: ${XARCH_OSS_BUCKET:xarch}
+        cname: ${XARCH_OSS_CNAME:}
+        auto-create-bucket: true
+
+      # ---- Generic AWS S3 ----
+      s3:
+        enabled: ${XARCH_S3_ENABLED:false}
+        region: ${XARCH_S3_REGION:us-east-1}
+        access-key-id: ${XARCH_S3_ACCESS_KEY_ID:}
+        secret-access-key: ${XARCH_S3_SECRET_ACCESS_KEY:}
+        endpoint: ${XARCH_S3_ENDPOINT:}
+        default-bucket: ${XARCH_S3_BUCKET:xarch}
+        cname: ${XARCH_S3_CNAME:}
+        path-style-access: true
+        auto-create-bucket: true

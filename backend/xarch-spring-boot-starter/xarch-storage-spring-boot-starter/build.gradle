@@ -1,0 +1,41 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    api project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+
+    // MinIO Java SDK
+    api 'io.minio:minio:8.5.10'
+
+    // Aliyun OSS Java SDK
+    api 'com.aliyun.oss:aliyun-sdk-oss:3.17.4'
+
+    // AWS SDK v2 (S3-compatible)
+    api platform('software.amazon.awssdk:bom:2.25.0')
+    api 'software.amazon.awssdk:s3'
+    api 'software.amazon.awssdk:s3-transfer-manager'
+
+    // Spring Boot integration
+    api 'org.springframework.boot:spring-boot-autoconfigure'
+    api 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Jackson
+    api 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.40'
+    annotationProcessor 'org.projectlombok:lombok:1.18.40'
+
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

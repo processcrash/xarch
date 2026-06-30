@@ -1,0 +1,139 @@
+{
+  "groups": [
+    {
+      "name": "xarch.resilience",
+      "type": "com.xarch.starter.resilience.ResilienceProperties",
+      "description": "Master switch and nested groups for the xarch resilience starter."
+    },
+    {
+      "name": "xarch.resilience.rate-limit",
+      "type": "com.xarch.starter.resilience.ResilienceProperties$RateLimit",
+      "description": "Token-bucket rate limit defaults used by the global filter and @RateLimit."
+    },
+    {
+      "name": "xarch.resilience.circuit-breaker",
+      "type": "com.xarch.starter.resilience.ResilienceProperties$CircuitBreaker",
+      "description": "Circuit breaker defaults used by @CircuitBreaker."
+    },
+    {
+      "name": "xarch.resilience.retry",
+      "type": "com.xarch.starter.resilience.ResilienceProperties$Retry",
+      "description": "Retry defaults used by @Retry."
+    },
+    {
+      "name": "xarch.resilience.bulkhead",
+      "type": "com.xarch.starter.resilience.ResilienceProperties$Bulkhead",
+      "description": "Bulkhead defaults used by @Bulkhead."
+    }
+  ],
+  "properties": [
+    {
+      "name": "xarch.resilience.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": "true",
+      "description": "Master switch for the resilience starter."
+    },
+    {
+      "name": "xarch.resilience.rate-limit.servlet-enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": "true",
+      "description": "Whether the global rate-limit servlet filter is registered."
+    },
+    {
+      "name": "xarch.resilience.rate-limit.permits-per-second",
+      "type": "java.lang.Integer",
+      "defaultValue": "100",
+      "description": "Default permits per second granted to each bucket."
+    },
+    {
+      "name": "xarch.resilience.rate-limit.burst-capacity",
+      "type": "java.lang.Integer",
+      "defaultValue": "100",
+      "description": "Maximum number of tokens the bucket can hold during an idle burst."
+    },
+    {
+      "name": "xarch.resilience.rate-limit.default-scope",
+      "type": "com.xarch.starter.resilience.ResilienceProperties$Scope",
+      "defaultValue": "IP",
+      "description": "Bucket key strategy for the global filter."
+    },
+    {
+      "name": "xarch.resilience.rate-limit.timeout-millis",
+      "type": "java.lang.Long",
+      "defaultValue": "0",
+      "description": "Maximum wait time (ms) for a permit. 0 means fail fast."
+    },
+    {
+      "name": "xarch.resilience.rate-limit.redis-key-prefix",
+      "type": "java.lang.String",
+      "defaultValue": "xarch:rl:",
+      "description": "Redis key prefix used for the bucket hash."
+    },
+    {
+      "name": "xarch.resilience.circuit-breaker.failure-rate-threshold",
+      "type": "java.lang.Float",
+      "defaultValue": "50.0",
+      "description": "Failure rate (percentage) above which the breaker opens."
+    },
+    {
+      "name": "xarch.resilience.circuit-breaker.sliding-window-size",
+      "type": "java.lang.Integer",
+      "defaultValue": "100",
+      "description": "Sliding window size used to evaluate the failure rate."
+    },
+    {
+      "name": "xarch.resilience.circuit-breaker.minimum-number-of-calls",
+      "type": "java.lang.Integer",
+      "defaultValue": "20",
+      "description": "Minimum number of calls required before the breaker can trip."
+    },
+    {
+      "name": "xarch.resilience.circuit-breaker.wait-duration-in-open-state-millis",
+      "type": "java.lang.Long",
+      "defaultValue": "10000",
+      "description": "Time the breaker stays open before transitioning to half-open."
+    },
+    {
+      "name": "xarch.resilience.circuit-breaker.permitted-number-of-calls-in-half-open-state",
+      "type": "java.lang.Integer",
+      "defaultValue": "5",
+      "description": "Permitted calls in the half-open state to probe recovery."
+    },
+    {
+      "name": "xarch.resilience.retry.max-attempts",
+      "type": "java.lang.Integer",
+      "defaultValue": "3",
+      "description": "Default number of attempts (initial + retries)."
+    },
+    {
+      "name": "xarch.resilience.retry.delay-millis",
+      "type": "java.lang.Long",
+      "defaultValue": "200",
+      "description": "Initial backoff between attempts."
+    },
+    {
+      "name": "xarch.resilience.retry.multiplier",
+      "type": "java.lang.Double",
+      "defaultValue": "2.0",
+      "description": "Exponential backoff multiplier."
+    },
+    {
+      "name": "xarch.resilience.retry.max-delay-millis",
+      "type": "java.lang.Long",
+      "defaultValue": "2000",
+      "description": "Maximum backoff between attempts."
+    },
+    {
+      "name": "xarch.resilience.bulkhead.concurrent-calls",
+      "type": "java.lang.Integer",
+      "defaultValue": "25",
+      "description": "Maximum concurrent invocations for each @Bulkhead."
+    },
+    {
+      "name": "xarch.resilience.bulkhead.max-wait-duration-millis",
+      "type": "java.lang.Long",
+      "defaultValue": "0",
+      "description": "Maximum wait time (ms) when the bulkhead is full."
+    }
+  ]
+}

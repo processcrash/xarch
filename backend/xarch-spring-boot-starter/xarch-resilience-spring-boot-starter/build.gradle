@@ -1,0 +1,42 @@
+// xarch-resilience-spring-boot-starter
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+
+    compileOnly 'org.springframework.boot:spring-boot-starter'
+    compileOnly 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.springframework.boot:spring-boot-starter-aop'
+    compileOnly 'org.springframework.boot:spring-boot-starter-data-redis'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Resilience4j (rate limiter, circuit breaker, retry, bulkhead)
+    api 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+    api 'io.github.resilience4j:resilience4j-micrometer:2.2.0'
+    api 'io.github.resilience4j:resilience4j-reactor:2.2.0'
+
+    // AOP is required for @Around on the custom annotations
+    api 'org.springframework.boot:spring-boot-starter-aop'
+    api 'org.springframework.boot:spring-boot-starter-actuator'
+
+    api 'io.micrometer:micrometer-core'
+
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

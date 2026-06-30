@@ -7,6 +7,8 @@ dependencies {
     implementation project(':xarch-spring-boot-starter:xarch-db-spring-boot-starter')
     implementation project(':xarch-spring-boot-starter:xarch-web-spring-boot-starter')
     implementation project(':xarch-spring-boot-starter:xarch-cache-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-storage-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-resilience-spring-boot-starter')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.40'

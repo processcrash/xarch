@@ -1,0 +1,60 @@
+# Default xarch resilience configuration. Copy/import this file from your
+# own application.yml with:
+#   spring.config.import: classpath:application-resilience-default.yml
+xarch:
+  resilience:
+    enabled: true
+    rate-limit:
+      # Global servlet filter — applies to every request before the
+      # controller. Disable with `servlet-enabled: false` when you only
+      # want per-method @RateLimit protection.
+      servlet-enabled: true
+      # Permits granted per second per bucket.
+      permits-per-second: 100
+      # Maximum tokens the bucket can hold during an idle burst.
+      burst-capacity: 100
+      # Bucket key derivation strategy.
+      default-scope: IP
+      # 0 = fail fast (recommended for web traffic).
+      timeout-millis: 0
+      # Redis key prefix — keep short, this is on the hot path.
+      redis-key-prefix: "xarch:rl:"
+    circuit-breaker:
+      # Open the breaker when > N% of the sliding window fails.
+      failure-rate-threshold: 50
+      sliding-window-size: 100
+      minimum-number-of-calls: 20
+      # Stay open for 10s, then go half-open.
+      wait-duration-in-open-state-millis: 10000
+      # Allow 5 calls in half-open to probe recovery.
+      permitted-number-of-calls-in-half-open-state: 5
+    retry:
+      max-attempts: 3
+      delay-millis: 200
+      multiplier: 2.0
+      max-delay-millis: 2000
+    bulkhead:
+      concurrent-calls: 25
+      max-wait-duration-millis: 0
+
+# Resilience4j's own knobs are exposed through the standard config tree.
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  ratelimiter:
+    configs:
+      default:
+        registerHealthIndicator: true
+  retry:
+    configs:
+      default:
+        registerHealthIndicator: true
+  bulkhead:
+    configs:
+      default:
+        registerHealthIndicator: true
+  micrometer:
+    enabled: true

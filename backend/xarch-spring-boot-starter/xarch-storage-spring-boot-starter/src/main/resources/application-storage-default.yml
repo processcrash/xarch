@@ -1,0 +1,47 @@
+xarch:
+  storage:
+    # Default storage backend: local | minio | aliyun_oss | s3
+    default-type: local
+
+    configs:
+
+      # ---- Local filesystem ----
+      local:
+        enabled: true
+        base-path: ./xarch-files
+        public-base-url: /files
+        default-bucket: xarch
+
+      # ---- MinIO (S3-compatible) ----
+      minio:
+        enabled: false
+        endpoint: http://localhost:9000
+        access-key: minioadmin
+        secret-key: minioadmin
+        region: us-east-1
+        default-bucket: xarch
+        cname: # e.g. https://cdn.example.com
+        auto-create-bucket: true
+
+      # ---- Aliyun OSS ----
+      aliyun-oss:
+        enabled: false
+        endpoint: https://oss-cn-hangzhou.aliyuncs.com
+        access-key-id: # your AccessKey ID
+        access-key-secret: # your AccessKey Secret
+        security-token: # optional, only for STS credentials
+        bucket-name: xarch
+        cname: # e.g. https://oss-cdn.example.com
+        auto-create-bucket: true
+
+      # ---- Generic AWS S3 ----
+      s3:
+        enabled: false
+        region: us-east-1
+        access-key-id: # your AWS access key id
+        secret-access-key: # your AWS secret access key
+        endpoint: # leave blank for AWS, set for R2/Spaces/MinIO gateway
+        default-bucket: xarch
+        cname: # e.g. https://cdn.example.com
+        path-style-access: true
+        auto-create-bucket: true

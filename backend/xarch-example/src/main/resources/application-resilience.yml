@@ -1,0 +1,67 @@
+# Resilience configuration for the xarch-example monolith.
+#
+# Activate with: --spring.profiles.active=resilience
+#
+# The starter's defaults (see application-resilience-default.yml in the
+# starter jar) are good for most cases — override only what differs from
+# the production policy.
+
+xarch:
+  resilience:
+    enabled: true
+    rate-limit:
+      # Global filter is on. Per-method @RateLimit annotations are always
+      # honoured regardless of this flag.
+      servlet-enabled: true
+      permits-per-second: 100
+      burst-capacity: 100
+      default-scope: IP
+      timeout-millis: 0
+      redis-key-prefix: "xarch:example:rl:"
+    circuit-breaker:
+      failure-rate-threshold: 50
+      sliding-window-size: 100
+      minimum-number-of-calls: 20
+      wait-duration-in-open-state-millis: 10000
+      permitted-number-of-calls-in-half-open-state: 5
+    retry:
+      max-attempts: 3
+      delay-millis: 200
+      multiplier: 2.0
+      max-delay-millis: 2000
+    bulkhead:
+      concurrent-calls: 25
+      max-wait-duration-millis: 0
+
+# Resilience4j's own per-instance configuration. Anything declared here
+# overrides the default and is picked up by the @CircuitBreaker aspect
+# when it lazily registers the named breaker on first use.
+resilience4j:
+  circuitbreaker:
+    instances:
+      user-query:
+        sliding-window-size: 20
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      demo-unreliable:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+  ratelimiter:
+    instances:
+      login-bucket:
+        limit-for-period: 5
+        limit-refresh-period: 1s
+        timeout-duration: 0
+
+# Expose the relevant actuator endpoints for monitoring.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,circuitbreakers,circuitbreakerevents,ratelimiters,retries,bulkheads
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true

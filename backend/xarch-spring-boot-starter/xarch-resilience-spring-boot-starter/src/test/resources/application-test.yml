@@ -1,0 +1,25 @@
+spring:
+  main:
+    web-application-type: servlet
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+xarch:
+  resilience:
+    enabled: true
+    rate-limit:
+      permits-per-second: 50
+      burst-capacity: 50
+      default-scope: IP
+    circuit-breaker:
+      failure-rate-threshold: 50
+      sliding-window-size: 10
+      minimum-number-of-calls: 5
+    retry:
+      max-attempts: 3
+      delay-millis: 50
+      multiplier: 2.0
+    bulkhead:
+      concurrent-calls: 10
