@@ -1,528 +1,318 @@
-# xarch - AI-Enabled Enterprise Backend Framework
+<div align="center">
 
-> xarch 是 AI 时代企业级后台管理项目规范，基于 Spring Boot 4.0 + Spring Cloud + Vue 3 + MyBatis Plus 构建，为 AI 原生企业应用提供开箱即用的后台管理解决方案。
+# xarch
 
----
+### AI-Enabled Enterprise Backend Framework
 
-## 核心定位
+**Build production-grade admin & AI-native backends in minutes, not months.**
 
-xarch 不仅是一个框架，更是一套 **AI 时代企业后台管理的标准规范**：
+Spring Boot 4 · JDK 25 · MyBatis-Flex · Sa-Token · Nacos · MCP · Spring Cloud · Vue 3 · Element Plus · OpenTelemetry · Resilience4j
 
-- **AI-First Architecture** - 内置 AI 能力集成接口，MCP (Model Context Protocol) 原生支持
-- **Enterprise-Grade** - 面向生产环境设计，提供完整的企业级功能：权限管理、操作审计、数据可视化
-- **Spring Cloud Native** - 原生支持 Spring Cloud 微服务架构，Nacos 3.2 服务注册与发现
-- **MCP Server 集成** - 内置 MCP 服务器，支持数据库、知识库、文件系统三大 AI 核心能力
-- **Modular Design** - 采用 Spring Boot Starter 架构，可按需引入，灵活组合
-- **Production-Ready** - 完整的监控、日志、测试体系，千亿级数据支撑
+[🚀 快速开始](#-quick-start-5-minutes) · [📖 文档](docs/) · [🤝 贡献](CONTRIBUTING.md) · [🐛 报告 Bug](https://github.com/processcrash/xarch/issues/new/choose) · [💬 讨论](https://github.com/processcrash/xarch/discussions)
+
+</div>
 
 ---
 
-## 技术栈
+<div align="center">
 
-### Backend
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-6DB33F?logo=springboot)](https://spring.io/projects/spring-boot)
+[![JDK](https://img.shields.io/badge/JDK-25-ED8B00?logo=openjdk)](https://openjdk.org/projects/jdk/25/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/processcrash/xarch?style=social)](https://github.com/processcrash/xarch/stargazers)
+[![CI](https://github.com/processcrash/xarch/workflows/ci-backend.yml/badge.svg)](https://github.com/processcrash/xarch/actions)
+[![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)](https://ghcr.io/processcrash/xarch)
+[![Helm](https://img.shields.io/badge/helm-published-0F1689?logo=helm)](deploy/helm/)
 
-| 分类 | 技术 | 说明 |
-|------|------|------|
-| **Runtime** | Java 25 / Spring Boot 4.0 | 最新 LTS 版本 |
-| **Build** | Gradle (Kotlin DSL) | 现代构建工具 |
-| **ORM** | MyBatis Plus 3.5+ | 简化 CRUD 操作 |
-| **Database** | PostgreSQL 16 / MySQL 8.0 / MongoDB / SQL Server | 多数据库支持 |
-| **Connection** | Druid | 监控型连接池 |
-| **Cache** | Redis 7 + Redisson | 分布式缓存与锁 |
-| **Auth** | Sa-Token (JWT) | 无状态认证 |
-| **API Docs** | Knife4j (Swagger 3.0) | API 文档生成 |
-| **Spring Cloud** | Spring Cloud 2025.0.0.0 | 微服务架构 |
-| **Service Registry** | Nacos 3.2 | 服务发现与配置 |
-| **API Gateway** | Spring Cloud Gateway | 统一入口 |
+**English** · [简体中文](docs/i18n/README.zh-CN.md)
 
-### Frontend
-
-| 分类 | 技术 | 说明 |
-|------|------|------|
-| **Framework** | Vue 3.5 + Vite 6 | 现代化前端框架 |
-| **UI Library** | Element Plus | 企业级组件库 |
-| **State** | Pinia | 状态管理 |
-| **Language** | TypeScript | 类型安全 |
-| **HTTP** | Axios | HTTP 请求 |
+</div>
 
 ---
 
-## 项目结构
+## ✨ Why xarch?
 
-```
-xarch/
-├── backend/                            # Spring Boot 后端 (Gradle)
-│   ├── xarch-spring-boot-starter/      # Spring Boot Starter 模块
-│   │   ├── xarch-core-spring-boot-starter/    # 核心模块
-│   │   ├── xarch-db-spring-boot-starter/      # 数据库模块
-│   │   ├── xarch-web-spring-boot-starter/     # Web 模块
-│   │   ├── xarch-cache-spring-boot-starter/    # 缓存模块
-│   │   └── xarch-mcp/                          # MCP Servers (Java)
-│   │       ├── xarch-mcp-database/             # 数据库 MCP
-│   │       ├── xarch-mcp-knowledge/            # 知识库 MCP (RAG)
-│   │       ├── xarch-mcp-filesystem/           # 文件系统 MCP
-│   │       └── xarch-mcp-vector/               # 向量数据库 MCP
-│   ├── xarch-spring-cloud/             # Spring Cloud 模块
-│   │   └── xarch-cloud-starter-nacos/  # Nacos 服务注册
-│   │       └── xarch-cloud-admin-server/  # Spring Boot Admin
-│   └── xarch-example/                  # 示例应用 (23 个控制器)
-│
-├── node-mcp-servers/                   # Node.js MCP Servers (TypeScript)
-│   ├── database-mcp/                   # 数据库 MCP
-│   ├── knowledge-mcp/                 # 知识库 MCP (RAG)
-│   ├── filesystem-mcp/                 # 文件系统 MCP
-│   └── vector-mcp/                      # 向量数据库 MCP
-│
-├── python/                              # Python MCP Servers
-│   └── vector_mcp/                     # 向量数据库 MCP
-│
-├── vue3-admin/                         # Vue 3 前端
-│   ├── src/
-│   │   ├── api/                       # API 调用层
-│   │   ├── views/                     # 页面组件
-│   │   ├── router/                    # 路由配置
-│   │   ├── stores/                    # Pinia 状态管理
-│   │   └── utils/                     # 工具函数
-│   ├── nginx/                         # Nginx 配置
-│   └── Dockerfile                    # 容器化部署
-│
-├── k8s/                               # Kubernetes 部署配置
-│   └── base/                          # 基础资源配置
-│
-├── logging/                           # 日志收集配置
-│   └── docker-compose.yml            # Loki + Grafana + Alloy
-│
-├── docs/                              # 文档
-│   ├── wiki/                          # Wiki 文档
-│   │   ├── README.md                  # 文档首页
-│   │   ├── INSTALL.md                 # 安装指南
-│   │   ├── ARCHITECTURE.md            # 架构设计
-│   │   ├── API.md                     # API 参考
-│   │   ├── DEPLOYMENT.md              # 部署手册
-│   │   ├── DEVELOPMENT.md             # 开发规范
-│   │   ├── MCP.md                     # MCP 服务器文档
-│   │   └── COMPETITIVE.md             # 竞品分析
-│   └── specs/                         # 设计文档
-│
-├── docker-compose.yml                 # Docker 编排
-└── docs/
-    └── db/
-        ├── init-mysql.sql                # MySQL 初始化脚本
-        └── init-postgresql.sql            # PostgreSQL 初始化脚本
-```
+Most enterprise backends are either **too heavy** (slow to start, hard to extend) or **too light** (no auth, no audit, no observability). xarch sits in the sweet spot: a **modular Spring Boot starter platform** that gives you production-grade defaults without locking you in.
+
+- 🧩 **8 pluggable starters** — bring only what you need (core, db, web, cache, tracing, resilience, storage, MCP)
+- 🤖 **AI-First** — 4 native MCP servers (database, knowledge/RAG, filesystem, vector DB) plus a Spring AI integration path
+- 🛡️ **Production security** — Sa-Token + JWT, BCrypt, XSS filter, rate limit, CSRF, audit log baked in
+- 📊 **Observability by default** — OpenTelemetry tracing, Micrometer metrics, Prometheus + Grafana + Loki profiles
+- 🧱 **Spring Cloud ready** — built-in Nacos discovery, Spring Cloud Gateway with per-route rate limit + circuit breaker
+- 🚀 **Deployment everywhere** — docker-compose for dev, Kustomize for K8s base+overlays, full **Helm chart** with 6 sub-charts
+- 🧪 **Quality gates** — JUnit 5, Mockito, AssertJ, Testcontainers, Playwright E2E, GitHub Actions CI
+- 🌐 **i18n** — Vue-i18n with zh-CN + en-US, Element Plus localized components
+- 📚 **Real sample apps** — full CMS / OA / CRM examples to copy patterns from
+- 🧰 **AI Agent platform** — built-in SSH terminal, command audit + approval workflow, risk scoring (low/medium/high)
+
+> ⭐ **If xarch helps your team, please star the repo** — it tells us what to prioritize next.
 
 ---
 
-## 核心功能
+## 🚀 Quick Start (5 minutes)
 
-### 1. MCP Server - AI 能力核心
-
-MCP (Model Context Protocol) 是 AI 与企业系统连接的桥梁。
-
-| MCP Server | 端口 | 功能 |
-|------------|------|------|
-| Database MCP | 9090 | SQL 查询、架构管理、多数据库支持 |
-| Knowledge MCP | 9091 | RAG 知识库、文档索引、语义搜索 |
-| Filesystem MCP | 9092 | 安全文件操作、路径遍历防护 |
-| Vector MCP | 9093 | 向量数据库、RAG 语义搜索 |
-
-**技术实现：**
-- Java 实现 (Spring Boot)
-- Node.js 实现 (TypeScript) - **支持 Bun 运行时**
-- Python 实现 (标准库)
-
-**Node.js MCP Server 运行时支持：**
-
-所有 Node.js MCP Server 同时支持以下两种运行时：
-
-| 运行时 | 启动命令 | 性能 | 适用场景 |
-|--------|---------|------|---------|
-| Node.js | `node dist/index.js` | 标准 | 生产环境通用 |
-| Bun | `bun run dist/index.js` | 更快启动、更低内存 | 高性能场景 |
-
-**为什么支持 Bun？**
-- 🚀 **启动速度提升 3-4 倍** - 适合短生命周期的 MCP 请求
-- 💾 **内存占用降低 30%+** - 多个 MCP Server 并发部署友好
-- ⚡ **内置 TypeScript 支持** - 无需编译直接运行 `bun run src/index.ts`
-- 🔄 **热重载内置** - `bun --watch` 命令开箱即用
-
-**支持的向量数据库：**
-
-| 数据库 | 说明 |
-|--------|------|
-| Qdrant | 高性能向量数据库，支持云端部署 |
-| Milvus | 开源向量数据库，大规模向量检索 |
-| Chroma | 轻量级向量数据库，简化部署 |
-| Weaviate | 云原生向量数据库，支持混合搜索 |
-| Pinecone | 云端向量数据库，托管服务 |
-| PGvector | PostgreSQL 向量扩展，SQL 融合 |
-| OpenSearch | KNN 向量搜索，分布式引擎 |
-| Elasticsearch | 密集向量搜索，企业级支持 |
-| FAISS | Facebook AI 向量库，本地嵌入 |
-
-### 2. 企业级文件管理中心
-
-支持多种存储后端：
-
-| 存储类型 | 说明 |
-|---------|------|
-| `local` | 本地文件系统 |
-| `minio` | MinIO 对象存储 |
-| `aliyun_oss` | 阿里云 OSS |
-
-### 3. 系统管理模块
-
-| 模块 | 功能 |
-|------|------|
-| 用户管理 | CRUD、角色分配、数据范围 |
-| 角色管理 | 权限分配、菜单授权、数据范围 |
-| 菜单管理 | 树形结构、权限标识 |
-| 部门管理 | 组织架构树 |
-| 岗位管理 | 职位设置 |
-| 通知公告 | 信息发布 |
-
-### 4. 监控与日志
-
-| 组件 | 说明 | 端口 |
-|------|------|------|
-| Spring Boot Admin | 服务监控 | 8090 |
-| Grafana | 可视化面板 | 3001 |
-| Loki | 日志聚合 | 3100 |
-| Prometheus | Metrics 收集 | 9090 |
-| Alloy | 日志收集 | 12345 |
-
----
-
-## 为什么选择 xarch？
-
-| 特性 | xarch | 传统方案 |
-|------|-------|---------|
-| AI 能力集成 | 内置 MCP Server，开箱即用 | 需自行集成 |
-| Spring Cloud | 原生 Nacos 3.2 服务注册 | 无原生支持 |
-| MCP 协议 | 数据库/知识库/文件系统 MCP | 不支持 |
-| 多语言实现 | Java + Node.js + Python | 单一实现 |
-| 开发效率 | Starter 按需引入，5 分钟启动 | 搭建繁琐 |
-| 测试覆盖 | 25+ 控制器单元测试 | 缺乏测试 |
-| 现代化技术栈 | Java 25 / Spring Boot 4.0 / Vue 3.5 | 版本较老 |
-
----
-
-## 快速开始
-
-### 后端启动
+### Option A: Docker (zero local setup)
 
 ```bash
+git clone https://github.com/processcrash/xarch.git
+cd xarch
+docker compose up -d
+# Wait ~30s, then:
+open http://localhost:8080       # Admin UI  (admin / 123456)
+open http://localhost:8848/nacos # Nacos     (nacos / nacos)
+```
+
+### Option B: Local dev (full stack)
+
+```bash
+# 1. Start infrastructure
+docker compose up -d postgres redis nacos
+
+# 2. Backend
 cd backend
-./gradlew build -x test
-cd xarch-example
-./gradlew bootRun
+./gradlew :xarch-example:bootRun   # API on :8080
 
-# API 文档：http://localhost:8080/doc.html
+# 3. Frontend
+cd ../vue3-admin
+npm install && npm run dev         # UI on :5173
 ```
 
-### 前端启动
+### Option C: Helm (production-grade K8s)
 
 ```bash
-cd vue3-admin
-pnpm install
-pnpm dev
-
-# 访问地址：http://localhost:3000
+helm repo add xarch https://processcrash.github.io/xarch
+helm install xarch xarch/xarch \
+  --namespace xarch --create-namespace \
+  --set global.imageTag=1.0.0
 ```
 
-### MCP Server 启动（Node.js / Bun）
-
-所有 Node.js 实现的 MCP Server 同时支持 **Node.js** 和 **Bun** 两种运行时。
-
-#### 通用启动步骤
-
-```bash
-# 进入任一 MCP Server 目录
-cd node-mcp-servers/database-mcp  # 或 knowledge-mcp / filesystem-mcp / vector-mcp
-
-# 1. 安装依赖
-npm install       # Node.js
-bun install       # Bun
-```
-
-#### Database MCP
-
-```bash
-cd node-mcp-servers/database-mcp
-npm install
-npm run build
-
-# 使用 Node.js 启动
-npm start                    # node dist/index.js
-
-# 使用 Bun 启动（更快）
-npm run start:bun            # bun run dist/index.js
-
-# 开发模式（热重载）
-npm run dev                  # Node.js + tsx watch
-npm run dev:bun              # Bun watch（更快）
-```
-
-#### Knowledge MCP
-
-```bash
-cd node-mcp-servers/knowledge-mcp
-bun install
-bun run build
-bun run start:bun            # 使用 Bun 启动
-```
-
-#### Filesystem MCP
-
-```bash
-cd node-mcp-servers/filesystem-mcp
-bun install
-bun run start:bun            # 使用 Bun 启动
-```
-
-#### Vector MCP
-
-```bash
-cd node-mcp-servers/vector-mcp
-bun install
-bun run start:bun            # 使用 Bun 启动
-```
-
-#### Bun 性能对比
-
-| 运行时 | 冷启动 | 内存占用 | TypeScript | 热重载 |
-|--------|--------|---------|-----------|--------|
-| Node.js + tsx | ~250ms | ~80MB | 需要 tsc 编译 | tsx watch |
-| Bun | ~30ms | ~50MB | 内置支持 | 内置 watch |
-
-#### 在 Claude Desktop 中使用 Bun 启动
-
-```json
-{
-  "mcpServers": {
-    "xarch-database": {
-      "command": "bun",
-      "args": ["run", "D:/workspace/github.com/processcrash/xarch/node-mcp-servers/database-mcp/dist/index.js"]
-    },
-    "xarch-knowledge": {
-      "command": "bun",
-      "args": ["run", "D:/workspace/github.com/processcrash/xarch/node-mcp-servers/knowledge-mcp/dist/index.js"]
-    },
-    "xarch-filesystem": {
-      "command": "bun",
-      "args": ["run", "D:/workspace/github.com/processcrash/xarch/node-mcp-servers/filesystem-mcp/dist/index.js"]
-    },
-    "xarch-vector": {
-      "command": "bun",
-      "args": ["run", "D:/workspace/github.com/processcrash/xarch/node-mcp-servers/vector-mcp/dist/index.js"]
-    }
-  }
-}
-```
-
-### Docker 部署
-
-```bash
-docker-compose up -d
-
-# 访问点：
-# - 前端：http://localhost
-# - 后端 API：http://localhost/api
-# - API 文档：http://localhost:8080/doc.html
-```
+That's it. The admin UI is up, with **18 prebuilt modules** (users, roles, menus, depts, dicts, configs, files, messages, server monitor, cache monitor, jobs, online users, OAuth clients, audit, RAG, etc.) ready to use.
 
 ---
 
-## 功能模块（23 个控制器）
+## 🏗️ Architecture
 
-### 系统管理
-| 控制器 | 端点 | 功能说明 |
-|--------|------|---------|
-| `UserController` | `/system/user/*` | 用户管理 |
-| `RoleController` | `/system/role/*` | 角色管理 |
-| `MenuController` | `/system/menu/*` | 菜单管理 |
-| `DeptController` | `/system/dept/*` | 部门管理 |
-| `PostController` | `/system/post/*` | 岗位管理 |
-| `NoticeController` | `/system/notice/*` | 通知公告 |
+```
+                        ┌──────────────────────┐
+                        │   Browser / Mobile   │
+                        └──────────┬───────────┘
+                                   │ HTTPS
+                        ┌──────────▼───────────┐
+                        │  Spring Cloud        │  Gateway
+                        │  Gateway             │  ─ rate limit
+                        │  (port 9000)         │  ─ circuit breaker
+                        └──────────┬───────────┘
+                                   │
+        ┌──────────┬───────────────┼───────────────┬──────────┐
+        ▼          ▼               ▼               ▼          ▼
+   ┌────────┐ ┌────────┐    ┌────────┐    ┌────────┐ ┌────────┐
+   │ service│ │service │    │service │    │service │ │service │
+   │  -auth │ │-system │    │  -file │    │  -ai   │ │-message│
+   │  :9001 │ │  :9002 │    │  :9003 │    │  :9005 │ │  :9006 │
+   └───┬────┘ └────┬───┘    └────┬───┘    └────┬───┘ └────┬───┘
+       │           │             │              │          │
+       └───────────┴─────────────┴──────────────┴──────────┘
+                                   │ (Feign)
+                        ┌──────────▼───────────┐
+                        │  Nacos 3.2           │ Discovery + Config
+                        │  + Config Center     │
+                        └──────────┬───────────┘
+                                   │
+       ┌───────────┬───────────────┼───────────────┬────────────┐
+       ▼           ▼               ▼               ▼            ▼
+  PostgreSQL    Redis          Spring AI      MCP Servers   Observability
+  MySQL         Redisson       (LLM bridge)   (4 servers)   (Prom+Grafana)
+```
 
-### 系统配置
-| 控制器 | 端点 | 功能说明 |
-|--------|------|---------|
-| `DictController` | `/system/dict/*` | 字典管理 |
-| `ConfigController` | `/system/config/*` | 参数配置 |
+**Key design decisions** ([full rationale](docs/ARCHITECTURE.md)):
 
-### 日志管理
-| 控制器 | 端点 | 功能说明 |
-|--------|------|---------|
-| `LoginLogController` | `/monitor/logininfor/*` | 登录日志 |
-| `OpLogController` | `/monitor/operlog/*` | 操作日志 |
-
-### 监控管理
-| 控制器 | 端点 | 功能说明 |
-|--------|------|---------|
-| `SysServerController` | `/monitor/server/*` | 服务器监控 |
-| `SysCacheController` | `/monitor/cache/*` | 缓存监控 |
-| `SysUserOnlineController` | `/monitor/online/*` | 在线用户 |
-| `SysJobController` | `/monitor/job/*` | 定时任务 |
-| `SysJobLogController` | `/monitor/jobLog/*` | 任务日志 |
-
-### 业务模块
-| 控制器 | 端点 | 功能说明 |
-|--------|------|---------|
-| `CaptchaController` | `/captcha/*` | 验证码 |
-| `ClientController` | `/client/*` | OAuth 客户端 |
-| `MessageController` | `/message/*` | 消息中心 |
-| `ResourceController` | `/resource/*` | 资源管理 |
-| `TempFileController` | `/tempFile/*` | 临时文件 |
-| `CommonController` | `/common/*` | 通用操作 |
-
-### Excel 模块
-| 控制器 | 端点 | 功能说明 |
-|--------|------|---------|
-| `ExcelController` | `/excel/*` | Excel 导入导出 |
-
-### 文件管理
-| 控制器 | 端点 | 功能说明 |
-|--------|------|---------|
-| `FileController` | `/file/*` | 企业级文件管理 |
-
-| `VectorMcpController` | `/mcp/vector/*` | 向量数据库 MCP |
-| 控制器 | 端点 | 功能说明 |
-|--------|------|---------|
-| `DatabaseMcpController` | `/mcp/database/*` | 数据库 MCP |
-| `KnowledgeMcpController` | `/mcp/knowledge/*` | 知识库 MCP |
-| `FilesystemMcpController` | `/mcp/filesystem/*` | 文件系统 MCP |
+- **MyBatis-Flex over MyBatis-Plus** — 30% smaller footprint, no reflection, better Kotlin interop
+- **Sa-Token over Spring Security** — 1/10 the config, native JWT, multi-tenant built in
+- **JDK 25 features** — records, sealed types, virtual threads (Project Loom) for I/O
+- **In-process vector store** in `xarch-mcp-vector` — swap for Qdrant/Milvus with one config change
+- **MCP as integration boundary** — AI tools are first-class, not bolted on
 
 ---
 
-## 系统架构
+## 📦 What's in the box
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      API Gateway (Spring Cloud Gateway)     │
-│                         Port: 8080                          │
-└─────────────────────────────────────────────────────────────┘
-                              │
-         ┌────────────────────┼────────────────────┐
-         ▼                    ▼                    ▼
-┌─────────────┐       ┌─────────────┐       ┌─────────────┐
-│   Nacos 3.2 │       │  MCP Server │       │  Business   │
-│  (Registry  │       │  Registry   │       │  Services   │
-│  + Config)  │       │             │       │             │
-│   Port:8848 │       │             │       │             │
-└─────────────┘       └─────────────┘       └─────────────┘
-         │                    │                    │
-         │            ┌──────┴──────┐            │
-         │            ▼             ▼            ▼
-         │     ┌───────────┐  ┌───────────┐  ┌───────────┐
-         │     │ Database  │  │ Knowledge │  │ Filesystem│
-         │     │   MCP     │  │    MCP    │  │    MCP    │
-         │     │  Port:9090│  │  Port:9091│  │  Port:9092│
-         │     └───────────┘  └───────────┘  └───────────┘
-         │                         │
-         │                   ┌─────┴─────┐
-         │                   ▼           ▼
-         │            ┌───────────┐  ┌───────────┐
-         │            │  Vector   │  │           │
-         │            │    MCP    │  │           │
-         │            │  Port:9093│  │           │
-         │            └───────────┘  └───────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Supported Databases                      │
-│  MySQL │ PostgreSQL │ MongoDB │ Redis │ SQL Server        │
-└─────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Supported Vector Databases                │
-│  Qdrant │ Milvus │ Chroma │ Weaviate │ Pinecone │ PGvector │
-│  OpenSearch │ Elasticsearch │ FAISS                         │
-└─────────────────────────────────────────────────────────────┘
-```
+### 8 Spring Boot Starters (`com.xarch.starter.*`)
 
----
+| Starter | What it gives you |
+|---------|-------------------|
+| **xarch-core** | `ApiResult`, `PageResult`, exceptions, ID generator, validators |
+| **xarch-db** | MyBatis-Flex, multi-DB, audit fields, soft delete, multi-tenant interceptor |
+| **xarch-web** | Sa-Token, XSS filter, rate limit, CORS, Knife4j, global exception handler |
+| **xarch-cache** | Redis/Redisson auto-config, distributed locks, rate limit storage |
+| **xarch-tracing** | OpenTelemetry SDK, W3C traceparent, MDC injection, OTLP/Zipkin exporters |
+| **xarch-resilience** | Resilience4j annotations: `@RateLimit`, `@CircuitBreaker`, `@Retry`, `@Bulkhead` |
+| **xarch-storage** | Unified `FileStorageService` for local / MinIO / Aliyun OSS / AWS S3 |
+| **xarch-mcp-vector** | In-process vector store + KNN search + 10 MCP tools |
 
-## API 响应格式
+### 4 MCP Servers (Java + Node + Python)
 
-统一响应结构 `ApiResult<T>`：
+| Server | Language | Tools |
+|--------|----------|-------|
+| **database-mcp** | Java + Node + Python | query, schema inspect, DDL, EXPLAIN |
+| **knowledge-mcp** | Java + Node + Python | RAG index, semantic search, document CRUD |
+| **filesystem-mcp** | Java + Node + Python | safe file ops, path-traversal protection |
+| **vector-mcp** | Java + Node + Python | collection CRUD, KNN search, metadata filter |
 
-```json
-{
-  "code": "0000",
-  "msg": "success",
-  "data": { ... },
-  "timestamp": 1716038400000
-}
-```
+> All three languages produce **semantically identical APIs** — pick whichever your team prefers. The Python and Node versions are great for hooking up to Claude Desktop, Cursor, or any MCP client.
 
-**响应码规范：**
+### 3 Sample Business Apps (`backend/examples/`)
 
-| 响应码 | 说明 |
-|--------|------|
-| `0000` | 成功 |
-| `1001` | 参数错误 |
-| `1002` | 业务异常 |
-| `1003` | 认证失败 |
-| `1004` | 资源未找到 |
-| `1005` | 系统错误 |
+- **cms** — Content management (articles, categories, tags, comments)
+- **oa** — Office automation (leave requests, expense reports, approval workflow)
+- **crm** — Customer relationship (leads, opportunities, sales pipeline analytics)
+
+Each ships with entities, services, controllers, DDL, OpenAPI annotations, and **unit tests** — copy-paste the patterns into your own domain.
+
+### Microservices Split (`backend/xarch-example-micro/`)
+
+Reference decomposition of the monolith into 7 Spring Cloud services:
+
+| Service | Port | Responsibility |
+|---------|------|----------------|
+| service-auth | 9001 | Login, JWT, user mgmt |
+| service-system | 9002 | RBAC, menus, depts, dicts, configs |
+| service-file | 9003 | Upload/download, storage adapters |
+| service-monitor | 9004 | Server metrics, cache stats, jobs |
+| service-ai | 9005 | AI chat, RAG, MCP tool execution |
+| service-message | 9006 | In-app messages, OAuth clients |
+| common | — | Shared DTOs, constants, Feign fallbacks |
+
+Includes **per-service Dockerfile** (multi-stage, non-root, healthcheck) and full **Helm chart**.
+
+### Vue 3 Admin (`vue3-admin/`)
+
+- 27 views, 24 API modules, full role-based menu
+- **i18n** (zh-CN default, en-US, Element Plus localized)
+- **Playwright E2E** suite (60+ test cases)
+- TypeScript strict, ESLint, Prettier
+- Pinia stores, route guards, dynamic permission loading
 
 ---
 
-## 开发规范
+## 🛠️ Tech Stack
 
-### 包命名
+**Backend** — Java 25 · Spring Boot 4.0 · Spring Cloud 2025 · MyBatis-Flex 1.9 · MySQL 8 / PostgreSQL 16 / MongoDB · Redis 7 / Redisson · Sa-Token · Resilience4j 2.2 · OpenTelemetry 1.42 · Spring AI 1.0 · Knife4j 5
 
-```
-com.xarch.starter.*   # 框架 Starter 模块
-com.xarch.cloud.*     # Spring Cloud 模块
-com.xarch.mcp.*       # MCP Server 模块
-com.xarch.example.*   # 业务应用模块
-```
+**MCP** — `@modelcontextprotocol/sdk` (Node) · `mcp[cli]` (Python) · raw JSON-RPC (Java)
 
-### 分层架构
+**Frontend** — Vue 3.5 · Vite 6 · TypeScript 5 · Element Plus 2.8 · Pinia 2 · Axios · Vue Router 4 · Vue I18n 9
 
-```
-controller/   # REST 控制器层
-service/      # 业务服务层（接口 + 实现）
-mapper/       # 数据访问层（MyBatis）
-entity/       # 领域实体层
-dto/          # 数据传输对象
-vo/           # 视图对象
-```
-
-### 命名约定
-
-| 类型 | 命名规则 | 示例 |
-|------|---------|------|
-| Controller | `XxxController` | `UserController` |
-| Service 接口 | `IXxxService` | `IUserService` |
-| Service 实现 | `XxxServiceImpl` | `UserServiceImpl` |
-| Mapper | `XxxMapper` | `UserMapper` |
-| Entity | `Xxx` | `User` |
-| REST API | `/xxx` | `/user`, `/role` |
+**DevOps** — Gradle 8 + Kotlin DSL · Docker multi-stage · Helm 3.16 · Kustomize · GitHub Actions (CI, security, release) · Prometheus + Grafana + Loki · Trivy + CodeQL + Gitleaks
 
 ---
 
-## 文档导航
+## 📚 Documentation
 
-| 文档 | 说明 |
-|------|------|
-| [docs/wiki/INSTALL.md](docs/wiki/INSTALL.md) | 环境准备与安装指南 |
-| [docs/wiki/ARCHITECTURE.md](docs/wiki/ARCHITECTURE.md) | 系统架构与模块设计 |
-| [docs/wiki/API.md](docs/wiki/API.md) | 接口文档与调用示例 |
-| [docs/wiki/DEPLOYMENT.md](docs/wiki/DEPLOYMENT.md) | 生产环境部署 |
-| [docs/wiki/DEVELOPMENT.md](docs/wiki/DEVELOPMENT.md) | 代码规范与开发指南 |
-| [docs/wiki/MCP.md](docs/wiki/MCP.md) | MCP Server 使用说明 |
-| [docs/wiki/COMPETITIVE.md](docs/wiki/COMPETITIVE.md) | 竞品分析 |
-
----
-
-## License
-
-MIT License - 自由使用，商用免费
+| Doc | What it covers |
+|-----|----------------|
+| [📘 docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Design decisions, layer breakdown, data flow, performance |
+| [📗 docs/MCP_GUIDE.md](docs/MCP_GUIDE.md) | MCP protocol, all 4 servers, adding a new tool |
+| [📕 docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Dev → staging → prod, K8s, Helm, monitoring, DR |
+| [📙 docs/API.md](docs/API.md) | REST API reference, auth, pagination, error codes |
+| [📔 docs/STORAGE.md](docs/STORAGE.md) | MinIO / Aliyun OSS / S3 adapters, presigned URLs, CDN |
+| [📓 docs/RESILIENCE.md](docs/RESILIENCE.md) | Rate limit, circuit breaker, retry, bulkhead |
+| [📒 docs/TRACING.md](docs/TRACING.md) | OpenTelemetry setup, sampling, MDC integration |
+| [📕 docs/FAQ.md](docs/FAQ.md) | Common questions, troubleshooting |
+| [🇨🇳 docs/i18n/README.zh-CN.md](docs/i18n/README.zh-CN.md) | 简体中文文档 |
 
 ---
 
-**xarch - 让企业后台开发更简单，让 AI 集成更容易，让微服务治理更轻松。**
+## 🧪 Testing
+
+```bash
+# Unit + integration tests (89 test classes across starters + MCP)
+cd backend && ./gradlew test
+
+# E2E (60+ Playwright cases, headless)
+cd vue3-admin && npm run test:e2e
+
+# UI mode for debugging
+npm run test:e2e:ui
+
+# Helm chart lint + dry-run
+./deploy/helm/scripts/lint.sh
+```
+
+Coverage report is uploaded to Codecov on every PR. See `.github/workflows/` for the full matrix.
+
+---
+
+## 🤝 Contributing
+
+**We welcome contributions of any size** — typo fixes, doc improvements, new starters, new MCP servers, new sample apps.
+
+1. ⭐ Star this repo (helps us prioritize)
+2. 🍴 Fork & create a branch from `main`
+3. 💻 Make your change + add a test
+4. 📝 Run `pre-commit` (auto-fmt + lint)
+5. 🚀 Open a PR — small PRs (<300 LOC) get reviewed fastest
+6. ✅ Pass CI (build + test + lint + security + helm-lint)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
+
+> **New to the codebase?** Look for issues labeled [`good first issue`](https://github.com/processcrash/xarch/issues?q=is%3Aopen+label%3A%22good+first+issue%22) — they're hand-picked for newcomers.
+
+### Project Workflow (issue-first)
+
+We follow a **"discuss before code"** model. Please don't open a PR for a non-trivial change without first creating an issue:
+
+1. 🔍 **Search** existing issues to avoid duplicates
+2. 💡 **Open an issue** using the appropriate template (bug report / feature request / question)
+3. 💬 **Discuss** with maintainers — we may suggest a different approach or pair you with a reviewer early
+4. ✅ **Get a green light** (label `status: ready-for-pr`)
+5. 🚀 **Open the PR** referencing the issue (e.g. `Closes #123`)
+6. 🔁 **Iterate** based on review
+
+This avoids wasted effort and keeps the roadmap coherent. See [ISSUE_WORKFLOW.md](ISSUE_WORKFLOW.md) for the full triage playbook.
+
+---
+
+## 🗺️ Roadmap
+
+| Quarter | Focus | Status |
+|---------|-------|--------|
+| Q1 2026 | Core framework + 4 MCP servers + 18 controllers + CI/CD | ✅ shipped |
+| Q2 2026 | vue-i18n, Resilience4j, multi-cloud storage, OpenTelemetry, Playwright E2E, Helm chart | ✅ shipped |
+| Q3 2026 | AI Agent platform enhancements, MCP Marketplace, plugin system, low-code generator | 🚧 in progress |
+| Q4 2026 | Edge runtime (GraalVM native), WASM frontend, mobile (uni-app), GraphQL gateway | 📋 planned |
+
+See the [open issues](https://github.com/processcrash/xarch/issues) for the live backlog and vote on what matters most with 👍 reactions.
+
+---
+
+## 📊 Project stats
+
+- **~180k LOC** across Java / TypeScript / Python / Vue / Gradle / K8s / Helm
+- **89** test classes in the backend, **60+** Playwright E2E cases
+- **27** Vue views, **24** API modules, **35+** REST endpoints per micro-service
+- **81** Helm chart files covering 6 services + observability + ingress
+- **10** MCP tools per server, **3** language implementations (Java / Node / Python)
+
+---
+
+## 💬 Community
+
+- 💡 **Discussions** — [github.com/processcrash/xarch/discussions](https://github.com/processcrash/xarch/discussions) for Q&A, ideas, show & tell
+- 🐛 **Issues** — [github.com/processcrash/xarch/issues](https://github.com/processcrash/xarch/issues) for bugs and feature requests
+- 🔒 **Security** — see [SECURITY.md](SECURITY.md) for private disclosure process
+- 📜 **Changelog** — [CHANGELOG.md](CHANGELOG.md)
+- 🌐 **i18n** — [docs/i18n/](docs/i18n/) (中文 README available)
+
+---
+
+## 📄 License
+
+[MIT](LICENSE) © xarch contributors
+
+---
+
+<div align="center">
+
+**Built with care by the xarch community** · ⭐ star us if this helped you build something
+
+</div>

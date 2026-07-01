@@ -1,0 +1,100 @@
+name: 💡 Feature Request
+description: Suggest a new feature or improvement
+title: "[Feature]: "
+labels: ["type: feature", "status: needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea that would make xarch better? We'd love to hear it!
+        Please search existing issues first to avoid duplicates.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What problem does this solve? What user pain point does it address? Why now?
+      placeholder: |
+        Right now, I have to write the same boilerplate X every time I start a new service.
+        It's especially painful when Y is involved.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe what you'd like to see. Be specific — APIs, config keys, UI changes, etc.
+      placeholder: |
+        - Add a `@XarchStarter` annotation that auto-configures Z
+        - Provide a starter that bundles A + B + C
+        - Add a new MCP tool `vector_search_with_filter`
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Roughly how big is this change?
+      options:
+        - XS — typo, doc tweak, single-line change
+        - S — single file, < 100 LOC
+        - M — single module, < 500 LOC
+        - L — cross-module, requires design discussion
+        - XL — architectural change, requires RFC
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Area
+      options:
+        - Backend (core starters)
+        - MCP servers
+        - Microservices split
+        - Frontend (vue3-admin)
+        - AI / agents
+        - Storage / file management
+        - Observability / tracing
+        - Resilience / security
+        - K8s / Helm / DevOps
+        - Documentation
+        - Other
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider, and why is your proposed one better?
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Usage example
+      description: Code or config snippet showing what the new feature would look like in practice.
+      render: java
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contrib
+    attributes:
+      label: Willingness to contribute
+      options:
+        - label: I am willing to submit a PR for this
+        - label: I need help from the maintainers
+        - label: Just a suggestion — I won't have time to implement it
+
+  - type: markdown
+    attributes:
+      value: |
+        **Triage process:**
+        - Maintainer will review and label with one of:
+          - `status: needs-design` — opens a design discussion
+          - `status: ready-for-pr` — you can start implementing
+          - `status: wontfix` — explanation provided
+          - `status: roadmap` — added to the public roadmap
+        - For `L` or `XL` scope features, we'll usually ask for an RFC before coding starts

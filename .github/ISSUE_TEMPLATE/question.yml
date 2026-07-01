@@ -1,0 +1,59 @@
+name: ❓ Question / Help
+description: Ask a question about using xarch (not a bug, not a feature request)
+title: "[Question]: "
+labels: ["type: question", "status: needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question about how to use xarch?
+        - 📖 Check the [docs/](https://github.com/processcrash/xarch/tree/main/docs) first
+        - 💬 For open-ended Q&A, prefer [GitHub Discussions](https://github.com/processcrash/xarch/discussions) instead
+        - 🐛 If this is actually a bug, use the **Bug Report** template
+        - 💡 If you're proposing a new feature, use the **Feature Request** template
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Topic area
+      options:
+        - Getting started / install
+        - Configuration
+        - Authentication / Sa-Token
+        - Database / MyBatis-Flex
+        - MCP servers
+        - Microservices / Nacos / Gateway
+        - Frontend (Vue 3)
+        - Storage (MinIO / OSS / S3)
+        - Resilience4j / rate limit
+        - Tracing / OpenTelemetry
+        - Helm / Kubernetes
+        - Other
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: Be as specific as possible. Include your goal, what you tried, and what went wrong.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Relevant code, config, or error messages. Use a code block.
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Self-check
+      options:
+        - label: I have read the documentation
+          required: true
+        - label: I searched existing issues and discussions
+          required: true

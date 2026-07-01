@@ -1,0 +1,83 @@
+name: 🔌 MCP Server Proposal
+description: Propose a new MCP server or tool
+title: "[MCP]: "
+labels: ["type: feature", "area: mcp", "status: needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Propose a new MCP server (e.g. **GitHub MCP**, **Slack MCP**) or a new tool to add to an existing server.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Proposal type
+      options:
+        - New MCP server
+        - New tool for existing server
+        - Improvement to existing tool
+
+  - type: input
+    id: server
+    attributes:
+      label: Server name
+      description: e.g. "github", "slack", "kubernetes", or "xarch-mcp-vector"
+      placeholder: github
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case
+      description: What user problem does this solve? Give a concrete example.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tools
+    attributes:
+      label: Proposed tools
+      description: For each tool: name, description, input schema (params + types), output schema.
+      placeholder: |
+        ### `github_create_issue`
+        Description: Create a new GitHub issue
+        Inputs:
+          - repo: string (required) — "owner/repo"
+          - title: string (required)
+          - body: string (optional)
+          - labels: string[] (optional)
+        Output:
+          - issueNumber: number
+          - url: string
+    validations:
+      required: true
+
+  - type: dropdown
+    id: languages
+    attributes:
+      label: Languages to implement
+      description: Which SDK implementations do you plan to provide?
+      options:
+        - Java (Spring Boot)
+        - TypeScript / Node.js
+        - Python
+        - Go
+      multi-select: true
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security considerations
+      description: What auth does it need? How is it protected? Any rate limits?
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contrib
+    attributes:
+      label: Willingness
+      options:
+        - label: I will implement this (all 3 languages)
+        - label: I will implement one language only
+        - label: Just a proposal — I need a maintainer to pick it up

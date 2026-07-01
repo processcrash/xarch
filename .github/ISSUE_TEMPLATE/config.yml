@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/processcrash/xarch/discussions
+    about: Open-ended Q&A, ideas, and show & tell — please use Discussions for these instead of opening an issue.
+  - name: 🔒 Security disclosure
+    url: https://github.com/processcrash/xarch/blob/main/SECURITY.md
+    about: For security vulnerabilities, follow the private disclosure process in SECURITY.md.
+  - name: 📖 Documentation
+    url: https://github.com/processcrash/xarch/tree/main/docs
+    about: Read the architecture, deployment, MCP, storage, resilience, and tracing guides.
+  - name: 📜 Changelog
+    url: https://github.com/processcrash/xarch/blob/main/CHANGELOG.md
+    about: See what's new in each release.
