@@ -1,0 +1,10 @@
+The Spring Cloud Gateway {{ include "gateway.fullname" . }} has been deployed.
+
+It is reachable from within the cluster at:
+  http://{{ include "gateway.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+To check status:
+  kubectl --namespace {{ .Release.Namespace }} get deployment {{ include "gateway.fullname" . }}
+{{ if .Values.ingress.enabled }}
+The gateway is exposed via Ingress.
+{{ end }}

@@ -1,0 +1,173 @@
+# =============================================================================
+# Staging environment overrides
+# =============================================================================
+# Mirrors production shape with smaller footprint and pinned versions.
+# =============================================================================
+
+namespace:
+  name: xarch-staging
+
+global:
+  imageRegistry: ghcr.io/processcrash
+  timezone: Asia/Shanghai
+  javaOpts: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxRAMPercentage=75.0"
+
+microservices:
+  enabled: true
+  defaultEnabled: true
+  image:
+    repository: xarch-example-micro
+    tag: "1.0.0-rc.1"
+    pullPolicy: IfNotPresent
+  resourcePreset: medium
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  serviceMonitor:
+    enabled: true
+  networkPolicy:
+    enabled: true
+
+serviceAuth:
+  enabled: true
+  name: service-auth
+  port: 9001
+  replicaCount: 2
+serviceSystem:
+  enabled: true
+  name: service-system
+  port: 9002
+  replicaCount: 2
+serviceFile:
+  enabled: true
+  name: service-file
+  port: 9003
+  replicaCount: 2
+serviceMonitor:
+  enabled: true
+  name: service-monitor
+  port: 9004
+  replicaCount: 1
+serviceAi:
+  enabled: true
+  name: service-ai
+  port: 9005
+  replicaCount: 2
+serviceMessage:
+  enabled: true
+  name: service-message
+  port: 9006
+  replicaCount: 2
+
+gateway:
+  enabled: true
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  serviceMonitor:
+    enabled: true
+  routesConfigMap:
+    enabled: true
+    routes:
+      - id: service-auth
+        uri: lb://service-auth
+        predicates:
+          - Path=/api/auth/**
+      - id: service-system
+        uri: lb://service-system
+        predicates:
+          - Path=/api/system/**
+      - id: service-ai
+        uri: lb://service-ai
+        predicates:
+          - Path=/api/ai/**
+
+mysql:
+  enabled: true
+  auth:
+    bootstrapSecret: false
+  persistence:
+    size: 20Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+redis:
+  enabled: true
+  auth:
+    bootstrapSecret: false
+  persistence:
+    size: 5Gi
+
+nacos:
+  enabled: true
+  mode: standalone
+  replicaCount: 1
+  auth:
+    enableAuth: true
+  persistence:
+    enabled: true
+    size: 5Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  hosts:
+    - host: staging.xarch.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend:
+            service: gateway
+            port: 8080
+        - path: /mcp
+          pathType: Prefix
+          backend:
+            service: gateway
+            port: 8080
+  tls:
+    - secretName: xarch-staging-tls
+      hosts:
+        - staging.xarch.example.com
+
+observability:
+  enabled: true
+  prometheus:
+    enabled: true
+    retention: 7d
+  grafana:
+    enabled: true
+    adminPassword: changeme-staging
+
+resourceQuota:
+  enabled: true
+  hard:
+    requests.cpu: "10"
+    requests.memory: 20Gi
+    limits.cpu: "20"
+    limits.memory: 40Gi
+    pods: "50"
+
+limitRange:
+  enabled: true
+  defaults:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

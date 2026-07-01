@@ -1,0 +1,17 @@
+apiVersion: v2
+name: nacos
+description: |
+  Nacos 2.x service registry and config center. Supports standalone and
+  cluster modes; cluster mode requires a shared MySQL (use the
+  externalMysql block). For production, prefer cluster mode + an external
+  managed MySQL.
+type: application
+version: 1.0.0
+appVersion: v2.2.3
+keywords:
+  - xarch
+  - nacos
+  - service-registry
+maintainers:
+  - name: processcrash
+    url: https://github.com/processcrash

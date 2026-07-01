@@ -1,0 +1,16 @@
+apiVersion: v2
+name: redis
+description: |
+  Single-instance Redis chart for xarch. Configurable AOF persistence,
+  memory policy, and password. Sentinel and Cluster modes are documented
+  in the README but not yet templated - prefer managed Redis in production.
+type: application
+version: 1.0.0
+appVersion: "7-alpine"
+keywords:
+  - xarch
+  - redis
+  - cache
+maintainers:
+  - name: processcrash
+    url: https://github.com/processcrash

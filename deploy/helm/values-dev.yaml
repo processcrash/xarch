@@ -1,0 +1,120 @@
+# =============================================================================
+# Development environment overrides
+# =============================================================================
+# Usage:
+#   helm install xarch ./xarch -n xarch-dev --create-namespace \
+#     -f ./xarch/values.yaml -f ./values-dev.yaml
+# =============================================================================
+
+namespace:
+  name: xarch-dev
+
+global:
+  imageRegistry: ghcr.io/processcrash
+  timezone: Asia/Shanghai
+  javaOpts: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxRAMPercentage=75.0"
+
+microservices:
+  enabled: true
+  defaultEnabled: true
+  image:
+    repository: xarch-example-micro
+    tag: latest
+    pullPolicy: Always
+  resourcePreset: small
+  autoscaling:
+    enabled: false
+  podDisruptionBudget:
+    enabled: false
+  serviceMonitor:
+    enabled: false
+  networkPolicy:
+    enabled: false
+
+# Disable all services in dev by default and enable per service as needed.
+serviceAuth:
+  enabled: true
+  name: service-auth
+  port: 9001
+  replicaCount: 1
+
+serviceSystem:
+  enabled: true
+  name: service-system
+  port: 9002
+  replicaCount: 1
+
+serviceFile:
+  enabled: true
+  name: service-file
+  port: 9003
+  replicaCount: 1
+
+serviceMonitor:
+  enabled: true
+  name: service-monitor
+  port: 9004
+  replicaCount: 1
+
+serviceAi:
+  enabled: true
+  name: service-ai
+  port: 9005
+  replicaCount: 1
+
+serviceMessage:
+  enabled: true
+  name: service-message
+  port: 9006
+  replicaCount: 1
+
+gateway:
+  enabled: true
+  replicaCount: 1
+  service:
+    type: NodePort
+
+mysql:
+  enabled: true
+  auth:
+    bootstrapSecret: true
+    rootPassword: root123
+    password: xarch123
+  persistence:
+    size: 10Gi
+  initScripts:
+    001-init.sql: |
+      CREATE DATABASE IF NOT EXISTS xarch DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+      SET GLOBAL max_connections = 2000;
+
+redis:
+  enabled: true
+  auth:
+    bootstrapSecret: true
+    password: redis123
+  persistence:
+    size: 2Gi
+
+nacos:
+  enabled: true
+  mode: standalone
+  replicaCount: 1
+  auth:
+    enableAuth: false
+  persistence:
+    enabled: false
+  jvm:
+    xms: 256m
+    xmx: 512m
+
+ingress:
+  enabled: false
+
+observability:
+  enabled: false
+
+resourceQuota:
+  enabled: false
+
+limitRange:
+  enabled: false

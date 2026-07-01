@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "xarch values schema",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["global"],
+  "properties": {
+    "global": {
+      "type": "object",
+      "required": ["imageRegistry", "timezone"],
+      "properties": {
+        "imageRegistry": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Default image registry. Must not be empty."
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "storageClass": {
+          "type": "string"
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "nacos": { "$ref": "#/definitions/connectionBlock" },
+        "mysql": { "$ref": "#/definitions/connectionBlock" },
+        "redis": { "$ref": "#/definitions/connectionBlock" },
+        "javaOpts": { "type": "string", "minLength": 1 }
+      }
+    },
+    "microservices": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "resourcePreset": {
+          "type": "string",
+          "enum": ["small", "medium", "large"]
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "repository": { "type": "string" },
+            "tag": { "type": "string" },
+            "pullPolicy": {
+              "type": "string",
+              "enum": ["Always", "IfNotPresent", "Never"]
+            }
+          }
+        }
+      }
+    },
+    "gateway": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "replicaCount": { "type": "integer", "minimum": 1 },
+        "service": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["ClusterIP", "LoadBalancer", "NodePort"]
+            }
+          }
+        }
+      }
+    },
+    "mysql": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "type": "string",
+              "pattern": "^[0-9]+(Mi|Gi|Ti)$"
+            }
+          }
+        }
+      }
+    },
+    "redis": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "architecture": {
+          "type": "string",
+          "enum": ["standalone", "sentinel", "cluster"]
+        }
+      }
+    },
+    "nacos": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "mode": {
+          "type": "string",
+          "enum": ["standalone", "cluster"]
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "className": { "type": "string" }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" }
+      }
+    }
+  },
+  "definitions": {
+    "connectionBlock": {
+      "type": "object",
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer" },
+        "database": { "type": "string" },
+        "username": { "type": "string" },
+        "usernameRef": { "type": "string" },
+        "passwordRef": { "type": "string" },
+        "serverAddr": { "type": "string" },
+        "namespace": { "type": "string" },
+        "group": { "type": "string" }
+      }
+    }
+  }
+}

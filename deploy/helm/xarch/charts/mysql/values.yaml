@@ -1,0 +1,47 @@
+name: mysql
+
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+auth:
+  # When true, this chart renders a Secret containing the passwords. In
+  # production, set this to false and provision the Secret externally
+  # (e.g. via External Secrets Operator pointing at Vault).
+  bootstrapSecret: true
+  rootPassword: ""
+  rootPasswordRef: mysql-root-password
+  database: xarch
+  username: xarch
+  password: ""
+  passwordRef: mysql-password
+
+persistence:
+  enabled: true
+  size: 50Gi
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+
+initScripts: {}
+# 001-schema.sql: |
+#   CREATE DATABASE IF NOT EXISTS xarch DEFAULT CHARACTER SET utf8mb4;
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+
+service:
+  type: ClusterIP
+  port: 3306
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

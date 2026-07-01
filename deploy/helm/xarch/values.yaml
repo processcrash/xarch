@@ -1,0 +1,412 @@
+# =============================================================================
+# xarch - default values
+# =============================================================================
+# All values documented here can be overridden per environment using a
+# values-*.yaml file (see values-dev.yaml / values-staging.yaml / values-prod.yaml)
+# or via `helm install --set key=value`.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Global
+# -----------------------------------------------------------------------------
+global:
+  # Default image registry shared by all sub-charts. Override per environment
+  # when pushing to a private registry.
+  imageRegistry: ghcr.io/processcrash
+  # Image pull secrets to use for every workload. Most sub-charts expose
+  # their own imagePullSecrets that inherit from this value.
+  imagePullSecrets: []
+  # - name: ghcr-secret
+  # Default storage class for persistent volumes.
+  storageClass: ""
+  # Default timezone injected into every container.
+  timezone: Asia/Shanghai
+  # Cluster-internal service suffix for Nacos / Redis / MySQL.
+  serviceDomain: xarch.svc.cluster.local
+  # Nacos coordinates used by every Spring Cloud component.
+  nacos:
+    serverAddr: nacos:8848
+    namespace: xarch-cloud
+    group: DEFAULT_GROUP
+    username: nacos
+    passwordRef: nacos-password
+  # MySQL coordinates.
+  mysql:
+    host: mysql
+    port: 3306
+    database: xarch
+    usernameRef: mysql-username
+    passwordRef: mysql-password
+  # Redis coordinates.
+  redis:
+    host: redis
+    port: 6379
+    passwordRef: redis-password
+  # Spring Cloud / Sa-Token defaults.
+  saToken:
+    timeout: 7200
+  # Java options applied to every JVM workload unless overridden.
+  javaOpts: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxRAMPercentage=75.0"
+
+# -----------------------------------------------------------------------------
+# Common library chart (no resources, helpers only)
+# -----------------------------------------------------------------------------
+common:
+  enabled: true
+
+# -----------------------------------------------------------------------------
+# Microservices - shared defaults
+# -----------------------------------------------------------------------------
+microservices:
+  enabled: true
+  # When true, every microservice is installed. Set to false to install only
+  # a subset, and override per-service `enabled` flags below.
+  defaultEnabled: true
+  image:
+    repository: xarch-example-micro
+    pullPolicy: IfNotPresent
+    tag: "1.0.0"
+  serviceAccount:
+    create: true
+    name: ""
+  # Resource preset (small|medium|large) - applied when resources not given.
+  resourcePreset: medium
+  # Default pod settings applied to every microservice.
+  podAnnotations: {}
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+    capabilities:
+      drop: [ALL]
+  # Horizontal Pod Autoscaler defaults.
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  # PodDisruptionBudget defaults.
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+  # Prometheus Operator integration.
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+  # Network policies (locked-down by default).
+  networkPolicy:
+    enabled: true
+  # Common environment variables merged into every microservice.
+  env: []
+  # Common secret references merged into every microservice.
+  envFrom: []
+
+# Per-service configuration. Each service is enabled by default and uses the
+# shared image repository above, but image.tag can be overridden per service
+# to support phased rollouts.
+serviceAuth:
+  enabled: true
+  name: service-auth
+  port: 9001
+  component: authentication
+  env: []
+serviceSystem:
+  enabled: true
+  name: service-system
+  port: 9002
+  component: business
+  env: []
+serviceFile:
+  enabled: true
+  name: service-file
+  port: 9003
+  component: storage
+  env: []
+  persistence:
+    enabled: true
+    size: 20Gi
+    accessModes: [ReadWriteOnce]
+    mountPath: /data
+serviceMonitor:
+  enabled: true
+  name: service-monitor
+  port: 9004
+  component: observability-bridge
+  env: []
+serviceAi:
+  enabled: true
+  name: service-ai
+  port: 9005
+  component: ai
+  env: []
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+serviceMessage:
+  enabled: true
+  name: service-message
+  port: 9006
+  component: messaging
+  env: []
+
+# Per-service resource overrides. Anything not set falls back to the preset
+# selected by `microservices.resourcePreset`.
+serviceAuthResources: {}
+serviceSystemResources: {}
+serviceFileResources: {}
+serviceMonitorResources: {}
+serviceAiResources: {}
+serviceMessageResources: {}
+
+# -----------------------------------------------------------------------------
+# Spring Cloud Gateway
+# -----------------------------------------------------------------------------
+gateway:
+  enabled: true
+  name: xarch-cloud-gateway
+  port: 8080
+  replicaCount: 2
+  image:
+    repository: xarch-cloud-gateway
+    pullPolicy: IfNotPresent
+    tag: "1.0.0"
+  service:
+    type: ClusterIP
+    annotations: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+  serviceMonitor:
+    enabled: false
+  # Routes can be defined inline or loaded from Nacos at runtime.
+  routes: []
+  # - id: system-user
+  #   uri: lb://service-system
+  #   predicates:
+  #     - Path=/api/system/user/**
+
+# -----------------------------------------------------------------------------
+# MySQL
+# -----------------------------------------------------------------------------
+mysql:
+  enabled: true
+  image:
+    repository: mysql
+    tag: "8.0"
+    pullPolicy: IfNotPresent
+  auth:
+    rootPasswordRef: mysql-root-password
+    database: xarch
+    username: xarch
+    passwordRef: mysql-password
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: ""
+    accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+  initScripts: {}
+  # 001-schema.sql: |
+  #   CREATE DATABASE IF NOT EXISTS xarch ...
+
+# -----------------------------------------------------------------------------
+# Redis
+# -----------------------------------------------------------------------------
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: "7-alpine"
+    pullPolicy: IfNotPresent
+  auth:
+    passwordRef: redis-password
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+    accessModes: [ReadWriteOnce]
+  config:
+    maxmemory: 1gb
+    maxmemoryPolicy: allkeys-lru
+    appendonly: "yes"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+  # To enable Sentinel or Cluster mode, override this section entirely.
+  architecture: standalone
+
+# -----------------------------------------------------------------------------
+# Nacos
+# -----------------------------------------------------------------------------
+nacos:
+  enabled: true
+  image:
+    repository: nacos/nacos-server
+    tag: v2.2.3
+    pullPolicy: IfNotPresent
+  mode: standalone # standalone | cluster
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 8848
+        targetPort: 8848
+      - name: grpc
+        port: 9848
+        targetPort: 9848
+  auth:
+    enableAuth: false
+    username: nacos
+    passwordRef: nacos-password
+  persistence:
+    enabled: false
+    size: 20Gi
+  # When external MySQL persistence is used (recommended for production).
+  externalMysql:
+    enabled: false
+    host: ""
+    port: 3306
+    database: nacos
+    usernameRef: nacos-mysql-username
+    passwordRef: nacos-mysql-password
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+# -----------------------------------------------------------------------------
+# Ingress
+# -----------------------------------------------------------------------------
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: xarch.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend:
+            service: gateway
+            port: 8080
+        - path: /mcp
+          pathType: Prefix
+          backend:
+            service: gateway
+            port: 8080
+  tls: []
+  # - secretName: xarch-tls
+  #   hosts:
+  #     - xarch.example.com
+
+# -----------------------------------------------------------------------------
+# Observability
+# -----------------------------------------------------------------------------
+observability:
+  enabled: false
+  prometheus:
+    enabled: true
+    retention: 15d
+    storageSize: 50Gi
+  grafana:
+    enabled: true
+    adminPassword: changeme
+  loki:
+    enabled: false
+  alertmanager:
+    enabled: false
+
+# -----------------------------------------------------------------------------
+# Resource presets
+# -----------------------------------------------------------------------------
+presets:
+  small:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  medium:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  large:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 4Gi
+
+# -----------------------------------------------------------------------------
+# Kubernetes namespace and quota
+# -----------------------------------------------------------------------------
+namespace:
+  create: true
+  name: xarch
+  labels:
+    app.kubernetes.io/part-of: xarch
+    app.kubernetes.io/managed-by: helm
+resourceQuota:
+  enabled: false
+  hard:
+    requests.cpu: "20"
+    requests.memory: 40Gi
+    limits.cpu: "40"
+    limits.memory: 80Gi
+    pods: "100"
+limitRange:
+  enabled: false
+  defaults:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# -----------------------------------------------------------------------------
+# Image pull secret - pre-create from a dockerconfigjson value
+# -----------------------------------------------------------------------------
+imagePullSecret:
+  create: false
+  name: ghcr-secret
+  # registry: ghcr.io
+  # username: ""
+  # password: ""
+  # email: ""
+  # auth: ""

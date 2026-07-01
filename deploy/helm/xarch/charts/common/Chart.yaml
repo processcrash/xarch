@@ -1,0 +1,15 @@
+apiVersion: v2
+name: common
+description: |
+  Common library chart for xarch sub-charts. Provides template helpers and
+  pod-spec snippets that are shared across microservice / gateway sub-charts.
+type: library
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - xarch
+  - library
+  - common
+maintainers:
+  - name: processcrash
+    url: https://github.com/processcrash

@@ -1,0 +1,16 @@
+apiVersion: v2
+name: microservice
+description: |
+  Generic Spring Boot microservice chart used by all six xarch services
+  (service-auth, service-system, service-file, service-monitor,
+  service-ai, service-message). Configured via the parent umbrella chart.
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - xarch
+  - microservice
+  - spring-boot
+maintainers:
+  - name: processcrash
+    url: https://github.com/processcrash

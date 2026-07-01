@@ -1,0 +1,181 @@
+# =============================================================================
+# Production environment overrides
+# =============================================================================
+# Pinned versions, HPA + PDB enabled, observability stack enabled, image
+# pull secrets required for ghcr.io.
+# =============================================================================
+
+namespace:
+  name: xarch
+
+global:
+  imageRegistry: ghcr.io/processcrash
+  imagePullSecrets:
+    - name: ghcr-secret
+  timezone: Asia/Shanghai
+  javaOpts: "-Xms1024m -Xmx2048m -XX:+UseG1GC -XX:MaxRAMPercentage=75.0 -XX:+UseStringDeduplication"
+  storageClass: gp3
+
+microservices:
+  enabled: true
+  defaultEnabled: true
+  image:
+    repository: xarch-example-micro
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  resourcePreset: large
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+  serviceMonitor:
+    enabled: true
+  networkPolicy:
+    enabled: true
+
+serviceAuth:
+  enabled: true
+  name: service-auth
+  port: 9001
+  replicaCount: 3
+serviceSystem:
+  enabled: true
+  name: service-system
+  port: 9002
+  replicaCount: 3
+serviceFile:
+  enabled: true
+  name: service-file
+  port: 9003
+  replicaCount: 2
+  persistence:
+    size: 200Gi
+serviceMonitor:
+  enabled: true
+  name: service-monitor
+  port: 9004
+  replicaCount: 1
+serviceAi:
+  enabled: true
+  name: service-ai
+  port: 9005
+  replicaCount: 3
+serviceMessage:
+  enabled: true
+  name: service-message
+  port: 9006
+  replicaCount: 3
+
+gateway:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+  serviceMonitor:
+    enabled: true
+  routesConfigMap:
+    enabled: false  # Routes managed via Nacos in production.
+
+mysql:
+  enabled: false  # Use external managed MySQL (RDS / Cloud SQL).
+  # When using the in-cluster MySQL for dev clusters, flip this to true.
+  auth:
+    bootstrapSecret: false  # Provisioned externally via Vault / Sealed Secrets.
+  persistence:
+    size: 100Gi
+
+redis:
+  enabled: false  # Use external managed Redis (ElastiCache / Memorystore).
+  auth:
+    bootstrapSecret: false
+
+nacos:
+  enabled: true
+  mode: cluster
+  replicaCount: 3
+  auth:
+    enableAuth: true
+  persistence:
+    enabled: true
+    size: 20Gi
+  externalMysql:
+    enabled: true
+    host: mysql.prod.internal
+    port: 3306
+    database: nacos
+  jvm:
+    xms: 1024m
+    xmx: 2048m
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/limit-rps: "200"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: xarch.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend:
+            service: gateway
+            port: 8080
+        - path: /mcp
+          pathType: Prefix
+          backend:
+            service: gateway
+            port: 8080
+  tls:
+    - secretName: xarch-prod-tls
+      hosts:
+        - xarch.example.com
+
+observability:
+  enabled: true
+  prometheus:
+    enabled: true
+    retention: 30d
+    storageSize: 200Gi
+  grafana:
+    enabled: true
+    adminPassword: changeme  # override via --set or external secret
+
+resourceQuota:
+  enabled: true
+  hard:
+    requests.cpu: "40"
+    requests.memory: 80Gi
+    limits.cpu: "80"
+    limits.memory: 160Gi
+    pods: "200"
+    persistentvolumeclaims: "20"
+
+limitRange:
+  enabled: true
+  defaults:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+imagePullSecret:
+  create: true
+  name: ghcr-secret
+  # registry: ghcr.io
+  # username: <bot-account>
+  # password: <ghcr-token>
+  # email: bot@example.com
+  # auth: <base64 user:pass>

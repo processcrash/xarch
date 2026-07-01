@@ -1,0 +1,83 @@
+apiVersion: v2
+name: xarch
+description: |
+  xarch - AI-Enabled Enterprise Backend Framework.
+  An umbrella chart that deploys the full xarch stack: six Java/Spring Boot
+  microservices, the Spring Cloud Gateway, Nacos, MySQL, Redis, observability
+  stack, and supporting Kubernetes resources.
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+icon: https://raw.githubusercontent.com/processcrash/xarch/main/docs/assets/logo.png
+home: https://github.com/processcrash/xarch
+sources:
+  - https://github.com/processcrash/xarch
+keywords:
+  - java
+  - spring-boot
+  - sa-token
+  - microservices
+  - mcp
+  - ai
+  - nacos
+maintainers:
+  - name: processcrash
+    email: dev@processcrash.local
+    url: https://github.com/processcrash
+kubeVersion: ">=1.24.0-0"
+
+dependencies:
+  - name: common
+    version: 1.0.0
+    condition: common.enabled
+    repository: file://charts/common
+  - name: microservice
+    version: 1.0.0
+    condition: microservices.enabled
+    repository: file://charts/microservice
+    alias: service-auth
+  - name: microservice
+    version: 1.0.0
+    condition: microservices.enabled
+    repository: file://charts/microservice
+    alias: service-system
+  - name: microservice
+    version: 1.0.0
+    condition: microservices.enabled
+    repository: file://charts/microservice
+    alias: service-file
+  - name: microservice
+    version: 1.0.0
+    condition: microservices.enabled
+    repository: file://charts/microservice
+    alias: service-monitor
+  - name: microservice
+    version: 1.0.0
+    condition: microservices.enabled
+    repository: file://charts/microservice
+    alias: service-ai
+  - name: microservice
+    version: 1.0.0
+    condition: microservices.enabled
+    repository: file://charts/microservice
+    alias: service-message
+  - name: gateway
+    version: 1.0.0
+    condition: gateway.enabled
+    repository: file://charts/gateway
+  - name: mysql
+    version: 1.0.0
+    condition: mysql.enabled
+    repository: file://charts/mysql
+  - name: redis
+    version: 1.0.0
+    condition: redis.enabled
+    repository: file://charts/redis
+  - name: nacos
+    version: 1.0.0
+    condition: nacos.enabled
+    repository: file://charts/nacos
+  - name: observability
+    version: 1.0.0
+    condition: observability.enabled
+    repository: file://charts/observability

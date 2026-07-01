@@ -1,0 +1,12 @@
+{{- if .Values.enabled -}}
+The microservice {{ include "microservice.fullname" . }} has been deployed.
+
+It is reachable from within the cluster at:
+  {{ include "microservice.fullname" . }}.{{ .Release.Namespace | default "xarch" }}.svc.cluster.local:{{ .Values.service.port | default .Values.port }}
+
+To check status:
+  kubectl --namespace {{ .Release.Namespace | default "xarch" }} get deployment {{ include "microservice.fullname" . }}
+
+To view logs:
+  kubectl --namespace {{ .Release.Namespace | default "xarch" }} logs -l app.kubernetes.io/name={{ include "microservice.fullname" . }} -f
+{{- end }}

@@ -1,0 +1,17 @@
+apiVersion: v2
+name: mysql
+description: |
+  Single-instance MySQL 8 chart for xarch. Supports PVC-backed persistence and
+  ConfigMap-driven init scripts. For production-grade HA, point the umbrella
+  chart at an external managed MySQL (RDS / Cloud SQL / Vitess) and disable
+  this sub-chart via .Values.mysql.enabled=false.
+type: application
+version: 1.0.0
+appVersion: "8.0"
+keywords:
+  - xarch
+  - mysql
+  - database
+maintainers:
+  - name: processcrash
+    url: https://github.com/processcrash

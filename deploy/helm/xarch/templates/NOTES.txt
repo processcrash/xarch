@@ -1,0 +1,34 @@
+xarch has been installed.
+
+Release name: {{ .Release.Name }}
+Namespace:    {{ .Values.namespace.name }}
+
+To check rollout status:
+  kubectl --namespace {{ .Values.namespace.name }} rollout status deploy --selector app.kubernetes.io/part-of=xarch
+
+To see the gateway URL:
+  kubectl --namespace {{ .Values.namespace.name }} get svc {{ include "xarch.fullname" . }}-gateway
+
+{{- if .Values.ingress.enabled }}
+Ingress hosts:
+{{- range .Values.ingress.hosts }}
+  - https://{{ .host }}
+{{- end }}
+{{- end }}
+
+Components:
+{{- if .Values.gateway.enabled }}
+  Gateway        : {{ .Values.gateway.replicaCount }} replica(s) on port {{ .Values.gateway.service.port }}
+{{- end }}
+{{- if .Values.mysql.enabled }}
+  MySQL          : single instance, PVC-backed
+{{- end }}
+{{- if .Values.redis.enabled }}
+  Redis          : {{ .Values.redis.architecture }} mode
+{{- end }}
+{{- if .Values.nacos.enabled }}
+  Nacos          : {{ .Values.nacos.mode }} mode
+{{- end }}
+{{- if .Values.observability.enabled }}
+  Observability  : Prometheus + Grafana
+{{- end }}

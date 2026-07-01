@@ -1,0 +1,64 @@
+name: nacos
+
+image:
+  repository: nacos/nacos-server
+  tag: v2.2.3
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# standalone | cluster
+mode: standalone
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8848
+      targetPort: 8848
+    - name: grpc
+      port: 9848
+      targetPort: 9848
+
+auth:
+  enableAuth: false
+  username: nacos
+  password: ""
+  passwordRef: nacos-password
+
+persistence:
+  enabled: false
+  size: 20Gi
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+
+# External MySQL persistence (recommended for production / cluster mode).
+externalMysql:
+  enabled: false
+  host: ""
+  port: 3306
+  database: nacos
+  num: 1
+  username: nacos
+  usernameRef: nacos-mysql-username
+  passwordRef: nacos-mysql-password
+
+jvm:
+  xms: 512m
+  xmx: 1024m
+  xmn: 256m
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "xarch.fullname" . }}-test-connection
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "xarch.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: wget
+      image: busybox:1.36
+      command: ["sh", "-c"]
+      args:
+        - |
+          echo "Testing gateway reachability"
+          wget --spider --timeout=5 http://{{ .Values.gateway.name }}:{{ .Values.gateway.port }}/actuator/health && echo "Gateway reachable" || exit 1
+          echo "All connection tests passed"

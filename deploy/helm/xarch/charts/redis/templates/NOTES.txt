@@ -1,0 +1,5 @@
+Redis {{ include "redis.fullname" . }} has been deployed.
+
+Reachable at: {{ include "redis.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+Password stored in Secret: {{ include "redis.secretName" . }}

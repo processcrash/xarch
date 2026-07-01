@@ -1,0 +1,108 @@
+{{/*
+Standard container security context.
+Usage:
+  {{ include "common.containerSecurityContext" . }}
+*/}}
+{{- define "common.containerSecurityContext" -}}
+allowPrivilegeEscalation: false
+readOnlyRootFilesystem: false
+runAsNonRoot: true
+capabilities:
+  drop:
+    - ALL
+seccompProfile:
+  type: RuntimeDefault
+{{- end -}}
+
+{{/*
+Standard pod security context.
+*/}}
+{{- define "common.podSecurityContext" -}}
+runAsNonRoot: true
+runAsUser: 65532
+runAsGroup: 65532
+fsGroup: 65532
+fsGroupChangePolicy: OnRootMismatch
+seccompProfile:
+  type: RuntimeDefault
+{{- end -}}
+
+{{/*
+Standard image pull secrets block.
+*/}}
+{{- define "common.imagePullSecrets" -}}
+{{- $secrets := list -}}
+{{- if .Values.global.imagePullSecrets -}}
+{{- $secrets = concat $secrets .Values.global.imagePullSecrets -}}
+{{- end -}}
+{{- if .Values.imagePullSecrets -}}
+{{- $secrets = concat $secrets .Values.imagePullSecrets -}}
+{{- end -}}
+{{- if $secrets -}}
+imagePullSecrets:
+{{- toYaml $secrets | nindent 0 }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Common env block shared by all xarch JVM workloads.
+Usage:
+  env:
+  {{- include "common.globalEnv" . | nindent 4 }}
+*/}}
+{{- define "common.globalEnv" -}}
+- name: TZ
+  value: {{ .Values.global.timezone | quote }}
+- name: JAVA_OPTS
+  value: {{ .Values.global.javaOpts | quote }}
+- name: NACOS_SERVER_ADDR
+  value: {{ .Values.global.nacos.serverAddr | quote }}
+- name: SPRING_CLOUD_NACOS_SERVER_ADDR
+  value: {{ .Values.global.nacos.serverAddr | quote }}
+- name: SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE
+  value: {{ .Values.global.nacos.namespace | quote }}
+- name: SPRING_CLOUD_NACOS_DISCOVERY_GROUP
+  value: {{ .Values.global.nacos.group | quote }}
+- name: SPRING_CLOUD_NACOS_CONFIG_NAMESPACE
+  value: {{ .Values.global.nacos.namespace | quote }}
+- name: SPRING_CLOUD_NACOS_CONFIG_GROUP
+  value: {{ .Values.global.nacos.group | quote }}
+- name: NACOS_USERNAME
+  valueFrom:
+    secretKeyRef:
+      name: {{ default (printf "%s-secrets" (include "xarch.fullname" .)) "xarch-secrets" }}
+      key: {{ .Values.global.nacos.usernameRef | default "NACOS_USERNAME" }}
+      optional: true
+- name: NACOS_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ default (printf "%s-secrets" (include "xarch.fullname" .)) "xarch-secrets" }}
+      key: {{ .Values.global.nacos.passwordRef | default "NACOS_PASSWORD" }}
+      optional: true
+- name: SPRING_DATASOURCE_URL
+  value: "jdbc:mysql://{{ .Values.global.mysql.host }}:{{ .Values.global.mysql.port }}/{{ .Values.global.mysql.database }}?useUnicode=true&characterEncoding=utf8&serverTimezone={{ .Values.global.timezone }}"
+- name: SPRING_DATASOURCE_USERNAME
+  valueFrom:
+    secretKeyRef:
+      name: {{ default (printf "%s-secrets" (include "xarch.fullname" .)) "xarch-secrets" }}
+      key: {{ .Values.global.mysql.usernameRef | default "DB_USERNAME" }}
+      optional: true
+- name: SPRING_DATASOURCE_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ default (printf "%s-secrets" (include "xarch.fullname" .)) "xarch-secrets" }}
+      key: {{ .Values.global.mysql.passwordRef | default "DB_PASSWORD" }}
+      optional: true
+- name: SPRING_REDIS_HOST
+  value: {{ .Values.global.redis.host | quote }}
+- name: SPRING_REDIS_PORT
+  value: {{ .Values.global.redis.port | quote }}
+- name: SPRING_REDIS_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ default (printf "%s-secrets" (include "xarch.fullname" .)) "xarch-secrets" }}
+      key: {{ .Values.global.redis.passwordRef | default "REDIS_PASSWORD" }}
+      optional: true
+- name: SA_TOKEN_TIMEOUT
+  value: {{ .Values.global.saToken.timeout | quote }}
+{{- end -}}

@@ -1,0 +1,48 @@
+name: redis
+
+image:
+  repository: redis
+  tag: "7-alpine"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+auth:
+  # When true, the chart renders a Secret with the redis password.
+  bootstrapSecret: true
+  password: ""
+  passwordRef: redis-password
+
+# Architecture: standalone | sentinel | cluster
+# sentinel / cluster modes are not yet templated - keep standalone.
+architecture: standalone
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+
+config:
+  maxmemory: 1gb
+  maxmemoryPolicy: allkeys-lru
+  appendonly: "yes"
+  tcpKeepalive: 60
+  timeout: 0
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+
+service:
+  type: ClusterIP
+  port: 6379
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

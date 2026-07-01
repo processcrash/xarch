@@ -1,0 +1,118 @@
+# Default values for the microservice sub-chart.
+# All values are normally provided by the parent umbrella chart.
+name: ""
+component: ""
+port: 8080
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+containerSecurityContext: {}
+
+env: []
+envFrom: []
+
+resources: {}
+# When no resources given, falls back to .Values.presets[preset].
+
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+
+probes:
+  liveness:
+    enabled: true
+    path: /actuator/health
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    enabled: true
+    path: /actuator/health
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  startup:
+    enabled: false
+    path: /actuator/health
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    failureThreshold: 30
+
+persistence:
+  enabled: false
+  size: 10Gi
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  mountPath: /data
+
+configmap:
+  enabled: false
+  data: {}
+
+secret:
+  create: false
+  data: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  maxUnavailable: ""
+
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  path: /actuator/prometheus
+
+networkPolicy:
+  enabled: true
+  ingressNamespaceSelector: {}
+  egress:
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 8848
+        - port: 9848
+        - port: 3306
+        - port: 6379
+
+initContainers: []
+sidecars: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Common preset selector — when set, looks up .Values.presets[name].
+resourcePreset: medium

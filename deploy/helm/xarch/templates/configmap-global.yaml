@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "xarch.fullname" . }}-config
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "xarch.labels" . | nindent 4 }}
+    app.kubernetes.io/component: config
+data:
+  APP_NAME: {{ .Values.global.imageRegistry | quote }}
+  TZ: {{ .Values.global.timezone | quote }}
+  JAVA_OPTS: {{ .Values.global.javaOpts | quote }}
+  NACOS_SERVER_ADDR: {{ .Values.global.nacos.serverAddr | quote }}
+  SPRING_CLOUD_NACOS_SERVER_ADDR: {{ .Values.global.nacos.serverAddr | quote }}
+  SPRING_CLOUD_NACOS_DISCOVERY_NAMESPACE: {{ .Values.global.nacos.namespace | quote }}
+  SPRING_CLOUD_NACOS_DISCOVERY_GROUP: {{ .Values.global.nacos.group | quote }}
+  SPRING_CLOUD_NACOS_CONFIG_NAMESPACE: {{ .Values.global.nacos.namespace | quote }}
+  SPRING_CLOUD_NACOS_CONFIG_GROUP: {{ .Values.global.nacos.group | quote }}
+  SPRING_DATASOURCE_URL: "jdbc:mysql://{{ .Values.global.mysql.host }}:{{ .Values.global.mysql.port }}/{{ .Values.global.mysql.database }}?useUnicode=true&characterEncoding=utf8&serverTimezone={{ .Values.global.timezone }}"
+  SPRING_REDIS_HOST: {{ .Values.global.redis.host | quote }}
+  SPRING_REDIS_PORT: {{ .Values.global.redis.port | quote }}
+  SA_TOKEN_TIMEOUT: {{ .Values.global.saToken.timeout | quote }}

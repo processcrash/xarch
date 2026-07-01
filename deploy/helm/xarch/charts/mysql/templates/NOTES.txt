@@ -1,0 +1,10 @@
+MySQL {{ include "mysql.fullname" . }} has been deployed.
+
+It is reachable at:
+  {{ include "mysql.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+Root password and user password are stored in Secret:
+  {{ include "mysql.secretName" . }}
+{{ if .Values.persistence.enabled }}
+Data is persisted to PVC {{ include "mysql.fullname" . }}-data.
+{{ end }}

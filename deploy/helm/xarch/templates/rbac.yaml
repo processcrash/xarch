@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "xarch.fullname" . }}-sa
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "xarch.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "xarch.fullname" . }}-role
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "xarch.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets", "pods", "services", "endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "xarch.fullname" . }}-rolebinding
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "xarch.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "xarch.fullname" . }}-sa
+    namespace: {{ .Values.namespace.name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "xarch.fullname" . }}-role

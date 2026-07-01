@@ -1,0 +1,8 @@
+{{- if .Values.prometheus.enabled }}
+Prometheus is available at:
+  http://{{ include "observability.fullname" . }}-prometheus.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.prometheusPort }}
+{{- end }}
+{{- if .Values.grafana.enabled }}
+Grafana is available at:
+  http://{{ include "observability.fullname" . }}-grafana.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.grafanaPort }}
+{{- end }}

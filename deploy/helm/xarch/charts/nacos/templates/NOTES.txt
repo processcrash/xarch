@@ -1,0 +1,9 @@
+Nacos {{ include "nacos.fullname" . }} has been deployed in {{ .Values.mode }} mode.
+
+Reachable at:
+  {{ include "nacos.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:8848
+
+Console credentials stored in Secret: {{ include "nacos.fullname" . }}-auth
+{{ if .Values.externalMysql.enabled }}
+Using external MySQL at {{ .Values.externalMysql.host }}:{{ .Values.externalMysql.port }}/{{ .Values.externalMysql.database }}.
+{{ end }}

@@ -1,0 +1,17 @@
+apiVersion: v2
+name: gateway
+description: |
+  Spring Cloud Gateway chart for xarch. Provides a single ingress point for
+  all six microservices and (optionally) exposes them via a Kubernetes
+  Ingress. Routes are managed through Nacos in production; this chart can
+  optionally inject a local route ConfigMap for development.
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - xarch
+  - spring-cloud-gateway
+  - api-gateway
+maintainers:
+  - name: processcrash
+    url: https://github.com/processcrash
