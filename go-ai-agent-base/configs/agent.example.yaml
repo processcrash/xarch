@@ -1,0 +1,128 @@
+# ===============================================
+# go-ai-agent-base — example configuration
+# ===============================================
+# Copy to configs/agent.yaml and fill in your LLM API key.
+# All settings can be overridden by env vars: XARCH_AGENT_<KEY>
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+  shutdown_timeout: 15s
+  cors:
+    allowed_origins: ["*"]
+    allowed_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowed_headers: ["Authorization", "Content-Type", "X-Request-Id"]
+
+agent:
+  default: "assistant"
+  max_iterations: 10
+  timeout: 60s
+  agents:
+    - name: "assistant"
+      provider: "gemini"
+      model: "gemini-2.5-flash"
+      system_prompt: |
+        You are xarch Assistant, a helpful, harmless, and honest
+        enterprise AI agent. Be concise; cite sources when possible.
+      temperature: 0.7
+      max_tokens: 4096
+      tools: ["current_time", "calculator"]
+      mcp_servers: []
+      timeout: 60s
+
+    - name: "coder"
+      provider: "openai"
+      model: "gpt-4o-mini"
+      system_prompt: |
+        You are an expert software engineer. When given a task,
+        write clean, idiomatic Go. Always include tests.
+      temperature: 0.2
+      max_tokens: 8192
+      tools: ["read_file", "write_file", "shell"]
+      mcp_servers: ["filesystem-mcp", "github-mcp"]
+      timeout: 120s
+
+llm:
+  default_provider: "gemini"
+  gemini:
+    api_key: "${GOOGLE_API_KEY}"      # set via env
+    endpoint: "https://generativelanguage.googleapis.com"
+    timeout: 60s
+    max_retries: 3
+    rate_limit_rps: 50
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    endpoint: "https://api.openai.com/v1"
+    timeout: 60s
+    max_retries: 3
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY}"
+    endpoint: "https://api.anthropic.com"
+    timeout: 60s
+    max_retries: 3
+  ollama:
+    endpoint: "http://localhost:11434"
+    timeout: 120s
+
+memory:
+  backend: "memory"  # memory | redis | postgres
+  max_entries: 1000
+  redis:
+    url: "redis://localhost:6379"
+    db: 0
+    prefix: "xarch:memory:"
+  postgres:
+    url: "postgres://xarch:xarch@localhost:5432/xarch"
+    table: "agent_memory"
+
+session:
+  backend: "memory"  # memory | redis
+  ttl: 24h
+  max_messages: 100
+  redis:
+    url: "redis://localhost:6379"
+    db: 0
+    prefix: "xarch:session:"
+
+auth:
+  enabled: true
+  jwt:
+    algorithm: "HS256"
+    secret: "${JWT_SECRET}"            # set via env
+    issuer: "xarch-ai-agent"
+    audience: "xarch-clients"
+  api_keys:
+    - key: "${ADMIN_API_KEY}"
+      name: "admin"
+      scopes: ["*"]
+
+observability:
+  log_level: "info"        # debug|info|warn|error
+  log_format: "json"       # json|text
+  service_name: "go-ai-agent-base"
+  tracing:
+    enabled: true
+    exporter: "stdout"      # otlp|jaeger|zipkin|stdout
+    endpoint: "http://localhost:4318"
+    sample_rate: 1.0
+  metrics:
+    enabled: true
+    path: "/metrics"
+
+tools:
+  directory: "./configs/tools"
+
+mcp:
+  servers:
+    - name: "filesystem-mcp"
+      command: "java"
+      args: ["-jar", "/opt/xarch/mcp/filesystem-mcp/lib/filesystem-mcp-1.0.0.jar"]
+      env:
+        XARCH_FS_ALLOWED_ROOTS: "/workspace"
+    - name: "database-mcp"
+      command: "java"
+      args: ["-jar", "/opt/xarch/mcp/database-mcp/lib/database-mcp-1.0.0.jar"]
+    - name: "github-mcp"
+      url: "https://api.githubcopilot.com/mcp/"

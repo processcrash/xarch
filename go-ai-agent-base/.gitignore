@@ -1,0 +1,58 @@
+# ===============================================
+# go-ai-agent-base .gitignore
+# ===============================================
+
+# Binaries
+/bin/
+/server
+/agent
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test artifacts
+*.test
+*.out
+coverage.out
+coverage.html
+*.coverprofile
+
+# Go workspace files
+go.work
+go.work.sum
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Local config overrides
+configs/agent.local.yaml
+configs/agent.local.yml
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build cache
+.cache/
+dist/
+
+# Secrets
+secrets/
+*.pem
+*.key
+*.crt
+
+# Backups
+*.bak
+*.tmp
