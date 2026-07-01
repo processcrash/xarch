@@ -1,0 +1,34 @@
+# ===============================================
+# xarch RabbitMQ starter — default config
+# ===============================================
+# Connection settings are read from Spring Boot's standard
+# spring.rabbitmq.* properties. This file only documents the
+# xarch-specific extensions.
+
+xarch:
+  mq:
+    enabled: true
+    producer:
+      auto-declare: true         # declare queues/exchanges/bindings on startup
+      publisher-confirms: true   # ack from broker when message is persisted
+      publisher-returns: true    # detect unroutable messages
+      default-exchange: ""       # AMQP default direct exchange
+      mandatory: true            # require routability
+    consumer:
+      concurrency: 1
+      max-concurrency: 8
+      prefetch: 10
+      auto-startup: true
+      retry-max-attempts: 3
+      retry-initial-interval: 1000    # 1s
+      retry-multiplier: 2.0
+      retry-max-interval: 30000       # 30s
+    dlx:
+      enabled: true
+      exchange: xarch.dlx
+      queue: xarch.dlq
+      routing-key: "#"               # topic wildcard
+      message-ttl: 60000             # 60s before DLQ drains
+      max-length: 100000
+    tracing:
+      enabled: true                  # requires xarch-tracing-spring-boot-starter

@@ -1,0 +1,137 @@
+{
+  "groups": [
+    {
+      "name": "xarch.mq",
+      "description": "xarch RabbitMQ starter configuration.",
+      "type": "com.xarch.starter.mq.XarchMqProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "xarch.mq.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Master switch for the xarch RabbitMQ starter."
+    },
+    {
+      "name": "xarch.mq.producer.auto-declare",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Auto-declare exchanges/queues/bindings at startup."
+    },
+    {
+      "name": "xarch.mq.producer.publisher-confirms",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Enable AMQP publisher confirms for at-least-once semantics."
+    },
+    {
+      "name": "xarch.mq.producer.publisher-returns",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Enable AMQP publisher returns to detect unroutable messages."
+    },
+    {
+      "name": "xarch.mq.producer.default-exchange",
+      "type": "java.lang.String",
+      "defaultValue": "",
+      "description": "Default exchange to publish to when not specified."
+    },
+    {
+      "name": "xarch.mq.producer.mandatory",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Whether messages must be routable; unroutable messages trigger a return."
+    },
+    {
+      "name": "xarch.mq.consumer.concurrency",
+      "type": "java.lang.Integer",
+      "defaultValue": 1,
+      "description": "Default concurrent consumers per listener."
+    },
+    {
+      "name": "xarch.mq.consumer.max-concurrency",
+      "type": "java.lang.Integer",
+      "defaultValue": 8,
+      "description": "Default max concurrent consumers per listener."
+    },
+    {
+      "name": "xarch.mq.consumer.prefetch",
+      "type": "java.lang.Integer",
+      "defaultValue": 10,
+      "description": "Default prefetch count per consumer."
+    },
+    {
+      "name": "xarch.mq.consumer.auto-startup",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Whether listener containers start automatically."
+    },
+    {
+      "name": "xarch.mq.consumer.retry-max-attempts",
+      "type": "java.lang.Integer",
+      "defaultValue": 3,
+      "description": "Max retry attempts before sending to DLQ."
+    },
+    {
+      "name": "xarch.mq.consumer.retry-initial-interval",
+      "type": "java.lang.Long",
+      "defaultValue": 1000,
+      "description": "Initial retry back-off interval in milliseconds."
+    },
+    {
+      "name": "xarch.mq.consumer.retry-multiplier",
+      "type": "java.lang.Double",
+      "defaultValue": 2.0,
+      "description": "Back-off multiplier for retries."
+    },
+    {
+      "name": "xarch.mq.consumer.retry-max-interval",
+      "type": "java.lang.Long",
+      "defaultValue": 30000,
+      "description": "Max retry back-off interval in milliseconds."
+    },
+    {
+      "name": "xarch.mq.dlx.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Auto-declare the dead-letter exchange and queue."
+    },
+    {
+      "name": "xarch.mq.dlx.exchange",
+      "type": "java.lang.String",
+      "defaultValue": "xarch.dlx",
+      "description": "Dead-letter exchange name."
+    },
+    {
+      "name": "xarch.mq.dlx.queue",
+      "type": "java.lang.String",
+      "defaultValue": "xarch.dlq",
+      "description": "Dead-letter queue name."
+    },
+    {
+      "name": "xarch.mq.dlx.routing-key",
+      "type": "java.lang.String",
+      "defaultValue": "#",
+      "description": "Routing key for binding the DLQ to the DLX."
+    },
+    {
+      "name": "xarch.mq.dlx.message-ttl",
+      "type": "java.lang.Long",
+      "defaultValue": 60000,
+      "description": "Time-to-live (ms) for messages in the DLQ."
+    },
+    {
+      "name": "xarch.mq.dlx.max-length",
+      "type": "java.lang.Integer",
+      "defaultValue": 100000,
+      "description": "Max number of messages retained in the DLQ (0 = unlimited)."
+    },
+    {
+      "name": "xarch.mq.tracing.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Inject OpenTelemetry trace context into AMQP headers (requires xarch-tracing)."
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+# ===============================================
+# xarch-example — RabbitMQ demo configuration
+# ===============================================
+spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:xarch}
+    password: ${RABBITMQ_PASSWORD:xarch}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    listener:
+      simple:
+        # Acknowledgement happens inside the @XarchMessageListener's
+        # retry template, so the container itself uses MANUAL for
+        # fine-grained control.
+        acknowledge-mode: manual
+        prefetch: 10
+        concurrency: 1
+        max-concurrency: 8
+
+xarch:
+  mq:
+    enabled: true
+    producer:
+      auto-declare: true
+      publisher-confirms: true
+      publisher-returns: true
+      default-exchange: ""
+      mandatory: true
+    consumer:
+      concurrency: 2
+      max-concurrency: 8
+      prefetch: 10
+      auto-startup: true
+      retry-max-attempts: 3
+      retry-initial-interval: 1000
+      retry-multiplier: 2.0
+      retry-max-interval: 30000
+    dlx:
+      enabled: true
+      exchange: xarch.dlx
+      queue: xarch.dlq
+      routing-key: "#"
+      message-ttl: 60000
+      max-length: 100000
+    tracing:
+      enabled: true

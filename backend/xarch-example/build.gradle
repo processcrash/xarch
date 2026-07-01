@@ -9,6 +9,10 @@ dependencies {
     implementation project(':xarch-spring-boot-starter:xarch-cache-spring-boot-starter')
     implementation project(':xarch-spring-boot-starter:xarch-storage-spring-boot-starter')
     implementation project(':xarch-spring-boot-starter:xarch-resilience-spring-boot-starter')
+    implementation project(':xarch-spring-boot-starter:xarch-mq-spring-boot-starter')
+
+    // Spring AMQP for RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.40'

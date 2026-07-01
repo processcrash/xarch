@@ -1,0 +1,44 @@
+dependencies {
+    api project(':xarch-spring-boot-starter:xarch-core-spring-boot-starter')
+
+    compileOnly 'org.springframework.boot:spring-boot-starter'
+    compileOnly 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.springframework.boot:spring-boot-starter-actuator'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Spring AMQP (RabbitMQ)
+    api 'org.springframework.boot:spring-boot-starter-amqp:3.4.0'
+
+    // Micrometer for metrics
+    api 'io.micrometer:micrometer-core:1.14.0'
+
+    // JSON converter already provided by spring-amqp (Jackson 2 JsonMessageConverter)
+    api 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Tracing bridge — pull in optional
+    compileOnly project(':xarch-spring-boot-starter:xarch-tracing-spring-boot-starter')
+    api 'io.opentelemetry:opentelemetry-api:1.42.0'
+
+    // Logging
+    api 'org.slf4j:slf4j-api'
+
+    // Test
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.amqp:spring-rabbit-test'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.4'
+    testImplementation 'org.testcontainers:rabbitmq:1.20.4'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
