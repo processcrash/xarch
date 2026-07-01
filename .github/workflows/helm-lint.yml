@@ -1,0 +1,86 @@
+# ===============================================
+# Helm chart CI: lint + render all profiles
+# ===============================================
+name: helm-lint
+
+on:
+  push:
+    paths:
+      - 'deploy/helm/**'
+      - '.github/workflows/helm-lint.yml'
+  pull_request:
+    paths:
+      - 'deploy/helm/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint and render
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.2
+
+      - name: helm lint
+        run: |
+          echo "==> helm lint (root chart)"
+          helm lint deploy/helm/xarch
+          echo "==> helm lint (microservice subchart)"
+          helm lint deploy/helm/xarch/charts/microservice
+          echo "==> helm lint (gateway subchart)"
+          helm lint deploy/helm/xarch/charts/gateway
+          echo "==> helm lint (mysql subchart)"
+          helm lint deploy/helm/xarch/charts/mysql
+          echo "==> helm lint (redis subchart)"
+          helm lint deploy/helm/xarch/charts/redis
+          echo "==> helm lint (nacos subchart)"
+          helm lint deploy/helm/xarch/charts/nacos
+          echo "==> helm lint (observability subchart)"
+          helm lint deploy/helm/xarch/charts/observability
+
+      - name: helm template (dev)
+        run: helm template xarch deploy/helm/xarch --values deploy/helm/values-dev.yaml > /tmp/dev.yaml
+
+      - name: helm template (staging)
+        run: helm template xarch deploy/helm/xarch --values deploy/helm/values-staging.yaml > /tmp/staging.yaml
+
+      - name: helm template (prod)
+        run: helm template xarch deploy/helm/xarch --values deploy/helm/values-prod.yaml > /tmp/prod.yaml
+
+      - name: helm install --dry-run (prod)
+        run: |
+          helm install xarch deploy/helm/xarch \
+              --values deploy/helm/values-prod.yaml \
+              --dry-run --debug \
+              > /tmp/prod-dryrun.yaml 2>&1
+          echo "Dry-run render: $(wc -l < /tmp/prod-dryrun.yaml) lines"
+
+      - name: Upload render artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-rendered
+          path: |
+            /tmp/dev.yaml
+            /tmp/staging.yaml
+            /tmp/prod.yaml
+            /tmp/prod-dryrun.yaml
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: helm-docs (if available)
+        run: |
+          if command -v helm-docs >/dev/null 2>&1; then
+            helm-docs --chart-search-root=deploy/helm
+          else
+            echo "helm-docs not installed; skipping README regeneration"
+          fi
+        continue-on-error: true
