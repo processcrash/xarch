@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# ===============================================
+# build-all.sh — Build all java-mcp-servers
+# ===============================================
+# Builds every subproject, runs the test suite, and produces
+# runnable distributions under <server>/build/install/<server>/
+
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+cd "$HERE"
+
+echo "==> Building all java-mcp-servers (JDK 25, Gradle)"
+
+./gradlew clean check installDist --warning-mode summary
+
+echo ""
+echo "==> Build complete. Distributions:"
+for d in */build/install/*/; do
+    [ -d "$d" ] && echo "  - $d"
+done
+
+echo ""
+echo "==> Quick run:"
+echo "    echo '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"0.0.1\"}}}' | ./database-mcp/build/install/database-mcp/bin/database-mcp"

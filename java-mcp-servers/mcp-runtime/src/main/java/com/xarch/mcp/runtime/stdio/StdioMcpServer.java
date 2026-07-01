@@ -84,6 +84,17 @@ public class StdioMcpServer {
         return this;
     }
 
+    /**
+     * Convenience overload for handlers that return raw strings (e.g.
+     * pre-formatted JSON). Each string becomes a single text content block.
+     */
+    public StdioMcpServer tool(String name, String description, ObjectNode inputSchema,
+                               java.util.function.Function<JsonNode, List<String>> stringHandler) {
+        tools.add(new Tool(name, description, inputSchema,
+                args -> stringHandler.apply(args).stream().map(ContentBlock::text).toList()));
+        return this;
+    }
+
     public StdioMcpServer resource(String uri, String name, String description, String mimeType, Function<JsonNode, String> handler) {
         resources.add(new Resource(uri, name, description, mimeType, handler));
         return this;
