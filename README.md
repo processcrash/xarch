@@ -134,6 +134,61 @@ That's it. The admin UI is up, with **18 prebuilt modules** (users, roles, menus
 
 ---
 
+## 🤖 Companion project: `go-ai-agent-base`
+
+The xarch monorepo also ships a **Go-based AI Agent platform** built on Google's official [`adk-go`](https://github.com/google/adk-go) framework. While xarch's main backend is Java/Spring Boot, the Go companion targets teams that want a **lightweight, statically-linked, single-binary AI agent runtime** for greenfield agentic products or to embed as a library.
+
+```bash
+# Build the CLI + HTTP server binaries
+cd go-ai-agent-base
+make build
+
+# Try the local REPL
+./bin/agent chat --config configs/agent.example.yaml
+
+# Or run the HTTP server (default :8080)
+./bin/server --config configs/agent.example.yaml
+curl -X POST http://localhost:8080/api/v1/agents/assistant/sessions \
+     -H 'Content-Type: application/json' \
+     -d '{"user_id":"alice"}'
+```
+
+**Highlights**
+
+- **Built on `google/adk-go`** — same Agent/Tool/Session/Memory model, full Google lineage
+- **4 LLM providers out of the box** — Gemini, OpenAI, Anthropic, Ollama — all behind one `agent.LLM` interface
+- **Pluggable storage** — in-memory (default), Redis, Postgres for sessions and long-term memory
+- **Tool framework** — built-in time/calculator/HTTP tools + MCP bridge to `java-mcp-servers/`
+- **REST + SSE** — `/api/v1/agents/{name}/sessions/{sid}/stream` for real-time responses
+- **CLI REPL** for local development (`agent chat`) with `/help`, `/clear`, `/exit`
+- **Enterprise defaults** — JWT auth (HS256/RS256), structured logging (Zap), OTel tracing, Prometheus metrics
+- **Public Go SDK** — `pkg/sdk` for embedding the agent runtime from other Go services
+- **Distroless Docker** + Helm-friendly K8s manifests + HPA
+
+**Architecture at a glance**
+
+```
+                        ┌──────────────────────┐
+                        │  HTTP  /  CLI / SDK  │
+                        └──────────┬───────────┘
+                                   │
+                        ┌──────────▼───────────┐
+                        │      Runtime         │
+                        │  (orchestration,     │
+                        │   memory recall,     │
+                        │   tool loop)         │
+                        └──────────┬───────────┘
+                                   │
+              ┌─────────┬──────────┼──────────┬─────────┐
+              ▼         ▼          ▼          ▼         ▼
+          Gemini     OpenAI   Anthropic   Ollama    Tools
+                                              (HTTP/MCP/local)
+```
+
+See [go-ai-agent-base/README.md](go-ai-agent-base/README.md), [docs/ARCHITECTURE.md](go-ai-agent-base/docs/ARCHITECTURE.md), and [docs/QUICKSTART.md](go-ai-agent-base/docs/QUICKSTART.md) for details.
+
+---
+
 ## 📦 What's in the box
 
 ### 8 Spring Boot Starters (`com.xarch.starter.*`)
@@ -197,6 +252,8 @@ Includes **per-service Dockerfile** (multi-stage, non-root, healthcheck) and ful
 ## 🛠️ Tech Stack
 
 **Backend** — Java 25 · Spring Boot 4.0 · Spring Cloud 2025 · MyBatis-Flex 1.9 · MySQL 8 / PostgreSQL 16 / MongoDB · Redis 7 / Redisson · Sa-Token · Resilience4j 2.2 · OpenTelemetry 1.42 · Spring AI 1.0 · Knife4j 5
+
+**AI Agent** — Go 1.23+ · `google/adk-go` · Gin · Cobra · Viper · Zap · OpenTelemetry SDK · Prometheus client · golang-jwt · pgx · go-redis · testcontainers-go
 
 **MCP** — `@modelcontextprotocol/sdk` (Node) · `mcp[cli]` (Python) · raw JSON-RPC (Java)
 
