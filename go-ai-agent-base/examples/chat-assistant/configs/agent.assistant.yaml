@@ -1,0 +1,44 @@
+# Single-agent chat example
+# Copy of the top-level example with one agent and the two
+# built-in tools (current_time + calculator).
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+agent:
+  default: "assistant"
+  max_iterations: 5
+  agents:
+    - name: "assistant"
+      provider: "gemini"
+      model: "gemini-2.5-flash"
+      system_prompt: |
+        You are xarch Assistant. Be concise, cite tools when you use them.
+      temperature: 0.7
+      max_tokens: 4096
+      tools: ["current_time", "calculator"]
+
+llm:
+  default_provider: "gemini"
+  gemini:
+    api_key: "${GOOGLE_API_KEY}"
+    endpoint: "https://generativelanguage.googleapis.com"
+    timeout: 60s
+
+session:
+  backend: "memory"
+  ttl: 24h
+  max_messages: 100
+
+memory:
+  backend: "memory"
+  max_entries: 1000
+
+auth:
+  enabled: false   # dev mode
+
+observability:
+  log_format: "text"
+  metrics:
+    enabled: true

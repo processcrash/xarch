@@ -1,0 +1,109 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gaab-postgres
+    environment:
+      POSTGRES_USER: xarch
+      POSTGRES_PASSWORD: xarch
+      POSTGRES_DB: xarch
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xarch"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gaab-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: gaab-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gaab-net
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.108.0
+    container_name: gaab-otel
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./otel-collector.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    networks:
+      - gaab-net
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: gaab-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - gaab-net
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: gaab-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - gaab-net
+
+  server:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile
+    image: go-ai-agent-base:latest
+    container_name: gaab-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    environment:
+      XARCH_AGENT_SERVER_HOST: "0.0.0.0"
+      XARCH_AGENT_SERVER_PORT: "8080"
+      XARCH_AGENT_MEMORY_BACKEND: postgres
+      XARCH_AGENT_MEMORY_POSTGRES_URL: "postgres://xarch:xarch@postgres:5432/xarch?sslmode=disable"
+      XARCH_AGENT_SESSION_BACKEND: redis
+      XARCH_AGENT_SESSION_REDIS_URL: "redis://redis:6379"
+      XARCH_AGENT_LLM_GEMINI_API_KEY: "${GOOGLE_API_KEY:-changeme}"
+      XARCH_AGENT_OBSERVABILITY_TRACING_EXPORTER: otlp
+      XARCH_AGENT_OBSERVABILITY_TRACING_ENDPOINT: "otel-collector:4318"
+      XARCH_AGENT_AUTH_JWT_SECRET: "${JWT_SECRET:-change-me-in-prod}"
+    ports:
+      - "8080:8080"
+    networks:
+      - gaab-net
+
+volumes:
+  postgres-data:
+  redis-data:
+  grafana-data:
+
+networks:
+  gaab-net:
+    driver: bridge

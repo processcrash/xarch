@@ -1,0 +1,185 @@
+# ===============================================
+# go-ai-agent-base K8s manifests (dev-friendly baseline)
+# ===============================================
+# For production, use the Helm chart at deploy/helm/.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gaab
+  labels:
+    app.kubernetes.io/name: gaab
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gaab-secrets
+  namespace: gaab
+type: Opaque
+stringData:
+  GOOGLE_API_KEY: "REPLACE_ME"
+  JWT_SECRET: "REPLACE_ME"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gaab-config
+  namespace: gaab
+data:
+  configs/agent.yaml: |
+    server:
+      host: "0.0.0.0"
+      port: 8080
+    agent:
+      default: "assistant"
+      agents:
+        - name: "assistant"
+          provider: "gemini"
+          model: "gemini-2.5-flash"
+          system_prompt: "You are xarch Assistant."
+          temperature: 0.7
+          max_tokens: 4096
+          tools: ["current_time", "calculator"]
+    llm:
+      default_provider: "gemini"
+      gemini:
+        endpoint: "https://generativelanguage.googleapis.com"
+    session:
+      backend: "memory"
+      ttl: 24h
+      max_messages: 100
+    memory:
+      backend: "memory"
+      max_entries: 1000
+    auth:
+      enabled: true
+      jwt:
+        algorithm: "HS256"
+        issuer: "xarch-ai-agent"
+        audience: "xarch-clients"
+    observability:
+      log_format: "json"
+      tracing:
+        enabled: true
+        exporter: "stdout"
+        sample_rate: 1.0
+      metrics:
+        enabled: true
+        path: "/metrics"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gaab-server
+  namespace: gaab
+  labels:
+    app.kubernetes.io/name: gaab
+    app.kubernetes.io/component: server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gaab
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gaab
+        app.kubernetes.io/component: server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: gaab-sa
+      containers:
+        - name: server
+          image: go-ai-agent-base:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: XARCH_AGENT_SERVER_HOST
+              value: "0.0.0.0"
+            - name: XARCH_AGENT_SERVER_PORT
+              value: "8080"
+            - name: XARCH_AGENT_LLM_GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gaab-secrets
+                  key: GOOGLE_API_KEY
+            - name: XARCH_AGENT_AUTH_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gaab-secrets
+                  key: JWT_SECRET
+          envFrom:
+            - configMapRef:
+                name: gaab-config
+          volumeMounts:
+            - name: config
+              mountPath: /app/configs
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 1Gi
+      volumes:
+        - name: config
+          configMap:
+            name: gaab-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gaab-server
+  namespace: gaab
+spec:
+  selector:
+    app.kubernetes.io/name: gaab
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gaab-sa
+  namespace: gaab
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gaab-server
+  namespace: gaab
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gaab-server
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

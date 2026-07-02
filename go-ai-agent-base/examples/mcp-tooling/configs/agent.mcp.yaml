@@ -1,0 +1,63 @@
+# MCP-bridged agent example
+# This config enables the MCP server connections defined in the
+# xarch java-mcp-servers/ project (database-mcp, filesystem-mcp).
+
+server:
+  host: "0.0.0.0"
+  port: 8081  # avoid clash with the chat-assistant on 8080
+
+agent:
+  default: "dataops"
+  max_iterations: 8
+  agents:
+    - name: "dataops"
+      provider: "openai"
+      model: "gpt-4o-mini"
+      system_prompt: |
+        You are xarch DataOps. When given a data question, prefer to
+        use the database-mcp tools. When given a filesystem task,
+        use the filesystem-mcp tools. Always confirm what you did.
+      temperature: 0.3
+      max_tokens: 4096
+      tools:
+        - "mcp.database.list_tables"
+        - "mcp.database.query_execute"
+        - "mcp.filesystem.list_directory"
+        - "mcp.filesystem.read_file"
+
+llm:
+  default_provider: "openai"
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    endpoint: "https://api.openai.com/v1"
+
+mcp:
+  servers:
+    - name: "database-mcp"
+      command: "java"
+      args:
+        - "-jar"
+        - "../../java-mcp-servers/database-mcp/build/install/database-mcp/lib/database-mcp-1.0.0.jar"
+    - name: "filesystem-mcp"
+      command: "java"
+      args:
+        - "-jar"
+        - "../../java-mcp-servers/filesystem-mcp/build/install/filesystem-mcp/lib/filesystem-mcp-1.0.0.jar"
+      env:
+        XARCH_FS_ALLOWED_ROOTS: "$PWD/sample-data"
+
+session:
+  backend: "memory"
+  ttl: 24h
+
+memory:
+  backend: "memory"
+  max_entries: 1000
+
+auth:
+  enabled: false
+
+observability:
+  log_format: "text"
+  metrics:
+    enabled: true
